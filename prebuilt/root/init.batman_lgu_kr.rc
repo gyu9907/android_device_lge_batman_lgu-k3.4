@@ -355,6 +355,11 @@ service netmgrd /system/bin/netmgrd
     class main
     disabled
 
+service qcamerasvr /system/bin/mm-qcamera-daemon
+    class late_start
+    user camera
+    group camera system inet input
+
 service qcom-sh /system/bin/sh /init.qcom.sh
     class core
     user root

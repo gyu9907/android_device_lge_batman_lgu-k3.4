@@ -150,10 +150,6 @@ typedef struct camera_device_ops {
      */
     int (*preview_enabled)(struct camera_device *);
 
-#ifdef ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
-int (*dummy1);
-#endif
-
     /**
      * Request the camera HAL to store meta data or real YUV data in the video
      * buffers sent out via CAMERA_MSG_VIDEO_FRAME for a recording session. If

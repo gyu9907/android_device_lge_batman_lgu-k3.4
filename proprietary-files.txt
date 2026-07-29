@@ -23,6 +23,7 @@ lib/libaudcal.so
 lib/libaudioalsa.so
 
 # Camera
+bin/mm-qcamera-daemon
 lib/hw/camera.msm8660.so
 lib/libgemini.so
 lib/libidl.so
