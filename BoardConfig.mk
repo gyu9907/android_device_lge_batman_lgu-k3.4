@@ -22,6 +22,7 @@ ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_CPU_SMP := true
 
 TARGET_BOOTLOADER_BOARD_NAME := BATMAN_LGU
+TARGET_OTA_ASSERT_DEVICE := batman_lgu,batman
 TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE
@@ -30,12 +31,7 @@ COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE
 TARGET_BOOTANIMATION_PRELOAD := true
 
 # Camera
-COMMON_GLOBAL_CFLAGS += -DICS_CAMERA_BLOB
 BOARD_NEEDS_MEMORYHEAPPMEM := true
-
-## This is evil. The mt9m114 (FFC) data inside the liboemcamera blob is in the .bss section,
-## and inaccessible if PIE is enabled
-TARGET_DISABLE_ARM_PIE := true
 
 # Audio
 COMMON_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
@@ -67,15 +63,14 @@ TARGET_USE_SCORPION_PLD_SET := true
 TARGET_SCORPION_BIONIC_PLDOFFS := 6
 TARGET_SCORPION_BIONIC_PLDSIZE := 128
 
-BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu loglevel=1
+BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr kgsl.mmutype=gpummu vmalloc=580M
 BOARD_KERNEL_BASE := 0x40200000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_FORCE_RAMDISK_ADDRESS := 0x41a00000
 
 TARGET_KERNEL_SOURCE := kernel/lge/batman_lgu
-TARGET_KERNEL_CONFIG := cyanogenmod_batman_lgu_defconfig
+TARGET_KERNEL_CONFIG := batman_lgu_defconfig
 TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-eabi-4.4.3
-TARGET_PREBUILT_KERNEL := device/lge/batman_lgu/prebuilt/root/kernel
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000

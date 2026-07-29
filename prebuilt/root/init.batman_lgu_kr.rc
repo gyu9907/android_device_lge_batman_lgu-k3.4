@@ -46,7 +46,9 @@ on boot
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
     chown bluetooth bluetooth /proc/bluetooth/sleep/proto
     chown system system /sys/module/sco/parameters/disable_esco
+    chown bluetooth bluetooth /sys/module/hci_smd/parameters/hcismd_set
     chmod 0660 /sys/module/bluetooth_power/parameters/power
+    chmod 0660 /sys/module/hci_smd/parameters/hcismd_set
     chmod 0660 /sys/class/rfkill/rfkill0/state
     chmod 0660 /proc/bluetooth/sleep/proto
     chown bluetooth bluetooth /dev/ttyHS0
@@ -61,6 +63,20 @@ on boot
     chmod 2770 /dev/socket/qmux_audio
     mkdir /dev/socket/qmux_bluetooth 0770 bluetooth bluetooth
     chmod 2770 /dev/socket/qmux_bluetooth
+    mkdir /dev/socket/qmux_gps 0770 gps gps
+    chmod 2770 /dev/socket/qmux_gps
+
+    # Allow QMUX to configure the modem port-open timeout.
+    chown radio radio /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
+
+    setprop wifi.interface wlan0
+    setprop ro.telephony.call_ring.multiple false
+    setprop net.tcp.buffersize.lte 4094,281250,1220608,4096,140625,1220608
+    setprop net.tcp.buffersize.ehrpd 4094,87380,262144,4096,16384,262144
+    setprop net.tcp.buffersize.umts 4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hspa 4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hsupa 4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hsdpa 4094,87380,1220608,4096,16384,1220608
 
     # Create the directories used by the Wireless subsystem
     mkdir /data/misc/wifi 0775 wifi wifi
@@ -85,6 +101,7 @@ on boot
     chmod 0664 /sys/devices/virtual/graphics/fb1/hpd
     chmod 0664 /sys/devices/virtual/graphics/fb1/video_mode
     chmod 0664 /sys/devices/virtual/graphics/fb1/format_3d
+    chmod 0644 /sys/devices/virtual/graphics/fb1/hdmi_boot_completed
 
     # Change owner and group for media server and surface flinger
     chown system system /sys/devices/virtual/graphics/fb1/format_3d
@@ -113,6 +130,13 @@ on boot
     write /proc/sys/net/ipv6/conf/rmnet_sdio5/accept_ra 2
     write /proc/sys/net/ipv6/conf/rmnet_sdio6/accept_ra 2
     write /proc/sys/net/ipv6/conf/rmnet_sdio7/accept_ra 2
+    write /proc/sys/net/ipv6/conf/rmnet_usb0/accept_ra 2
+    write /proc/sys/net/ipv6/conf/rmnet_usb1/accept_ra 2
+    write /proc/sys/net/ipv6/conf/rmnet_usb2/accept_ra 2
+    write /proc/sys/net/ipv6/conf/rmnet_usb3/accept_ra 2
+
+    # Stock JB enables liberal TCP tracking for reordered LTE packets.
+    write /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal 1
 
     # Change owner and group for factory
     chown system system /sys/class/atcmd/name
@@ -185,7 +209,7 @@ on boot
     # Button backlight
     write /sys/class/leds/button-backlight/max_brightness 1
 
-    chmod 775 system/lib/modules/mwlan_aarp.ko
+    chmod 0775 /system/lib/modules/mwlan_aarp.ko
 
 on init
     export TMPDIR /data/local/tmp
@@ -212,6 +236,7 @@ on emmc-fs
     mount ext4 /dev/block/mmcblk0p28 /data nosuid nodev barrier=1 data=ordered noauto_da_alloc
 
     #persist
+    mkdir /persist 0771 system system
     wait /dev/block/mmcblk0p12
     exec /system/bin/e2fsck -y /dev/block/mmcblk0p12
     mount ext4 /dev/block/mmcblk0p12 /persist nosuid nodev barrier=1 data=ordered
@@ -226,6 +251,17 @@ on emmc-fs
     wait /dev/block/mmcblk0p29
     exec /system/bin/e2fsck -y /dev/block/mmcblk0p29
     mount ext4 /dev/block/mmcblk0p29 /mpt nosuid nodev barrier=1 data=ordered
+
+    # JB 3.4 eMMC layout: BSP/DRM is p20 and multimedia data is p23.
+    mkdir /drm 0771 system system
+    wait /dev/block/mmcblk0p20
+    exec /system/bin/e2fsck -y /dev/block/mmcblk0p20
+    mount ext4 /dev/block/mmcblk0p20 /drm nosuid nodev barrier=1
+
+    mkdir /mm 0771 system system
+    wait /dev/block/mmcblk0p23
+    exec /system/bin/e2fsck -y /dev/block/mmcblk0p23
+    mount ext4 /dev/block/mmcblk0p23 /mm nosuid nodev barrier=1
 
     #tombstones
     mkdir /tombstones 0771 system system
@@ -248,45 +284,71 @@ on post-fs
     mkdir /data/misc/sensors 0775 root root
     write /data/system/sensors/settings 0
     chmod 0664 /data/system/sensors/settings
-    # We chown/chmod /lgdrm again so because mount is run as root + defaults
-    mkdir /lgdrm 0770 lgdrm lgdrm_acc
-    mount yaffs2 mtd@lgdrm /lgdrm nosuid nodev
-    chown lgdrm lgdrm_acc /lgdrm
-    chmod 0770 /lgdrm
-
-    # create dirs if not exist
+    # Application-facing DRM directories remain on userdata.
     mkdir /data/lgdrm 0770 lgdrm lgdrm_acc
     mkdir /data/wmdrm 0770 lgdrm lgdrm_acc
 
 on post-fs-data
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
+    mkdir /data/misc/wifi/wpa_supplicant 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
+    mkdir /data/misc/audio 0770 audio audio
+    mkdir /data/misc/location 0770 gps gps
+    mkdir /data/time 0700 system system
+    mkdir /data/audio 0770 media audio
+    chmod 2770 /data/audio
+    chown system system /persist
+    chmod 0771 /persist
+
+    chmod 0664 /sys/devices/platform/msm_sdcc.1/polling
+    chmod 0664 /sys/devices/platform/msm_sdcc.2/polling
+    chmod 0664 /sys/devices/platform/msm_sdcc.3/polling
+    chmod 0664 /sys/devices/platform/msm_sdcc.4/polling
+    chown system system /sys/devices/platform/msm_sdcc.1/polling
+    chown system system /sys/devices/platform/msm_sdcc.2/polling
+    chown system system /sys/devices/platform/msm_sdcc.3/polling
+    chown system system /sys/devices/platform/msm_sdcc.4/polling
+
+    write /sys/module/subsystem_restart/parameters/restart_level 1
+    write /sys/module/subsystem_restart/parameters/enable_ramdumps 1
     setprop vold.post_fs_data_done 1
 
 service cnd /system/bin/cnd
-    class main
+    class late_start
     socket cnd stream 666 root radio
 
-service rmt_storage /system/bin/rmt_storage /dev/block/mmcblk0p10 /dev/block/mmcblk0p11 /dev/block/mmcblk0p13
+service rmt_storage /system/bin/rmt_storage
     class core
     user root
     disabled
 
-on property:ro.emmc=1
+on property:ro.boot.emmc=true
     start rmt_storage
+
+service bridgemgrd /system/bin/bridgemgrd
+    class late_start
+    user radio
+    group radio qcom_diag
+    disabled
+
+service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0
+    class late_start
+    user system
+    group system inet
+    disabled
 
 service qmiproxy /system/bin/qmiproxy
     class main
     user radio
-    group radio
+    group radio qcom_diag
     disabled
 
 service qmuxd /system/bin/qmuxd
     class main
     user radio
-    group radio
+    group radio audio bluetooth gps qcom_diag
     disabled
 
 service netmgrd /system/bin/netmgrd
@@ -406,12 +468,3 @@ service ami304d /system/bin/ami304d
 #    class main
 #    user compass
 #    group system
-
-service hdmid /system/bin/hdmid
-    class late_start
-    socket hdmid stream 0660 root system graphics
-    disabled
-
-#on property:ro.hdmi.enable=true
-#    start hdmid
-

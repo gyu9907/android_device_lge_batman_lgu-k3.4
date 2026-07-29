@@ -28,11 +28,11 @@ PRODUCT_DEFAULT_LANGUAGE := ko
 PRODUCT_DEFAULT_REGION := KR
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    BUILD_UTC_DATE=1351143135 \
-    PRODUCT_NAME=batman_lgu \
-    BUILD_FINGERPRINT=LGE/batman_lgu/batman_lgu:4.0.4/IMM76D/LG-F100L-V29l.1c2da9957a:user/release-keys \
-    PRIVATE_BUILD_DESC="batman_lgu-user 4.0.4 IMM76D 4822f9d0 release-keys" \
-    TARGET_DEVICE=batman_lgu \
+    BUILD_UTC_DATE=1366341132 \
+    PRODUCT_NAME=batman_lgu_kr \
+    PRODUCT_BOARD=batman_lgu_kr \
+    BUILD_FINGERPRINT=LGE/batman_lgu_kr/batman:4.1.2/JZO54K/LG-F100L-V40b.1e5d95b998:user/release-keys \
+    PRIVATE_BUILD_DESC="batman_lgu_kr-user 4.1.2 JZO54K 2b7eaa3e36 release-keys" \
     TARGET_AAPT_CHARACTERISTICS=nosdcard \
     PRODUCT_DEFAULT_LANGUAGE=ko \
     PRODUCT_DEFAULT_REGION=KR
