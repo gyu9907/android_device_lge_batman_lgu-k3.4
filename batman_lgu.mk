@@ -29,9 +29,9 @@ $(if $(wildcard device/lge/batman_lgu/stonecold/product/full.mk), $(call inherit
 
 # root
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/root/init.batman_lgu.rc:root/init.batman_lgu.rc \
+    $(LOCAL_PATH)/prebuilt/root/init.batman_lgu_kr.rc:root/init.batman_lgu_kr.rc \
     $(LOCAL_PATH)/prebuilt/root/init.batman_lgu.usb.rc:root/init.batman_lgu.usb.rc \
-    $(LOCAL_PATH)/prebuilt/root/ueventd.batman_lgu.rc:root/ueventd.batman_lgu.rc \
+    $(LOCAL_PATH)/prebuilt/root/ueventd.batman_lgu_kr.rc:root/ueventd.batman_lgu_kr.rc \
     $(LOCAL_PATH)/prebuilt/root/init.qcom.sh:root/init.qcom.sh
 
 # Boot Logo
@@ -56,31 +56,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/configs/synaptics_ts.kl:system/usr/keylayout/synaptics_ts.kl \
     $(LOCAL_PATH)/prebuilt/configs/synaptics_ts.idc:system/usr/idc/synaptics_ts.idc
 
-# Camera lib
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/camera/camera.msm8660.so:system/lib/hw/camera.msm8660.so
-
-# Adreno 200 for JB 4.1
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/a225_pfp.fw:system/etc/firmware/a225_pfp.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/a225_pm4.fw:system/etc/firmware/a225_pm4.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/a225p5_pm4.fw:system/etc/firmware/a225p5_pm4.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/leia_pfp_470.fw:system/etc/firmware/leia_pfp_470.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/leia_pm4_470.fw:system/etc/firmware/leia_pm4_470.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/eglsubAndroid.so:system/lib/egl/eglsubAndroid.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/libEGL_adreno200.so:system/lib/egl/libEGL_adreno200.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/libGLESv1_CM_adreno200.so:system/lib/egl/libGLESv1_CM_adreno200.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/libGLESv2S3D_adreno200.so:system/lib/egl/libGLESv2S3D_adreno200.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/libC2D2.so:system/lib/libC2D2.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/libOpenVG.so:system/lib/libOpenVG.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/libc2d2_z180.so:system/lib/libc2d2_z180.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/libgsl.so:system/lib/libgsl.so \
-    $(LOCAL_PATH)/prebuilt/adreno/lib/libsc-a2xx.so:system/lib/libsc-a2xx.so
-
 # KoreanIME
 PRODUCT_COPY_FILES += \
     $(if $(wildcard device/lge/batman_lgu/stonecold/lgeapps/lgeapps.mk), ,$(if $(wildcard device/lge/batman_lgu/stonecold/stonecold.mk), $(call add-to-product-copy-files-if-exists, $(LOCAL_PATH)/prebuilt/ime/KoreanIME.apk:system/app/KoreanIME.apk), $(call add-to-product-copy-files-if-exists, $(LOCAL_PATH)/prebuilt/ime/KoreanIME.apk:system/app/LatinIME.apk))) \
@@ -102,23 +77,17 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
     frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
+    frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml
 
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
-    audio.primary.msm8660 \
-    audio_policy.msm8660 \
+    audio.primary.batman_lgu_kr \
     libaudioutils
 
 # Graphics
 PRODUCT_PACKAGES += \
-    copybit.msm8660 \
-    gralloc.msm8660 \
-    hwcomposer.msm8660 \
-    libgenlock \
-    libmemalloc \
-    liboverlay \
     libQcomUI \
     libtilerenderer
 
@@ -133,10 +102,6 @@ PRODUCT_PACKAGES += \
     libOmxAacEnc \
     libOmxAmrEnc \
     libstagefrighthw
-
-# HDMI
-PRODUCT_PACKAGES += \
-    hdmid
 
 # USB
 PRODUCT_PACKAGES += \
@@ -162,7 +127,6 @@ PRODUCT_COPY_FILES += \
     $(call add-to-product-copy-files-if-exists, packages/apps/Nfc/migrate_nfc.txt:system/etc/updatecmds/migrate_nfc.txt)
 
 PRODUCT_PACKAGES += \
-    nfc.msm8660 \
     libnfc \
     libnfc_jni \
     Nfc \

@@ -23,33 +23,87 @@ lib/libaudcal.so
 lib/libaudioalsa.so
 
 # Camera
+lib/hw/camera.msm8660.so
 lib/libgemini.so
 lib/libidl.so
+lib/libimage-jpeg-dec-omx-comp.so
+lib/libimage-jpeg-enc-omx-comp.so
+lib/libimage-omx-common.so
 lib/libmmipl.so
 lib/libmmjpeg.so
 lib/libmmjps.so
+lib/libmmcamera_faceproc.so
+lib/libmmcamera_frameproc.so
+lib/libmmcamera_hdr_lib.so
+lib/libmmcamera_image_stab.so
+lib/libmmcamera_interface2.so
+lib/libmmcamera_statsproc31.so
+lib/libmmcamera_wavelet_lib.so
 lib/libmmmpo.so
 lib/libmmmpod.so
 lib/libmmstereo.so
+lib/libmmstillomx.so
 lib/liboemcamera.so
 lib/libDivxDrm.so
 lib/libOlaFaceDetector.so
-lib/lib_LG_fastaf_v2.0.so
 lib/libmmparser.so
 lib/libmmosal.so
 
 # Chromatix
 lib/libchromatix_imx074_default_video.so
 lib/libchromatix_imx074_preview.so
+lib/libchromatix_imx074_video_hd.so
 lib/libchromatix_imx074_zsl.so
+lib/libchromatix_imx091_default_video.so
+lib/libchromatix_imx091_preview.so
+lib/libchromatix_imx091_video_hd.so
+lib/libchromatix_imx105_default_video.so
+lib/libchromatix_imx105_preview.so
+lib/libchromatix_imx105_video_hfr.so
 lib/libchromatix_mt9e013_default_video.so
 lib/libchromatix_mt9e013_preview.so
+lib/libchromatix_mt9e013_video_hfr.so
+lib/libchromatix_mt9p017_default_video.so
+lib/libchromatix_mt9p017_preview.so
+lib/libchromatix_mt9p017_video_hfr.so
+lib/libchromatix_ov2720_default_video.so
+lib/libchromatix_ov2720_hfr.so
+lib/libchromatix_ov2720_preview.so
+lib/libchromatix_ov2720_zsl.so
+lib/libchromatix_ov5647_default_video.so
+lib/libchromatix_ov5647_preview.so
+lib/libchromatix_ov5647_video_hfr.so
+lib/libchromatix_ov8825_default_video.so
+lib/libchromatix_ov8825_preview.so
+lib/libchromatix_ov9726_default_video.so
+lib/libchromatix_ov9726_preview.so
+lib/libchromatix_s5k3l1yx_default_video.so
+lib/libchromatix_s5k3l1yx_hfr_120fps.so
+lib/libchromatix_s5k3l1yx_hfr_60fps.so
+lib/libchromatix_s5k3l1yx_hfr_90fps.so
+lib/libchromatix_s5k3l1yx_preview.so
+lib/libchromatix_s5k3l1yx_video_hd.so
+lib/libchromatix_s5k3l1yx_zsl.so
+lib/libchromatix_s5k4e1_default_video.so
+lib/libchromatix_s5k4e1_preview.so
+
+# Display / graphics HAL and their proprietary support libraries
+lib/hw/copybit.msm8660.so
+lib/hw/gralloc.msm8660.so
+lib/hw/hwcomposer.msm8660.so
+lib/libgenlock.so
+lib/libhwcexternal.so
+lib/libhwcservice.so
+lib/libmemalloc.so
+lib/liboverlay.so
+lib/libqdutils.so
 
 # Misc libraries
 lib/libmm-color-convertor.so
 
 # Bluetooth
 bin/BCM4330B14.hcd
+lib/libbt-aptx-4.0.3.so
 
 # Thermal
 lib/libthermal_mitigation.so
@@ -63,7 +117,6 @@ lib/libdiag.so
 lib/libdsi_netctrl.so
 lib/libdsm.so
 lib/libdsutils.so
-lib/libidl.so
 lib/libnetmgr.so
 lib/libnv.so
 lib/liboncrpc.so
@@ -71,6 +124,8 @@ lib/libqc-opt.so
 lib/libqdi.so
 lib/libqdp.so
 lib/libqmi.so
+lib/libqmi_client_qmux.so
+lib/libqcci_legacy.so
 lib/libqmiservices.so
 lib/libqueue.so
 lib/libtime_genoff.so
@@ -96,6 +151,7 @@ lib/libcommondefs.so
 
 # cnd
 lib/libcneutils.so
+lib/libcnefeatureconfig.so
 lib/libcneqmiutils.so
 lib/libxml.so
 
@@ -111,7 +167,7 @@ etc/firmware/dsps_fluid.b03
 etc/firmware/dsps_fluid.mdt
 etc/firmware/fw_bcmdhd.bin
 etc/firmware/fw_bcmdhd_apsta.bin
-etc/firmware/fw_bcmdhd_mfgtest.bin
+etc/firmware/fw_bcmdhd_mfg.bin
 etc/firmware/fw_bcmdhd_p2p.bin
 etc/firmware/vidc_1080p.fw
 
@@ -137,27 +193,32 @@ etc/thermald.conf
 lib/libbroadcast_service.so
 lib/libbroadcast_frame.so
 lib/libsurfaceflinger_client.so
+lib/libCommandSvc.so
 
 # vendor
 vendor/lib/drm/libdrmwvmplugin.so
 vendor/lib/libWVStreamControlAPI_L3.so
-vendor/lib/libwvm.so
 vendor/lib/libwvdrm_L3.so
 vendor/firmware/libpn544_fw.so
+lib/libQSEEComAPI.so
+lib/libdrminterface.so
+lib/liblgdrm.so
+lib/liblgsecclk.so
+lib/liblgtomadrm.so
+lib/liblgtomadrm_sf.so
 
-## egl
-#etc/firmware/leia_pfp_470.fw
-#etc/firmware/leia_pm4_470.fw
-#etc/firmware/yamato_pfp.fw
-#etc/firmware/yamato_pm4.fw
-#lib/libC2D2.so
-#lib/libgsl.so
-#lib/libOpenVG.so
-#lib/libsc-a2xx.so
-#lib/egl/eglsubAndroid.so
-#lib/egl/libEGL_adreno200.so
-#lib/egl/libGLES_android.so
-#lib/egl/libGLESv2S3D_adreno200.so
-#lib/egl/libGLESv1_CM_adreno200.so
-#lib/egl/libGLESv2_adreno200.so
-#lib/egl/libq3dtools_adreno200.so
+# Adreno userspace and firmware from the same JB release
+etc/firmware/leia_pfp_470.fw
+etc/firmware/leia_pm4_470.fw
+etc/firmware/yamato_pfp.fw
+etc/firmware/yamato_pm4.fw
+lib/libC2D2.so
+lib/libgsl.so
+lib/libOpenVG.so
+lib/libsc-a2xx.so
+lib/egl/eglsubAndroid.so
+lib/egl/libEGL_adreno200.so
+lib/egl/libGLESv2S3D_adreno200.so
+lib/egl/libGLESv1_CM_adreno200.so
+lib/egl/libGLESv2_adreno200.so
+lib/egl/libq3dtools_adreno200.so
