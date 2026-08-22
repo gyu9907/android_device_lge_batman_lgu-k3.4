@@ -8,6 +8,7 @@ Working:
 * Graphics
 * Sound
 * Wifi
+* Bluetooth
 * Sensors
 * Camera
 * Video
@@ -16,7 +17,6 @@ Working:
 
 Don't know:
 * Hotspot
-* Bluetooth
 * GPS
 
 Known issues:
