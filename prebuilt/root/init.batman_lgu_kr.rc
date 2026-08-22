@@ -5,6 +5,9 @@ on early-boot
     setrlimit 8 67108864 67108864
 
 on boot
+    # Start the stock Qualcomm camera server explicitly.
+    start qcamerasvr
+
     # for AMI306
     chown compass system /dev/k3g_misc
     chmod 0660 /dev/k3g_misc
