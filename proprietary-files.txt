@@ -199,7 +199,6 @@ lib/libCommandSvc.so
 vendor/lib/drm/libdrmwvmplugin.so
 vendor/lib/libWVStreamControlAPI_L3.so
 vendor/lib/libwvdrm_L3.so
-vendor/lib/libwvm.so
 vendor/firmware/libpn544_fw.so
 lib/libQSEEComAPI.so
 lib/libdrmfs.so
