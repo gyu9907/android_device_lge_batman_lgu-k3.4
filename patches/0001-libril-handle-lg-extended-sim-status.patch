@@ -1,0 +1,97 @@
+From: batman_lgu device maintainers
+Subject: [PATCH] libril: handle LG extended SIM status response
+
+LG's JB Qualcomm vendor RIL appends four PIN/PUK retry counters to each
+RIL_AppStatus.  Detect that 408-byte card status layout and serialize the
+extra fields expected by LGEQualcommUiccRIL.
+
+--- a/libril/ril.cpp
++++ b/libril/ril.cpp
+@@ -2225,6 +2225,57 @@ static void sendSimStatusAppInfo(Parcel &p, int num_apps, RIL_AppStatus appStatu
+         closeResponse;
+ }
+ 
++/*
++ * LG's JB Qualcomm RIL adds four private 32-bit fields to every application
++ * entry.  The card header is identical to v6, but the larger application
++ * stride makes the complete response 408 bytes instead of 280 bytes.
++ */
++typedef struct {
++    RIL_AppStatus ril;
++    int lge_private[4];
++} LgeRIL_AppStatus;
++
++typedef struct {
++    RIL_CardState card_state;
++    RIL_PinState universal_pin_state;
++    int gsm_umts_subscription_app_index;
++    int cdma_subscription_app_index;
++    int ims_subscription_app_index;
++    int num_applications;
++    LgeRIL_AppStatus applications[RIL_CARD_MAX_APPS];
++} LgeRIL_CardStatus_v6;
++
++static void sendLgeSimStatusAppInfo(Parcel &p, int num_apps,
++        LgeRIL_AppStatus appStatus[]) {
++    p.writeInt32(num_apps);
++    startResponse;
++    for (int i = 0; i < num_apps; i++) {
++        RIL_AppStatus *ril = &appStatus[i].ril;
++
++        p.writeInt32(ril->app_type);
++        p.writeInt32(ril->app_state);
++        p.writeInt32(ril->perso_substate);
++        writeStringToParcel(p, (const char *) ril->aid_ptr);
++        writeStringToParcel(p, (const char *) ril->app_label_ptr);
++        p.writeInt32(ril->pin1_replaced);
++        p.writeInt32(ril->pin1);
++        p.writeInt32(ril->pin2);
++        p.writeInt32(appStatus[i].lge_private[0]);
++        p.writeInt32(appStatus[i].lge_private[1]);
++        p.writeInt32(appStatus[i].lge_private[2]);
++        p.writeInt32(appStatus[i].lge_private[3]);
++        appendPrintBuf("%s[app_type=%d,app_state=%d,perso_substate=%d," \
++                "aid_ptr=%s,app_label_ptr=%s,pin1_replaced=%d,pin1=%d," \
++                "pin2=%d,remaining=%d/%d/%d/%d],", printBuf,
++                ril->app_type, ril->app_state, ril->perso_substate,
++                ril->aid_ptr, ril->app_label_ptr, ril->pin1_replaced,
++                ril->pin1, ril->pin2, appStatus[i].lge_private[0],
++                appStatus[i].lge_private[1], appStatus[i].lge_private[2],
++                appStatus[i].lge_private[3]);
++    }
++    closeResponse;
++}
++
+ static int responseSimStatus(Parcel &p, void *response, size_t responselen) {
+     if (response == NULL && responselen != 0) {
+         ALOGE("invalid response: NULL");
+@@ -2250,6 +2301,27 @@ static int responseSimStatus(Parcel &p, void *response, size_t responselen) {
+         p.writeInt32(-1);
+ 
+         sendSimStatusAppInfo(p, p_cur->num_applications, p_cur->applications);
++    } else if (responselen == sizeof (LgeRIL_CardStatus_v6)) {
++        LgeRIL_CardStatus_v6 *p_cur = ((LgeRIL_CardStatus_v6 *) response);
++
++        if (p_cur->num_applications < 0 ||
++                p_cur->num_applications > RIL_CARD_MAX_APPS) {
++            ALOGE("responseSimStatus: invalid LG response: len=%u, apps=%d",
++                    (unsigned int) responselen, p_cur->num_applications);
++            return RIL_ERRNO_INVALID_RESPONSE;
++        }
++
++        ALOGI("responseSimStatus: converting LG v6 response: len=%u, apps=%d",
++                (unsigned int) responselen, p_cur->num_applications);
++
++        p.writeInt32(p_cur->card_state);
++        p.writeInt32(p_cur->universal_pin_state);
++        p.writeInt32(p_cur->gsm_umts_subscription_app_index);
++        p.writeInt32(p_cur->cdma_subscription_app_index);
++        p.writeInt32(p_cur->ims_subscription_app_index);
++
++        sendLgeSimStatusAppInfo(p, p_cur->num_applications,
++                p_cur->applications);
+     } else {
+         ALOGE("responseSimStatus: RIL_CardStatus_v6 (%u) or v5 (%u) expected; "
+                 "received %u bytes", (unsigned int) sizeof (RIL_CardStatus_v6),
+--
+2.7.4
