@@ -22,4 +22,5 @@ Don't know:
 Known issues:
 * USB Tethering is not working
 * Bluetooth SCO is not working
+* Widevine is not working
 * Properiatary softwares are not working ( OSP, DMB, etc...)
