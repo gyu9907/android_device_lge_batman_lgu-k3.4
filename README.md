@@ -4,7 +4,6 @@ android_device_lge_batman_lgu
 CyanogenMod10 device tree for LG-F100L (LG Optimus Vu) - Jellybean (4.1.2) Branch
 
 Working:
-* RIL
 * Graphics
 * Sound
 * Wifi
@@ -16,6 +15,7 @@ Working:
 * MTP
 
 Don't know:
+* RIL
 * Hotspot
 * GPS
 
