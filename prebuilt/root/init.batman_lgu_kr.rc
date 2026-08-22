@@ -277,6 +277,9 @@ on emmc-fs
     exec /system/bin/sh /system/etc/init.qcom.mdm_links.sh
 
 on post-fs
+    # Stock starts the QSEE listener before the first RIL initialization.
+    start qseecomd
+
     # mpt partition attribute
     chown system system /mpt
     chmod 0771 /mpt
@@ -324,7 +327,8 @@ service rmt_storage /system/bin/rmt_storage
     user root
     disabled
 
-on property:ro.boot.emmc=true
+# CM10 init normalizes androidboot.emmc=true to ro.boot.emmc=1.
+on property:ro.boot.emmc=1
     start rmt_storage
 
 service bridgemgrd /system/bin/bridgemgrd
@@ -360,8 +364,26 @@ service qcamerasvr /system/bin/mm-qcamera-daemon
     user camera
     group camera system inet input
 
-service qcom-sh /system/bin/sh /init.qcom.sh
+service qcom-c_core-sh /system/bin/sh /init.qcom.class_core.sh
     class core
+    user root
+    oneshot
+
+service qseecomd /system/bin/qseecomd
+    class late_start
+    user system
+    group system
+
+service qcom-c_main-sh /system/bin/sh /init.qcom.class_main.sh
+    class main
+    user root
+    oneshot
+
+on property:vold.decrypt=trigger_restart_framework
+    start qcom-c_main-sh
+
+service qcom-sh /system/bin/sh /init.qcom.sh
+    class late_start
     user root
     oneshot
 

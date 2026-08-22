@@ -7,7 +7,7 @@ bin/netmgrd
 bin/qcks
 bin/qmiproxy
 bin/qmuxd
-bin/rild
+bin/qseecomd
 bin/rmt_storage
 bin/thermald
 bin/time_daemon
@@ -113,7 +113,6 @@ lib/libthermal_mitigation_fusion.so
 # Radio
 lib/libril-qc-qmi-1.so
 lib/libril-qcril-hook-oem.so
-lib/libril.so
 lib/libdiag.so
 lib/libdsi_netctrl.so
 lib/libdsm.so
@@ -202,6 +201,8 @@ vendor/lib/libWVStreamControlAPI_L3.so
 vendor/lib/libwvdrm_L3.so
 vendor/firmware/libpn544_fw.so
 lib/libQSEEComAPI.so
+lib/libdrmfs.so
+lib/libdrmtime.so
 lib/libdrminterface.so
 lib/liblgdrm.so
 lib/liblgsecclk.so
