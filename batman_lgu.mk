@@ -84,6 +84,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.primary.batman_lgu_kr \
+    audio_policy.msm8660 \
     libaudioutils
 
 # Graphics
