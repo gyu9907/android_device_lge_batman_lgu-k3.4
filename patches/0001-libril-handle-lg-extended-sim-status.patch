@@ -7,14 +7,13 @@ extra fields expected by LGEQualcommUiccRIL.
 
 --- a/libril/ril.cpp
 +++ b/libril/ril.cpp
-@@ -2225,6 +2225,57 @@ static void sendSimStatusAppInfo(Parcel &p, int num_apps, RIL_AppStatus appStatu
+@@ -2225,6 +2225,56 @@ static void sendSimStatusAppInfo(Parcel &p, int num_apps, RIL_AppStatus appStatu
          closeResponse;
  }
  
 +/*
-+ * LG's JB Qualcomm RIL adds four private 32-bit fields to every application
-+ * entry.  The card header is identical to v6, but the larger application
-+ * stride makes the complete response 408 bytes instead of 280 bytes.
++ * LG's JB Qualcomm RIL appends four private 32-bit retry counters to each
++ * application entry.  The card header is otherwise identical to v6.
 + */
 +typedef struct {
 +    RIL_AppStatus ril;
@@ -65,7 +64,7 @@ extra fields expected by LGEQualcommUiccRIL.
  static int responseSimStatus(Parcel &p, void *response, size_t responselen) {
      if (response == NULL && responselen != 0) {
          ALOGE("invalid response: NULL");
-@@ -2250,6 +2301,27 @@ static int responseSimStatus(Parcel &p, void *response, size_t responselen) {
+@@ -2250,4 +2300,25 @@ static int responseSimStatus(Parcel &p, void *response, size_t responselen) {
          p.writeInt32(-1);
  
          sendSimStatusAppInfo(p, p_cur->num_applications, p_cur->applications);
@@ -74,12 +73,12 @@ extra fields expected by LGEQualcommUiccRIL.
 +
 +        if (p_cur->num_applications < 0 ||
 +                p_cur->num_applications > RIL_CARD_MAX_APPS) {
-+            ALOGE("responseSimStatus: invalid LG response: len=%u, apps=%d",
++            RLOGE("responseSimStatus: invalid LG response: len=%u, apps=%d",
 +                    (unsigned int) responselen, p_cur->num_applications);
 +            return RIL_ERRNO_INVALID_RESPONSE;
 +        }
 +
-+        ALOGI("responseSimStatus: converting LG v6 response: len=%u, apps=%d",
++        RLOGI("responseSimStatus: converting LG v6 response: len=%u, apps=%d",
 +                (unsigned int) responselen, p_cur->num_applications);
 +
 +        p.writeInt32(p_cur->card_state);
@@ -91,7 +90,5 @@ extra fields expected by LGEQualcommUiccRIL.
 +        sendLgeSimStatusAppInfo(p, p_cur->num_applications,
 +                p_cur->applications);
      } else {
-         ALOGE("responseSimStatus: RIL_CardStatus_v6 (%u) or v5 (%u) expected; "
-                 "received %u bytes", (unsigned int) sizeof (RIL_CardStatus_v6),
 --
 2.7.4

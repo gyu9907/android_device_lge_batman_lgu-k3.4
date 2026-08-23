@@ -295,8 +295,8 @@ service rmt_storage /system/bin/rmt_storage
     user root
     disabled
 
-# CM10 init normalizes androidboot.emmc=true to ro.boot.emmc=1.
-on property:ro.boot.emmc=1
+# CM11 preserves androidboot.emmc=true instead of normalizing it to 1.
+on property:ro.boot.emmc=true
     start rmt_storage
 
 service bridgemgrd /system/bin/bridgemgrd

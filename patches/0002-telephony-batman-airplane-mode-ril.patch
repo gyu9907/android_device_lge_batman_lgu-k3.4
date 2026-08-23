@@ -1,5 +1,5 @@
 From: batman_lgu device maintainers
-Subject: [PATCH] telephony: work around batman SVLTE airplane mode
+Subject: [PATCH] telephony: work around batman SVLTE airplane mode on CM11
 
 Batman's QMI proxy keeps the AP modem online while the external MDM is
 offline.  The vendor RIL tries to move both modems to LPM for airplane mode,
@@ -11,8 +11,8 @@ the framework setting directly so the fix remains local to the RIL and does
 not require changes to the Phone application.  Preserve the vendor power path
 for non-airplane shutdown requests.
 
---- a/telephony/java/com/android/internal/telephony/LGEQualcommUiccRIL.java
-+++ b/telephony/java/com/android/internal/telephony/LGEQualcommUiccRIL.java
+--- a/src/java/com/android/internal/telephony/LGEQualcommUiccRIL.java
++++ b/src/java/com/android/internal/telephony/LGEQualcommUiccRIL.java
 @@ -19,9 +19,11 @@ package com.android.internal.telephony;
  import static com.android.internal.telephony.RILConstants.*;
  
@@ -22,8 +22,9 @@ for non-airplane shutdown requests.
  import android.os.Parcel;
  import android.os.SystemProperties;
 +import android.provider.Settings;
+ import android.telephony.SignalStrength;
  import android.text.TextUtils;
- import android.util.Log;
+ import android.telephony.Rlog;
  
 @@ -32,6 +34,8 @@ import java.util.ArrayList;
   * {@hide}
@@ -49,16 +50,14 @@ for non-airplane shutdown requests.
 +         * Data has already been torn down by ServiceStateTracker at this point.
 +         * Non-airplane shutdown requests still use the vendor implementation.
 +         */
-+        boolean airplaneModeOn = Settings.System.getInt(
-+                mContext.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
++        boolean airplaneModeOn = Settings.Global.getInt(
++                mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
++
 +        if (!on && airplaneModeOn) {
 +            riljLog("setRadioPower: logical airplane-mode power off");
 +            mLogicalAirplaneMode = true;
 +            setRadioState(RadioState.RADIO_OFF);
-+            if (result != null) {
-+                AsyncResult.forMessage(result, null, null);
-+                result.sendToTarget();
-+            }
++            completeRadioPowerRequest(result);
 +            return;
 +        }
 +
@@ -66,14 +65,18 @@ for non-airplane shutdown requests.
 +            riljLog("setRadioPower: logical airplane-mode power on");
 +            mLogicalAirplaneMode = false;
 +            setRadioState(RadioState.RADIO_ON);
-+            if (result != null) {
-+                AsyncResult.forMessage(result, null, null);
-+                result.sendToTarget();
-+            }
++            completeRadioPowerRequest(result);
 +            return;
 +        }
 +
 +        super.setRadioPower(on, result);
++    }
++
++    private static void completeRadioPowerRequest(Message result) {
++        if (result != null) {
++            AsyncResult.forMessage(result, null, null);
++            result.sendToTarget();
++        }
 +    }
 +
      /*
