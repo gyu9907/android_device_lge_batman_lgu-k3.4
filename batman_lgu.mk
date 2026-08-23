@@ -30,6 +30,7 @@ $(if $(wildcard device/lge/batman_lgu/stonecold/product/full.mk), $(call inherit
 # root
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/root/init.batman_lgu_kr.rc:root/init.batman_lgu_kr.rc \
+    $(LOCAL_PATH)/prebuilt/root/fstab.batman_lgu_kr:root/fstab.batman_lgu_kr \
     $(LOCAL_PATH)/prebuilt/root/init.batman_lgu.usb.rc:root/init.batman_lgu.usb.rc \
     $(LOCAL_PATH)/prebuilt/root/ueventd.batman_lgu_kr.rc:root/ueventd.batman_lgu_kr.rc \
     $(LOCAL_PATH)/prebuilt/root/init.qcom.class_core.sh:root/init.qcom.class_core.sh \
@@ -43,13 +44,10 @@ PRODUCT_COPY_FILES += \
 # Scripts
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/scripts/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
-    $(LOCAL_PATH)/prebuilt/scripts/init.qcom.post_boot.sh:system/etc/init.qcom.post_boot.sh \
-    $(LOCAL_PATH)/prebuilt/scripts/init.qcom.modem_links.sh:system/etc/init.qcom.modem_links.sh \
-    $(LOCAL_PATH)/prebuilt/scripts/init.qcom.mdm_links.sh:system/etc/init.qcom.mdm_links.sh
+    $(LOCAL_PATH)/prebuilt/scripts/init.qcom.post_boot.sh:system/etc/init.qcom.post_boot.sh
 
 # Configs
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/configs/vold.fstab:system/etc/vold.fstab \
     $(LOCAL_PATH)/prebuilt/configs/audio_policy.conf:system/vendor/etc/audio_policy.conf \
     $(LOCAL_PATH)/prebuilt/configs/atcmd_virtual_kbd.kl:system/usr/keylayout/atcmd_virtual_kbd.kl \
     $(LOCAL_PATH)/prebuilt/configs/ats_input.kl:system/usr/keylayout/ats_input.kl \
@@ -90,6 +88,16 @@ PRODUCT_PACKAGES += \
 
 # Graphics
 PRODUCT_PACKAGES += \
+	copybit.msm8660 \
+	gralloc.msm8660 \
+	hwcomposer.msm8660 \
+	libexternal \
+	libgenlock \
+	libmemalloc \
+	liboverlay \
+	libqdutils \
+	libqservice \
+	libvirtual \
     libQcomUI \
     libtilerenderer
 
@@ -109,7 +117,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory
 
+# Keep ADB available from the first USB property trigger during bring-up.
+# These settings are intentionally insecure and must not be used for release builds.
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    ro.secure=0 \
+    ro.adb.secure=0 \
+    ro.debuggable=1 \
     persist.sys.usb.config=mtp
 
 # Filesystem Management Tools
@@ -150,7 +163,8 @@ PRODUCT_PACKAGES += \
 
 # src
 PRODUCT_PACKAGES += \
-    hwaddrs
+    hwaddrs \
+    firmware_init
 #    ami304d \
 #    audio.primary.batman_lgu \
 #    lights.batman_lgu \

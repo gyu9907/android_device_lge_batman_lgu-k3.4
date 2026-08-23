@@ -149,3 +149,5 @@
 /dev/dtfiu                0660   felicaDT   felicaDT
 # MSE-ADD-E iC Data Transfer, daehwan.kim@lge.com, 2012/04/13
 #----------------------------------------------------------------
+
+/dev/rtc0                 0660   system     system

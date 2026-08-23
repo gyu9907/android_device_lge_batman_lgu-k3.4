@@ -52,6 +52,8 @@ enum ion_heap_type {
 #define ION_HEAP_CARVEOUT_MASK		(1 << ION_HEAP_TYPE_CARVEOUT)
 #define ION_HEAP_CP_MASK		(1 << ION_HEAP_TYPE_CP)
 
+#define ION_FLAG_CACHED 1
+
 
 /**
  * These are the only ids that should be used for Ion heap ids.
@@ -111,11 +113,9 @@ enum ion_fixed_position {
 #define CACHED          1
 #define UNCACHED        0
 
-#define ION_CACHE_SHIFT 0
-
-#define ION_SET_CACHE(__cache)  ((__cache) << ION_CACHE_SHIFT)
-
-#define ION_IS_CACHED(__flags)	((__flags) & (1 << ION_CACHE_SHIFT))
+#define ION_SET_CACHED(__flags)		((__flags) | ION_FLAG_CACHED)
+#define ION_SET_UNCACHED(__flags)	((__flags) & ~ION_FLAG_CACHED)
+#define ION_IS_CACHED(__flags)		((__flags) & ION_FLAG_CACHED)
 
 #ifdef __KERNEL__
 #include <linux/err.h>
@@ -638,6 +638,7 @@ static inline int msm_ion_unsecure_heap(int heap_id)
 struct ion_allocation_data {
 	size_t len;
 	size_t align;
+	unsigned int heap_mask;
 	unsigned int flags;
 	struct ion_handle *handle;
 };

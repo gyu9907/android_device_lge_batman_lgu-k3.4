@@ -7,8 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_PATH := $(TARGET_OUT)/bin
 LOCAL_SRC_FILES:= Middletester.c
 LOCAL_LDFLAGS := $(LOCAL_PATH)/libami304middleware.a
-LOCAL_SHARED_LIBRARIES := libcutils libc 
-LOCAL_SHARED_LIBRARIES := libutils
+LOCAL_SHARED_LIBRARIES := libcutils libutils liblog
 LOCAL_MODULE := ami304d
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
