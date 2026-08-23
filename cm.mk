@@ -6,7 +6,8 @@ PRODUCT_PACKAGES += Stk
 # Release name
 PRODUCT_RELEASE_NAME := OptimusVu
 
-TARGET_BOOTANIMATION_NAME := vertical-720x1280
+TARGET_SCREEN_WIDTH := 768
+TARGET_SCREEN_HEIGHT := 1024
 
 # Inherit some common CM stuff.
 #$(call inherit-product, vendor/cm/config/common_full_phone.mk)
