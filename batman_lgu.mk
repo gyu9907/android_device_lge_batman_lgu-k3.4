@@ -160,6 +160,12 @@ PRODUCT_PACKAGES += \
     hostapd \
     wpa_supplicant
 
+# Sensors
+# Wrap the proprietary sensor HAL so its legacy flip gesture is not exposed as
+# Android's lift-to-wake sensor.
+PRODUCT_PACKAGES += \
+    sensors.batman_lgu_kr
+
 # Torch, WifiDirect
 PRODUCT_PACKAGES += \
     Torch \
