@@ -44,7 +44,8 @@ lib/libmmmpo.so
 lib/libmmmpod.so
 lib/libmmstereo.so
 lib/libmmstillomx.so
-lib/liboemcamera.so
+# P930 FHD FOV branch patched for MT9E013 geometry
+lib/liboemcamera.so|0e30218bacc324a753c40f7aa540bf0b23b61a8a
 lib/libDivxDrm.so
 lib/libOlaFaceDetector.so
 lib/libmmparser.so
