@@ -122,12 +122,17 @@ static const char KEY_ISO_MODE[] = "iso";
 
 static char *camera_fixup_getparams(int id, const char *settings)
 {
+    if (!settings)
+        return NULL;
+
     android::CameraParameters params;
     params.unflatten(android::String8(settings));
 
     ALOGV("%s: original parameters:", __FUNCTION__);
 
-    params.set(KEY_SUPPORTED_ISO_MODES, iso_values[id]);
+    if (id >= 0 && id < static_cast<int>(sizeof(iso_values) /
+            sizeof(iso_values[0])))
+        params.set(KEY_SUPPORTED_ISO_MODES, iso_values[id]);
 
     android::String8 strParams = params.flatten();
     char *ret = strdup(strParams.string());
@@ -138,6 +143,9 @@ static char *camera_fixup_getparams(int id, const char *settings)
 
 static char *camera_fixup_setparams(int id, const char *settings, struct camera_device *device)
 {
+    if (!settings)
+        return NULL;
+
     android::CameraParameters params;
     params.unflatten(android::String8(settings));
 
@@ -513,11 +521,16 @@ static int camera_set_parameters(struct camera_device *device,
     char *tmp = NULL;
     tmp = camera_fixup_setparams(CAMERA_ID(device), params, device);
 
+    if (!tmp)
+        return -EINVAL;
+
 #ifdef LOG_PARAMETERS
     __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, tmp);
 #endif
 
     int ret = VENDOR_CALL(device, set_parameters, tmp);
+
+    free(tmp);
 
     return ret;
 }
@@ -532,6 +545,11 @@ static char *camera_get_parameters(struct camera_device *device)
 
     char *params = VENDOR_CALL(device, get_parameters);
 
+    if (!params) {
+        ALOGE("vendor camera returned null parameters");
+        return NULL;
+    }
+
 #ifdef LOG_PARAMETERS
     __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, params);
 #endif
@@ -539,6 +557,9 @@ static char *camera_get_parameters(struct camera_device *device)
     char *tmp = camera_fixup_getparams(CAMERA_ID(device), params);
     VENDOR_CALL(device, put_parameters, params);
     params = tmp;
+
+    if (!params)
+        return NULL;
 
 #ifdef LOG_PARAMETERS
     __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, params);

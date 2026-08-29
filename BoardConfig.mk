@@ -40,6 +40,10 @@ COMMON_GLOBAL_CFLAGS += -DMR0_CAMERA_BLOB
 COMMON_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
 COMMON_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
 COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
+# The legacy P930 HAL emits a null preview data callback before its first
+# display buffer.  CM12.1 otherwise dereferences data->handle and kills
+# mediaserver in CameraHardwareInterface::__data_cb().
+COMMON_GLOBAL_CFLAGS += -DLEGACY_CAMERA_NULL_DATA_CB
 
 # Audio
 COMMON_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
