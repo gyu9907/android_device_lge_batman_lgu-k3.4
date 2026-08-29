@@ -63,6 +63,10 @@ LOCAL_C_INCLUDES += hardware/libhardware_legacy/include
 LOCAL_C_INCLUDES += frameworks/base/include
 LOCAL_C_INCLUDES += system/core/include
 
+# The legacy ALSA HAL includes the kernel's exported UAPI (ion/msm_audio).
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+
 ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
 LOCAL_CFLAGS += -DQCOM_ACDB_ENABLED
 endif

@@ -20,8 +20,4 @@
 #define BTM_DEF_LOCAL_NAME "LG-F100L"
 #define BTA_DISABLE_DELAY 1000 /* milliseconds */
 
-#define BLE_INCLUDED FALSE
-#define BTA_GATT_INCLUDED FALSE
-#define SMP_INCLUDED FALSE
-
 #endif

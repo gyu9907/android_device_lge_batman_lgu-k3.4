@@ -1047,17 +1047,28 @@ status_t AudioHardware::initCheck()
     return mInit ? NO_ERROR : NO_INIT;
 }
 
+// default implementation calls its "without flags" counterpart
+AudioStreamOut* AudioHardware::openOutputStreamWithFlags(uint32_t devices,
+                                          audio_output_flags_t flags,
+                                          int *format,
+                                          uint32_t *channels,
+                                          uint32_t *sampleRate,
+                                          status_t *status)
+{
+    return openOutputStream(devices, format, channels, sampleRate, status);
+}
+
 AudioStreamOut* AudioHardware::openOutputStream(
         uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status)
 {
-    audio_output_flags_t flags = static_cast<audio_output_flags_t>(*status);
     { // scope for the lock
+	audio_output_flags_t flags = static_cast<audio_output_flags_t> (*status);
         status_t lStatus;
         Mutex::Autolock lock(mLock);
 #ifdef QCOM_VOIP_ENABLED
         // only one output stream allowed
         if (mOutput && !((flags & AUDIO_OUTPUT_FLAG_DIRECT) && (flags & AUDIO_OUTPUT_FLAG_VOIP_RX))
-                    && !(flags & AUDIO_OUTPUT_FLAG_LPA)) {
+                    /*&& !(flags & AUDIO_OUTPUT_FLAG_LPA)*/) {
             if (status) {
                 *status = INVALID_OPERATION;
             }
@@ -1088,7 +1099,7 @@ AudioStreamOut* AudioHardware::openOutputStream(
             return mDirectOutput;
         } else
 #endif
-	    if (flags & AUDIO_OUTPUT_FLAG_LPA) {
+	    /*if (flags & AUDIO_OUTPUT_FLAG_LPA) {
 			status_t err = BAD_VALUE;
 #if 0
             if (mOutput) {
@@ -1112,7 +1123,7 @@ AudioStreamOut* AudioHardware::openOutputStream(
             mOutputLPA = out;
             return mOutputLPA;
 
-        } else {
+        } else*/ {
 #if 0
             ALOGV(" AudioHardware::openOutputStream AudioStreamOutMSM8x60 output stream \n");
             // only one output stream allowed
@@ -1254,6 +1265,36 @@ status_t AudioHardware::setMode(int mode)
         clearCurDevice();
     }
     return status;
+}
+
+status_t AudioHardware::setMasterMute(bool muted) {
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+int AudioHardware::createAudioPatch(unsigned int num_sources,
+        const struct audio_port_config *sources,
+        unsigned int num_sinks,
+        const struct audio_port_config *sinks,
+        audio_patch_handle_t *handle) {
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+int AudioHardware::releaseAudioPatch(audio_patch_handle_t handle) {
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+int AudioHardware::getAudioPort(struct audio_port *port) {
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+int AudioHardware::setAudioPortConfig(
+        const struct audio_port_config *config) {
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
 }
 
 bool AudioHardware::checkOutputStandby()
@@ -3058,6 +3099,7 @@ status_t AudioHardware::AudioStreamOutMSM8x60::standby()
         return -1;
     }
     deleteFromTable(PCM_PLAY);
+    updateDeviceInfo(cur_rx, cur_tx);
     if(!getNodeByStreamType(VOICE_CALL)
 #ifdef QCOM_TUNNEL_LPA_ENABLED
        && !getNodeByStreamType(LPA_DECODE)
@@ -3073,10 +3115,12 @@ status_t AudioHardware::AudioStreamOutMSM8x60::standby()
     //in case if ANC don't disable cur device.
       if (anc_running == false){
 #endif
+#if 0
         if(enableDevice(cur_rx, 0)) {
             ALOGE("Disabling device failed for cur_rx %d", cur_rx);
             return 0;
         }
+#endif
 #ifdef QCOM_ANC_HEADSET_ENABLED
       }
 #endif
@@ -3166,6 +3210,12 @@ String8 AudioHardware::AudioStreamOutMSM8x60::getParameters(const String8& keys)
 }
 
 status_t AudioHardware::AudioStreamOutMSM8x60::getRenderPosition(uint32_t *dspFrames)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+status_t AudioHardware::AudioStreamOutMSM8x60::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
 {
     //TODO: enable when supported by driver
     return INVALID_OPERATION;
@@ -3481,6 +3531,12 @@ status_t AudioHardware::AudioStreamOutDirect::getRenderPosition(uint32_t *dspFra
     return INVALID_OPERATION;
 }
 
+status_t AudioHardware::AudioStreamOutDirect::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
 // End AudioStreamOutDirect
 //.----------------------------------------------------------------------------
 #endif
@@ -3774,8 +3830,7 @@ void* AudioHardware::AudioSessionOutLPA::memBufferAlloc(int nSize, int32_t *ion_
 
     alloc_data.len =   nSize;
     alloc_data.align = 0x1000;
-    alloc_data.heap_mask = ION_HEAP(ION_AUDIO_HEAP_ID);
-    alloc_data.flags = 0;
+    alloc_data.flags = ION_HEAP(ION_AUDIO_HEAP_ID);
     int rc = ioctl(ionfd, ION_IOC_ALLOC, &alloc_data);
     if (rc) {
         ALOGE("ION_IOC_ALLOC ioctl failed\n");
@@ -4255,6 +4310,12 @@ void AudioHardware::AudioSessionOutLPA::reset()
 }
 
 status_t AudioHardware::AudioSessionOutLPA::getRenderPosition(uint32_t *dspFrames)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+status_t AudioHardware::AudioSessionOutLPA::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
 {
     //TODO: enable when supported by driver
     return INVALID_OPERATION;
