@@ -56,11 +56,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/configs/synaptics_ts.kl:system/usr/keylayout/synaptics_ts.kl \
     $(LOCAL_PATH)/prebuilt/configs/synaptics_ts.idc:system/usr/idc/synaptics_ts.idc
 
-# KoreanIME
-PRODUCT_COPY_FILES += \
-    $(if $(wildcard device/lge/batman_lgu/stonecold/lgeapps/lgeapps.mk), ,$(if $(wildcard device/lge/batman_lgu/stonecold/stonecold.mk), $(call add-to-product-copy-files-if-exists, $(LOCAL_PATH)/prebuilt/ime/KoreanIME.apk:system/app/KoreanIME.apk), $(call add-to-product-copy-files-if-exists, $(LOCAL_PATH)/prebuilt/ime/KoreanIME.apk:system/app/LatinIME.apk))) \
-    $(if $(wildcard device/lge/batman_lgu/stonecold/lgeapps/lgeapps.mk), ,$(call add-to-product-copy-files-if-exists, $(LOCAL_PATH)/prebuilt/ime/libjni_koreanime.so:system/lib/libjni_koreanime.so))
-
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
