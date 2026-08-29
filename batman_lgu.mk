@@ -155,6 +155,11 @@ PRODUCT_PACKAGES += \
     Tag \
     com.android.nfc_extras
 
+# Wi-Fi
+PRODUCT_PACKAGES += \
+    hostapd \
+    wpa_supplicant
+
 # Torch, WifiDirect
 PRODUCT_PACKAGES += \
     Torch \
