@@ -184,3 +184,6 @@ PRODUCT_PACKAGES += \
 #    audio.primary.batman_lgu \
 #    lights.batman_lgu \
 #    power.batman_lgu
+
+# Device-local legacy Qualcomm RIL
+$(call project-set-path,ril,device/lge/batman_lgu/ril)

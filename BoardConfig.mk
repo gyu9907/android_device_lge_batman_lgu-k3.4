@@ -1,6 +1,8 @@
 COMMON_GLOBAL_CFLAGS += -DBATMAN_LGU -DNEED_UMS_ENABLE
 TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
+BOARD_VENDOR := lge
+
 #BOARD_HAVE_FM_RADIO := true
 #BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 
@@ -140,3 +142,11 @@ TARGET_USERIMAGES_USE_EXT4 := true
 
 # CyanogenMod hardware abstraction
 BOARD_HARDWARE_CLASS := device/lge/batman_lgu/cmhw/
+
+# Legacy LGE Qualcomm RIL compatibility
+BOARD_PROVIDES_LIBRIL := true
+BOARD_PROVIDES_LIBREFERENCE_RIL := true
+BOARD_PROVIDES_RILD := true
+BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
+TARGET_RIL_VARIANT_LEGACY := true
+TARGET_RIL_SUPPORT_SEEK := true
