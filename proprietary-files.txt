@@ -199,34 +199,21 @@ lib/liblgsecclk.so
 lib/liblgtomadrm.so
 lib/liblgtomadrm_sf.so
 
-# Adreno userspace and firmware imported from HTC Pyramid
-# SHA-256: cb7274d7966b02540895f4399e8567faecbb9503d6d95332046412fcd8b0710e
+# Adreno firmware from Batman LGU stock JB
 etc/firmware/leia_pfp_470.fw
-# SHA-256: d99151ad14fce57f9af4f5d80683a837179b9ea2195a7ddae390cd3cb56fb276
 etc/firmware/leia_pm4_470.fw
-# SHA-256: 28272f52d06aa44f7e2d624de7187755c8215a054d3c8e8e6d0656cd9ab13540
 etc/firmware/yamato_pfp.fw
-# SHA-256: 3237f5347bec0a00db475933f39724099aa8a96bc571c49a6df0b132c002cd36
 etc/firmware/yamato_pm4.fw
-# SHA-256: 633844f133a7201cf896a36083a575e4d1ba8453aaf0ae81190c060264da9520
-lib/libC2D2.so
-# SHA-256: f716cdce17e30439b2b0b35c91b056ab0f819958782add8921382aa85ad367b6
-lib/libc2d2_z180.so
-# SHA-256: b93d692d657bae17edf04933e879c705b66a8e58d60b1fe3271c9538204af4b4
-lib/libgsl.so
-# SHA-256: 1e42a47e7e3fdeb8d44a08122e50bb7f239ef70be87d886d1ba89b61f278131d
-lib/libOpenVG.so
-# SHA-256: 6c0df0eac0cfe8457288d9ecaae45d723bdd484cca69e8a93804c63d45e681b6
-lib/libsc-a2xx.so
-# SHA-256: 4a557367cfac0b7905df23c70f60fdf95a1cceb93afa6d79ef51fe3c8d08e763
-lib/egl/eglsubAndroid.so
-# SHA-256: 0f8db880397671c978a6534dc778de1809d0821e3ba3392b52d531796ca75d2f
-lib/egl/libEGL_adreno200.so
-# SHA-256: 3481b374a5fd587772b39612af20e002213cfe44460a9f914aa86be850127e4f
-lib/egl/libGLESv1_CM_adreno200.so
-# SHA-256: 92d9a5c11a2931257cf32e8467a012a25aca126c72dd3eab9ed21a284c15f0da
-lib/egl/libGLESv2_adreno200.so
-# SHA-256: 259376fe7044b758e78a4cf12437917a53be6c689f601e74b7f418f6b5bc8f1c
-lib/egl/libplayback_adreno200.so
-# SHA-256: eaf666602e92ee35b15644744ddef13633820d79e0123dd5c00dbb13cfc08e6f
-lib/egl/libq3dtools_adreno200.so
+
+# Adreno userspace imported from HTC Pyramid
+lib/libC2D2.so|b380758744d09e3061d3d16cb25a8012045581b3
+lib/libc2d2_z180.so|a8cf1615fdf5d3efc167a835d1eb72776ea1ca7b
+lib/libgsl.so|b5fa047e99d56333a4bad7aa9700f36b67ea5b88
+lib/libOpenVG.so|6328f392afbc79a469bf8485a605818e45a9ce41
+lib/libsc-a2xx.so|38f265a8e59195579bf27cbe3c1bab3f10905f69
+lib/egl/eglsubAndroid.so|a9429be9b815485cea46a2fe66d27445a0608f94
+lib/egl/libEGL_adreno200.so|d71a5e9b384700be86290d35779db01c93153e6d
+lib/egl/libGLESv1_CM_adreno200.so|0719972fc574ac22b6716c3b5f815a5ed0790def
+lib/egl/libGLESv2_adreno200.so|0f486e5cc96c2f4e5f348aab2972ef06987a69f6
+lib/egl/libplayback_adreno200.so|eaca0240f9f5dd2724d9bfe2a34c88bb659901a6
+lib/egl/libq3dtools_adreno200.so|b020398d8736f09a3bc7bffa1ae0a69fbfff3ec8
