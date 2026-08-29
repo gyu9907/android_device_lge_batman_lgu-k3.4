@@ -261,6 +261,12 @@ on post-fs-data
     mkdir /data/misc/wifi/wpa_supplicant 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
+
+    # Allow the CM display calibration UI to update the MDP kcal controls.
+    chown root system /sys/devices/platform/mdp.524801/kcal
+    chmod 0664 /sys/devices/platform/mdp.524801/kcal
+    restorecon /sys/devices/platform/mdp.524801/kcal
+
     mkdir /data/misc/audio 0770 audio audio
     mkdir /data/misc/location 0770 gps gps
     mkdir /data/time 0700 system system
