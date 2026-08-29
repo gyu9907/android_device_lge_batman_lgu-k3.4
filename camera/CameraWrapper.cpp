@@ -119,6 +119,12 @@ const static char * iso_values[] = {
 // the wrapper instead of relying on removed CameraParameters extensions.
 static const char KEY_SUPPORTED_ISO_MODES[] = "iso-values";
 static const char KEY_ISO_MODE[] = "iso";
+static const char KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO[] =
+        "preferred-preview-size-for-video";
+static const char KEY_SUPPORTED_PREVIEW_SIZES[] = "preview-size-values";
+static const char BATMAN_PREVIEW_SIZES[] =
+        "1360x768,1536x864,1280x720,960x720,800x480,768x432,720x480,640x480,"
+        "576x432,480x320,384x288,352x288,320x240,240x160,176x144";
 
 static char *camera_fixup_getparams(int id, const char *settings)
 {
@@ -133,6 +139,17 @@ static char *camera_fixup_getparams(int id, const char *settings)
     if (id >= 0 && id < static_cast<int>(sizeof(iso_values) /
             sizeof(iso_values[0])))
         params.set(KEY_SUPPORTED_ISO_MODES, iso_values[id]);
+
+    /* Select the p930 CM11 combination before Camera2 lays out its preview. */
+    if (id == 0) {
+        params.set(KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO, "1360x768");
+        /*
+         * 1360x768 is a selection-only alias: it matches the 1920x1088 ratio
+         * within Camera2's tolerance and the Vu's 768-pixel short display
+         * side. camera_fixup_setparams() maps it to the HAL's 1280x720 mode.
+         */
+        params.set(KEY_SUPPORTED_PREVIEW_SIZES, BATMAN_PREVIEW_SIZES);
+    }
 
     android::String8 strParams = params.flatten();
     char *ret = strdup(strParams.string());
@@ -161,6 +178,14 @@ static char *camera_fixup_setparams(int id, const char *settings, struct camera_
             params.set(KEY_ISO_MODE, "400");
         else if(strcmp(isoMode, "ISO800") == 0)
             params.set(KEY_ISO_MODE, "800");
+    }
+
+    int previewWidth = 0;
+    int previewHeight = 0;
+    params.getPreviewSize(&previewWidth, &previewHeight);
+    if (id == 0 && previewWidth == 1360 && previewHeight == 768) {
+        ALOGI("preview size alias: 1360x768 -> 1280x720");
+        params.setPreviewSize(1280, 720);
     }
 
     android::String8 strParams = params.flatten();

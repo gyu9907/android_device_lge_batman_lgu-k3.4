@@ -62,6 +62,9 @@ ro.media.enc.jpeg.quality=100
 ro.telephony.call_ring.delay=0
 pm.sleep_mode=1
 ro.product.camera=lgp930
+# The vendor blob implements the legacy camera1 API; avoid the Lollipop
+# camera2 compatibility path, as done by the known-good 3.0 device tree.
+camera2.portability.force_api=1
 ro.ril.disable.power.collapse=0
 ro.ril.fast.dormancy.rule=0
 windowsmgr.max_events_per_sec=90
