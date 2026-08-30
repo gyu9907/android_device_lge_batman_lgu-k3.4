@@ -71,6 +71,7 @@ static int set_bt_mac(void)
 		machex[4], machex[5], machex[6], machex[7],
 		machex[8], machex[9], machex[10], machex[11]);
 	fclose(fd);
+	chmod(BT_ADDR_FILE, 0666);
 
 	return 0;
 }
@@ -98,6 +99,7 @@ static int set_wifi_mac(void)
 		macbuf[0], macbuf[1], macbuf[2],
 		macbuf[3], macbuf[4], macbuf[5]);
 	fclose(fd);
+	chmod(WIFI_ADDR_FILE, 0666);
 
 	return 0;
 }

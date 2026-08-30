@@ -20,4 +20,6 @@
 #define BTM_DEF_LOCAL_NAME "LG-F100L"
 #define BTA_DISABLE_DELAY 1000 /* milliseconds */
 
+#define REMOVE_EAGER_THREADS FALSE
+
 #endif
