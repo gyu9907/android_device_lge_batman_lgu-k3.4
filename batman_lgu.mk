@@ -148,6 +148,7 @@ PRODUCT_COPY_FILES += \
     $(call add-to-product-copy-files-if-exists, packages/apps/Nfc/migrate_nfc.txt:system/etc/updatecmds/migrate_nfc.txt)
 
 PRODUCT_PACKAGES += \
+    nfc.msm8660 \
     libnfc \
     libnfc_jni \
     Nfc \
