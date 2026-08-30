@@ -10,6 +10,6 @@
 /dev/block/mmcblk0p22       /tombstones    ext4    nosuid,nodev,barrier=1,data=ordered                     wait
 /dev/block/mmcblk0p1        /firmware      vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337 wait
 /dev/block/mmcblk0p14       /modem         vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337 wait
-/dev/block/mmcblk0p8        /boot          emmc    defaults                                               defaults
-/dev/block/mmcblk0p13       /recovery      emmc    defaults                                               defaults
-/devices/platform/msm_sdcc.1/mmc_host/mmc0/mmc0:0001/block/mmcblk0 auto auto defaults voldmanaged=sdcard0:32,noemulatedsd
+/dev/block/mmcblk0p8        /boot          emmc    defaults                                               recoveryonly
+/dev/block/mmcblk0p13       /recovery      emmc    defaults                                               recoveryonly
+/devices/platform/msm_sdcc.1/mmc_host/mmc0/mmc0* auto auto defaults voldmanaged=sdcard0:32,noemulatedsd,nonremovable

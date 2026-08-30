@@ -35,9 +35,6 @@
     <!-- Minimum screen brightness allowed by the power manager. -->
     <integer name="config_screenBrightnessDim">2</integer>
 
-    <!-- Boolean indicating whether Softap requires reloading AP firmware -->
-    <bool name="config_wifiApFirmwareReload">false</bool>
-
     <!-- Disable fading edges for marquee text on the legacy display stack. -->
     <bool name="config_ui_enableFadingMarquee">false</bool>
 
@@ -165,6 +162,6 @@
         <item>0</item>
     </integer-array>
 
-    <!-- Workaround for devices with broken keyboards -->
-    <bool name="config_forceDisableHardwareKeyboard">true</bool>
+    <!-- The legacy sensor HAL does not provide reliable event timestamps. -->
+    <bool name="config_useSystemClockforRotationSensor">true</bool>
 </resources>

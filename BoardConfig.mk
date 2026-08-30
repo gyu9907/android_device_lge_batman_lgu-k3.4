@@ -87,7 +87,9 @@ TARGET_USE_SCORPION_PLD_SET := true
 TARGET_SCORPION_BIONIC_PLDOFFS := 6
 TARGET_SCORPION_BIONIC_PLDSIZE := 128
 
-BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr kgsl.mmutype=gpummu vmalloc=580M
+# Bring-up only: keep the serial console available and prevent init from
+# switching SELinux into enforcing mode while early-boot failures are traced.
+BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr androidboot.selinux=permissive kgsl.mmutype=gpummu vmalloc=580M
 BOARD_KERNEL_BASE := 0x40200000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
@@ -96,6 +98,18 @@ TARGET_KERNEL_SOURCE := kernel/lge/msm8660
 TARGET_KERNEL_CONFIG := batman_lgu_defconfig
 KERNEL_TOOLCHAIN_PREFIX := arm-eabi-
 KERNEL_TOOLCHAIN := "$(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.4.3/bin/"
+
+# Bring-up only.  Put these in ADDITIONAL_DEFAULT_PROPERTIES here so they
+# precede CM's secure defaults when default.prop removes duplicate keys.
+ADDITIONAL_DEFAULT_PROPERTIES += \
+    ro.secure=0 \
+    ro.adb.secure=0 \
+    ro.debuggable=1 \
+    security.perf_harden=0 \
+    cm.service.adb.root=1 \
+    service.adb.root=1 \
+    persist.service.adb.enable=1 \
+    persist.sys.usb.config=mtp,adb
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
@@ -123,9 +137,7 @@ WIFI_DRIVER_FW_PATH_AP := "/system/etc/firmware/fw_bcmdhd_apsta.bin"
 BOARD_LEGACY_NL80211_STA_EVENTS := true
 
 # GPS
-BOARD_USES_QCOM_LIBRPC := true
-BOARD_USES_QCOM_GPS := true
-BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := msm8660
+TARGET_GPS_HAL_PATH := device/lge/batman_lgu/gps
 BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 50000
 
 # Vold
@@ -138,6 +150,7 @@ ENABLE_WEBGL := true
 TARGET_FORCE_CPU_UPLOAD := false
 
 # Recovery
+COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
 BOARD_CUSTOM_GRAPHICS := ../../../device/lge/batman_lgu/recovery/graphics.c
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lge/batman_lgu/recovery/recovery_keymapping.c
@@ -154,3 +167,6 @@ BOARD_PROVIDES_RILD := true
 BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
 TARGET_RIL_VARIANT_LEGACY := true
 TARGET_RIL_SUPPORT_SEEK := true
+
+# CM 13 uses the Qualcomm power HAL from hardware/qcom/power.
+TARGET_POWERHAL_VARIANT := qcom

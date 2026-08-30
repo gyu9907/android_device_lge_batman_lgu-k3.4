@@ -374,8 +374,10 @@ public:
     virtual status_t    getPresentationPosition(uint64_t *frames, struct timespec *timestamp);
 
     virtual status_t    getNextWriteTimestamp(int64_t *timestamp);
+#ifdef QCOM_TUNNEL_LPA_ENABLED
     virtual status_t    setObserver(void *observer);
     void* memBufferAlloc(int nSize, int32_t *ion_fd);
+#endif
 
 private:
     Mutex               mLock;
@@ -393,7 +395,9 @@ private:
     bool                mEosEventReceived;
     uint32_t    mDevices;
     AudioHardware* mHardware;
+#ifdef QCOM_TUNNEL_LPA_ENABLED
     AudioEventObserver *mObserver;
+#endif
 
     //status_t            openDevice(char *pUseCase, bool bIsUseCase, int devices);
 

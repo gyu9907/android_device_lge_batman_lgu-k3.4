@@ -79,3 +79,6 @@ persist.rild.nitz_short_ons_0=
 persist.rild.nitz_short_ons_1=
 persist.rild.nitz_short_ons_2=
 persist.rild.nitz_short_ons_3=
+
+# The device exposes physical primary storage rather than emulated storage.
+ro.vold.primary_physical=1

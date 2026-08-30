@@ -120,9 +120,11 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.secure=0 \
     ro.adb.secure=0 \
     ro.debuggable=1 \
+    security.perf_harden=0 \
+    cm.service.adb.root=1 \
     service.adb.root=1 \
     persist.service.adb.enable=1 \
-    persist.sys.usb.config=mtp
+    persist.sys.usb.config=mtp,adb
 
 # Filesystem Management Tools
 PRODUCT_PACKAGES += \
@@ -170,6 +172,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     tcpdump \
     qrngd
+
+# Qualcomm compatibility library
+PRODUCT_PACKAGES += \
+    libstlport
 
 # src
 PRODUCT_PACKAGES += \

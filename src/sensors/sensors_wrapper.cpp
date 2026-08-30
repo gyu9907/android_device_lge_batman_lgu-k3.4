@@ -115,4 +115,5 @@ extern "C" sensors_module_t HAL_MODULE_INFO_SYM = {
         .reserved = {0},
     },
     .get_sensors_list = getSensorsList,
+    .set_operation_mode = NULL,
 };
