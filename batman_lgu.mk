@@ -137,7 +137,7 @@ PRODUCT_PACKAGES += \
 
 # GPS
 PRODUCT_PACKAGES += \
-    gps.batman_lgu
+    gps.msm8660
 
 # NFC
 PRODUCT_COPY_FILES += \

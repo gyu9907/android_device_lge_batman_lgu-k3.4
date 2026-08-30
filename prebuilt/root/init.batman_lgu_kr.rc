@@ -1,4 +1,4 @@
-import init.batman_lgu.usb.rc
+import /init.batman_lgu.usb.rc
 
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
