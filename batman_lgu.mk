@@ -80,8 +80,9 @@ PRODUCT_COPY_FILES += \
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
+    audio.r_submix.default \
+    audio.usb.default \
     audio.primary.batman_lgu_kr \
-    audio_policy.msm8660 \
     libaudioutils
 
 # Graphics

@@ -38,7 +38,7 @@ struct qcom_audio_module {
 struct qcom_audio_device {
     struct audio_hw_device device;
 
-    struct AudioHardwareInterface *hwif;
+    AudioHardwareInterface *hwif;
 };
 
 struct qcom_stream_out {
@@ -457,6 +457,17 @@ static uint32_t in_get_input_frames_lost(struct audio_stream_in *stream)
     return in->qcom_in->getInputFramesLost();
 }
 
+static int in_get_capture_position(const struct audio_stream_in *stream __unused,
+                                   int64_t *frames, int64_t *time)
+{
+    if (frames == NULL || time == NULL)
+        return -EINVAL;
+
+    // The legacy msm8660 driver does not expose a reliable capture timestamp.
+    // AUDIO_DEVICE_API_VERSION_3_0 permits HALs to report this as unsupported.
+    return -ENOSYS;
+}
+
 static int in_add_audio_effect(const struct audio_stream *stream, effect_handle_t effect)
 {
     const struct qcom_stream_in *in =
@@ -505,6 +516,52 @@ static int adev_get_master_volume(struct audio_hw_device *dev, float *volume) {
 
     struct qcom_audio_device *qadev = to_ladev(dev);
     return qadev->hwif->getMasterVolume(volume);
+}
+
+static int adev_set_master_mute(struct audio_hw_device *dev, bool muted)
+{
+    struct qcom_audio_device *qadev = to_ladev(dev);
+    return qadev->hwif->setMasterMute(muted);
+}
+
+static int adev_get_master_mute(struct audio_hw_device *dev __unused,
+                                bool *muted __unused)
+{
+    // Master mute is emulated by AudioFlinger for this legacy hardware.
+    return -ENOSYS;
+}
+
+static int adev_create_audio_patch(struct audio_hw_device *dev,
+                                   unsigned int num_sources,
+                                   const struct audio_port_config *sources,
+                                   unsigned int num_sinks,
+                                   const struct audio_port_config *sinks,
+                                   audio_patch_handle_t *handle)
+{
+    struct qcom_audio_device *qadev = to_ladev(dev);
+    return qadev->hwif->createAudioPatch(num_sources, sources, num_sinks,
+                                         sinks, handle);
+}
+
+static int adev_release_audio_patch(struct audio_hw_device *dev,
+                                    audio_patch_handle_t handle)
+{
+    struct qcom_audio_device *qadev = to_ladev(dev);
+    return qadev->hwif->releaseAudioPatch(handle);
+}
+
+static int adev_get_audio_port(struct audio_hw_device *dev,
+                               struct audio_port *port)
+{
+    struct qcom_audio_device *qadev = to_ladev(dev);
+    return qadev->hwif->getAudioPort(port);
+}
+
+static int adev_set_audio_port_config(struct audio_hw_device *dev,
+                                      const struct audio_port_config *config)
+{
+    struct qcom_audio_device *qadev = to_ladev(dev);
+    return qadev->hwif->setAudioPortConfig(config);
 }
 
 #ifdef QCOM_FM_ENABLED
@@ -605,6 +662,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out->stream.write = out_write;
     out->stream.get_render_position = out_get_render_position;
     out->stream.get_next_write_timestamp = out_get_next_write_timestamp;
+    out->stream.get_presentation_position = out_get_presentation_position;
 #ifdef QCOM_TUNNEL_LPA_ENABLED
     out->stream.start = out_start;
     out->stream.pause = out_pause;
@@ -678,6 +736,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->stream.set_gain = in_set_gain;
     in->stream.read = in_read;
     in->stream.get_input_frames_lost = in_get_input_frames_lost;
+    in->stream.get_capture_position = in_get_capture_position;
 
     *stream_in = &in->stream;
     return 0;
@@ -737,6 +796,9 @@ static int qcom_adev_open(const hw_module_t* module, const char* name,
         return -ENOMEM;
 
     qadev->device.common.tag = HARDWARE_DEVICE_TAG;
+    // Routing is still performed through the legacy "routing" parameter.
+    // Advertising 3.0 makes AudioFlinger use audio patches, which msm8660
+    // cannot implement and leaves cur_rx at the handset fallback.
     qadev->device.common.version = AUDIO_DEVICE_API_VERSION_2_0;
     qadev->device.common.module = const_cast<hw_module_t*>(module);
     qadev->device.common.close = qcom_adev_close;
@@ -745,6 +807,8 @@ static int qcom_adev_open(const hw_module_t* module, const char* name,
     qadev->device.set_voice_volume = adev_set_voice_volume;
     qadev->device.set_master_volume = adev_set_master_volume;
     qadev->device.get_master_volume = adev_get_master_volume;
+    qadev->device.set_master_mute = adev_set_master_mute;
+    qadev->device.get_master_mute = adev_get_master_mute;
 #ifdef QCOM_FM_ENABLED
     qadev->device.set_fm_volume = adev_set_fm_volume;
 #endif
@@ -759,6 +823,10 @@ static int qcom_adev_open(const hw_module_t* module, const char* name,
     qadev->device.open_input_stream = adev_open_input_stream;
     qadev->device.close_input_stream = adev_close_input_stream;
     qadev->device.dump = adev_dump;
+    qadev->device.create_audio_patch = adev_create_audio_patch;
+    qadev->device.release_audio_patch = adev_release_audio_patch;
+    qadev->device.get_audio_port = adev_get_audio_port;
+    qadev->device.set_audio_port_config = adev_set_audio_port_config;
 
     qadev->hwif = createAudioHardware();
     if (!qadev->hwif) {
