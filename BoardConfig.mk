@@ -64,7 +64,7 @@ BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
 TARGET_NEEDS_BLUETOOTH_INIT_DELAY := true
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/lge/batman_lgu/bluetooth
-BOARD_BLUEDROID_VENDOR_CONF := device/lge/batman_lgu/bluetooth/vnd_bt.txt
+BOARD_CUSTOM_BT_CONFIG := device/lge/batman_lgu/bluetooth/vnd_bt.txt
 
 # Graphics
 TARGET_QCOM_DISPLAY_VARIANT := caf

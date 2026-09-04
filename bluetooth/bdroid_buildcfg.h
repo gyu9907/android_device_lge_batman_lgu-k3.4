@@ -20,6 +20,9 @@
 #define BTM_DEF_LOCAL_NAME "LG-F100L"
 #define BTA_DISABLE_DELAY 1000 /* milliseconds */
 
+/* The legacy batman kernel rejects timer_create(CLOCK_BOOTTIME_ALARM). */
+#define KERNEL_MISSING_CLOCK_BOOTTIME_ALARM TRUE
+
 #define REMOVE_EAGER_THREADS FALSE
 
 #endif

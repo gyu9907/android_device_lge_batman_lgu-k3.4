@@ -19,7 +19,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
 #include <cutils/properties.h>
+#include <private/android_filesystem_config.h>
 
 #define BT_ADDR_FILE "/data/misc/bd_addr"
 #define WIFI_ADDR_FILE "/data/misc/wifi/config"
@@ -71,6 +73,7 @@ static int set_bt_mac(void)
 		machex[4], machex[5], machex[6], machex[7],
 		machex[8], machex[9], machex[10], machex[11]);
 	fclose(fd);
+	chown(BT_ADDR_FILE, AID_BLUETOOTH, AID_NET_BT_STACK);
 	chmod(BT_ADDR_FILE, 0666);
 
 	return 0;
@@ -99,6 +102,7 @@ static int set_wifi_mac(void)
 		macbuf[0], macbuf[1], macbuf[2],
 		macbuf[3], macbuf[4], macbuf[5]);
 	fclose(fd);
+	chown(WIFI_ADDR_FILE, AID_WIFI, AID_WIFI);
 	chmod(WIFI_ADDR_FILE, 0666);
 
 	return 0;
