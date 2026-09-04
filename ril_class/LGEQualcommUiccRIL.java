@@ -111,7 +111,7 @@ public class LGEQualcommUiccRIL extends RIL implements CommandsInterface {
     }
 
     @Override
-    protected void processUnsolicited(Parcel p) {
+    protected void processUnsolicited(Parcel p, int type) {
         int originalPosition = p.dataPosition();
         int response = p.readInt();
 
@@ -146,7 +146,7 @@ public class LGEQualcommUiccRIL extends RIL implements CommandsInterface {
         }
 
         p.setDataPosition(originalPosition);
-        super.processUnsolicited(p);
+        super.processUnsolicited(p, type);
     }
 
     @Override

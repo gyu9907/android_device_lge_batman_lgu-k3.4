@@ -3,54 +3,47 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := \
+LOCAL_SRC_FILES:= \
     librilutils.c \
     record_stream.c \
-    proto/sap-api.pb.cc
+    proto/sap-api.proto \
 
-LOCAL_C_INCLUDES += external/nanopb-c/
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/../include
+LOCAL_C_INCLUDES += \
+    external/nanopb-c/ \
+    $(LOCAL_PATH)/../include
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+    $(LOCAL_PATH)/../include
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nanopb-c-enable_malloc
 
-# Disable usage of Clang Toolchain here
-LOCAL_CLANG := false
-
-LOCAL_CFLAGS :=
-LOCAL_CPPFLAGS := -std=c++11
-
-LOCAL_MODULE := librilutils
+LOCAL_MODULE:= librilutils
 
 include $(BUILD_SHARED_LIBRARY)
 
+
 # Create static library for those that want it
-# ============================================
+# =========================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
     librilutils.c \
     record_stream.c \
-    proto/sap-api.pb.cc
+    proto/sap-api.proto \
 
-LOCAL_C_INCLUDES += external/nanopb-c/
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/../include
+LOCAL_C_INCLUDES += \
+    external/nanopb-c/ \
+    $(LOCAL_PATH)/../include
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+    $(LOCAL_PATH)/../include
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nanopb-c-enable_malloc
 
-# Disable usage of Clang Toolchain here
-LOCAL_CLANG := false
-
-LOCAL_CFLAGS :=
-LOCAL_CPPFLAGS := -std=c++11
-
-LOCAL_MODULE := librilutils_static
+LOCAL_MODULE:= librilutils_static
 
 include $(BUILD_STATIC_LIBRARY)
 
 # Create java protobuf code
-# =========================
+
 include $(CLEAR_VARS)
 
 src_proto := $(LOCAL_PATH)

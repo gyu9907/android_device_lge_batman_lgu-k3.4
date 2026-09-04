@@ -15,8 +15,7 @@
 ** limitations under the License.
 */
 
-extern char g_log_tag[12];
-#define LOG_TAG ((const char *)g_log_tag)
+#define LOG_TAG "RILC"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,8 +33,6 @@ static pthread_mutex_t listMutex;
 #define MUTEX_RELEASE() pthread_mutex_unlock(&listMutex)
 #define MUTEX_INIT() pthread_mutex_init(&listMutex, NULL)
 #define MUTEX_DESTROY() pthread_mutex_destroy(&listMutex)
-
-#include <telephony/ril_log.h>
 
 #ifndef timeradd
 #define timeradd(tvp, uvp, vvp)						\
@@ -78,7 +75,7 @@ static struct ril_event pending_list;
 #define DEBUG 0
 
 #if DEBUG
-#define dlog(x...) ALOGD( x )
+#define dlog(x...) RLOGD( x )
 static void dump_event(struct ril_event * ev)
 {
     dlog("~~~~ Event %x ~~~~", (unsigned int)ev);
@@ -123,18 +120,20 @@ static void addToList(struct ril_event * ev, struct ril_event * list)
 
 static void removeFromList(struct ril_event * ev)
 {
-    dlog("~~~~ Removing event ~~~~");
+    dlog("~~~~ +removeFromList ~~~~");
     dump_event(ev);
 
     ev->next->prev = ev->prev;
     ev->prev->next = ev->next;
     ev->next = NULL;
     ev->prev = NULL;
+    dlog("~~~~ -removeFromList ~~~~");
 }
 
 
 static void removeWatch(struct ril_event * ev, int index)
 {
+    dlog("~~~~ +removeWatch ~~~~");
     watch_table[index] = NULL;
     ev->index = -1;
 
@@ -153,6 +152,7 @@ static void removeWatch(struct ril_event * ev, int index)
         nfds = n + 1;
         dlog("~~~~ nfds = %d ~~~~", nfds);
     }
+    dlog("~~~~ -removeWatch ~~~~");
 }
 
 static void processTimeouts()
@@ -350,7 +350,6 @@ void ril_event_loop()
     struct timeval * ptv;
 
 
-    ALOGE("in ril_event_loop");
     for (;;) {
 
         // make local copy of read fd_set
@@ -370,7 +369,7 @@ void ril_event_loop()
         if (n < 0) {
             if (errno == EINTR) continue;
 
-            ALOGE("ril_event: select error (%d)", errno);
+            RLOGE("ril_event: select error (%d)", errno);
             // bail?
             return;
         }

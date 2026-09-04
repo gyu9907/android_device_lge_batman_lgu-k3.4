@@ -14,10 +14,6 @@
 
 
 LOCAL_PATH:= $(call my-dir)
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libnv_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libnv_intermediates/export_includes)
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/liboncrpc_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/liboncrpc_intermediates/export_includes)
 include $(CLEAR_VARS)
 
 
@@ -26,7 +22,14 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := getmac.c
 
 LOCAL_PRELINK_MODULE := false
-LOCAL_SHARED_LIBRARIES := libcutils libnv liboncrpc
+LOCAL_SHARED_LIBRARIES := libcutils
+LOCAL_LDFLAGS += \
+    -Lvendor/lge/batman_lgu/proprietary/lib \
+    -lnv \
+    -loncrpc
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+    vendor/lge/batman_lgu/proprietary/lib/libnv.so \
+    vendor/lge/batman_lgu/proprietary/lib/liboncrpc.so
 LOCAL_MODULE := hwaddrs
 
 include $(BUILD_EXECUTABLE)

@@ -17,7 +17,7 @@
 package org.cyanogenmod.hardware;
 
 import java.io.File;
-import org.cyanogenmod.hardware.util.FileUtils;
+import org.cyanogenmod.internal.util.FileUtils;
 
 public class VibratorHW {
     private static final String AMP_PATH = "/sys/class/timed_output/vibrator/amp";

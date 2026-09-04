@@ -1,7 +1,5 @@
-RIL_PATH := $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
-ifeq ($(BOARD_VENDOR),lge)
-ifeq ($(TARGET_BOARD_PLATFORM),msm8660)
-include $(call first-makefiles-under,$(RIL_PATH))
-endif
+ifeq ($(BOARD_PROVIDES_LIBRIL),true)
+include $(call all-makefiles-under,$(LOCAL_PATH))
 endif

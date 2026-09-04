@@ -24,7 +24,6 @@ MAKEFILE=../../../$OUTDIR/$DEVICE-vendor-blobs.mk
 PRODUCT_COPY_FILES += \\
     $OUTDIR/proprietary/lib/liboncrpc.so:obj/lib/liboncrpc.so \\
     $OUTDIR/proprietary/lib/libnv.so:obj/lib/libnv.so \\
-    $OUTDIR/proprietary/lib/libtime_genoff.so:obj/lib/libtime_genoff.so \\
     $OUTDIR/proprietary/lib/libaudioalsa.so:obj/lib/libaudioalsa.so \\
     $OUTDIR/proprietary/lib/libacdbloader.so:obj/lib/libacdbloader.so \\
     $OUTDIR/proprietary/lib/libacdbmapper.so:obj/lib/libacdbmapper.so
@@ -38,6 +37,10 @@ DISM=`egrep -c '(^#|^$)' proprietary-files.txt`
 COUNT=`expr $COUNT - $DISM`
 for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
   FILE=`echo "$ENTRY" | cut -d'|' -f1`
+  if [ "$FILE" = "lib/libtime_genoff.so" ]; then
+    COUNT=`expr $COUNT - 1`
+    continue
+  fi
   DEST=$FILE
   if [ "$FILE" = "lib/hw/sensors.msm8660.so" ]; then
     DEST=lib/hw/sensors.vendor.msm8660.so

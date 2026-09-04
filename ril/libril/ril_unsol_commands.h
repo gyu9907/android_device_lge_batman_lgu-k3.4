@@ -1,10 +1,6 @@
 /* //device/libs/telephony/ril_unsol_commands.h
 **
 ** Copyright 2006, The Android Open Source Project
-** Copyright (c) 2012, The Linux Foundation. All rights reserved.
-**
-** Not a Contribution, Apache license notifications and license are retained
-** for attribution purposes only.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -53,18 +49,15 @@
     {RIL_UNSOL_CDMA_PRL_CHANGED, responseInts, WAKE_PARTIAL},
     {RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE, responseVoid, WAKE_PARTIAL},
     {RIL_UNSOL_RIL_CONNECTED, responseInts, WAKE_PARTIAL},
-#ifndef RIL_VARIANT_LEGACY
     {RIL_UNSOL_VOICE_RADIO_TECH_CHANGED, responseInts, WAKE_PARTIAL},
+    {RIL_UNSOL_CELL_INFO_LIST, responseCellInfoList, WAKE_PARTIAL},
     {RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED, responseVoid, WAKE_PARTIAL},
-    {RIL_UNSOL_RESPONSE_TETHERED_MODE_STATE_CHANGED, responseInts, WAKE_PARTIAL},
-    {RIL_UNSOL_QOS_STATE_CHANGED_IND,   responseStrings, WAKE_PARTIAL},
+    {RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED, responseInts, WAKE_PARTIAL},
+    {RIL_UNSOL_SRVCC_STATE_NOTIFY, responseInts, WAKE_PARTIAL},
+    {RIL_UNSOL_HARDWARE_CONFIG_CHANGED, responseHardwareConfig, WAKE_PARTIAL},
+    {RIL_UNSOL_DC_RT_INFO_CHANGED, responseDcRtInfo, WAKE_PARTIAL},
+    {RIL_UNSOL_RADIO_CAPABILITY, responseRadioCapability, WAKE_PARTIAL},
     {RIL_UNSOL_ON_SS, responseSSData, WAKE_PARTIAL},
     {RIL_UNSOL_STK_CC_ALPHA_NOTIFY, responseString, WAKE_PARTIAL},
-    {RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED, responseInts, WAKE_PARTIAL},
-#else
-    {RIL_UNSOL_VOICE_RADIO_TECH_CHANGED, responseInts, WAKE_PARTIAL, J_RIL_UNSOL_VOICE_RADIO_TECH_CHANGED},
-    {RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED, responseVoid, WAKE_PARTIAL, J_RIL_UNSOL_RESPONSE_IMS_NETWORK_STATE_CHANGED},
-    {RIL_UNSOL_ON_SS, responseSSData, WAKE_PARTIAL, J_RIL_UNSOL_ON_SS},
-    {RIL_UNSOL_STK_CC_ALPHA_NOTIFY, responseString, WAKE_PARTIAL, J_RIL_UNSOL_STK_CC_ALPHA_NOTIFY},
-    {RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED, responseInts, WAKE_PARTIAL, J_RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED},
-#endif
+    {RIL_UNSOL_LCEDATA_RECV, responseLceData, WAKE_PARTIAL},
+    {RIL_UNSOL_PCO_DATA, responsePcoData, WAKE_PARTIAL},

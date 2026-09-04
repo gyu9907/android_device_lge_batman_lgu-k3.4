@@ -5,17 +5,15 @@ ifeq ($(BOARD_PROVIDES_RILD),true)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := \
-    rild.c
+LOCAL_SRC_FILES:= \
+	rild.c
+
 
 LOCAL_SHARED_LIBRARIES := \
-    liblog \
-    libcutils \
-    libril \
-    libdl
-
-# Disable usage of Clang Toolchain here
-LOCAL_CLANG := false
+	liblog \
+	libcutils \
+	libril \
+	libdl
 
 # temporary hack for broken vendor rils
 LOCAL_WHOLE_STATIC_LIBRARIES := \
@@ -23,8 +21,14 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 
 LOCAL_CFLAGS := -DRIL_SHLIB
 
-LOCAL_MODULE := rild
+ifeq ($(SIM_COUNT), 2)
+    LOCAL_CFLAGS += -DANDROID_MULTI_SIM
+    LOCAL_CFLAGS += -DANDROID_SIM_COUNT_2
+endif
+
+LOCAL_MODULE:= rild
 LOCAL_MODULE_TAGS := optional
+LOCAL_INIT_RC := rild.rc
 
 LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/libril
 
@@ -35,19 +39,17 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    radiooptions.c
+	radiooptions.c
 
 LOCAL_SHARED_LIBRARIES := \
-    liblog \
-    libcutils
+	liblog \
+	libcutils \
 
-# Disable usage of Clang Toolchain here
-LOCAL_CLANG := false
+LOCAL_CFLAGS := \
 
-LOCAL_CFLAGS :=
-
-LOCAL_MODULE := radiooptions
+LOCAL_MODULE:= radiooptions
 LOCAL_MODULE_TAGS := debug
 
 include $(BUILD_EXECUTABLE)
-endif # BOARD_PROVIDES_RILD
+
+endif

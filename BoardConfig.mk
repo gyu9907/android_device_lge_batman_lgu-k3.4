@@ -1,4 +1,4 @@
-COMMON_GLOBAL_CFLAGS += -DBATMAN_LGU -DNEED_UMS_ENABLE
+BOARD_GLOBAL_CFLAGS += -DBATMAN_LGU -DNEED_UMS_ENABLE
 TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
 BOARD_VENDOR := lge
@@ -28,7 +28,7 @@ TARGET_BOOTLOADER_BOARD_NAME := BATMAN_LGU
 TARGET_OTA_ASSERT_DEVICE := batman_lgu,batman
 TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
-COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE
+BOARD_GLOBAL_CFLAGS += -DQCOM_HARDWARE
 
 # Preload bootanimation
 TARGET_BOOTANIMATION_PRELOAD := true
@@ -36,17 +36,19 @@ TARGET_BOOTANIMATION_PRELOAD := true
 # Camera
 USE_DEVICE_SPECIFIC_CAMERA := true
 BOARD_NEEDS_MEMORYHEAPPMEM := true
-COMMON_GLOBAL_CFLAGS += -DMR0_CAMERA_BLOB
-COMMON_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
-COMMON_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
-COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
+TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
+TARGET_HAS_LEGACY_CAMERA_HAL1 := true
+BOARD_GLOBAL_CFLAGS += -DMR0_CAMERA_BLOB
+BOARD_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
+BOARD_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
+BOARD_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
 # The legacy P930 HAL emits a null preview data callback before its first
 # display buffer.  CM12.1 otherwise dereferences data->handle and kills
 # mediaserver in CameraHardwareInterface::__data_cb().
-COMMON_GLOBAL_CFLAGS += -DLEGACY_CAMERA_NULL_DATA_CB
+BOARD_GLOBAL_CFLAGS += -DLEGACY_CAMERA_NULL_DATA_CB
 
 # Audio
-COMMON_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
+BOARD_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
 TARGET_USES_ION_AUDIO := true
 TARGET_QCOM_AUDIO_VARIANT := caf
 BOARD_USES_LEGACY_ALSA_AUDIO := true
@@ -90,6 +92,7 @@ TARGET_SCORPION_BIONIC_PLDSIZE := 128
 # Bring-up only: keep the serial console available and prevent init from
 # switching SELinux into enforcing mode while early-boot failures are traced.
 BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr androidboot.selinux=permissive kgsl.mmutype=gpummu vmalloc=580M
+TARGET_NO_KERNEL_BUILD_VARIANT := true
 BOARD_KERNEL_BASE := 0x40200000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
@@ -97,11 +100,11 @@ BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
 TARGET_KERNEL_SOURCE := kernel/lge/msm8660
 TARGET_KERNEL_CONFIG := batman_lgu_defconfig
 KERNEL_TOOLCHAIN_PREFIX := arm-eabi-
-KERNEL_TOOLCHAIN := "$(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.4.3/bin/"
+KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.4.3/bin
 
-# Bring-up only.  Put these in ADDITIONAL_DEFAULT_PROPERTIES here so they
-# precede CM's secure defaults when default.prop removes duplicate keys.
-ADDITIONAL_DEFAULT_PROPERTIES += \
+# Bring-up only. Prepend these values and remove inherited copies because
+# default.prop uses the first occurrence of a duplicated property.
+ADDITIONAL_DEFAULT_PROPERTIES := \
     ro.secure=0 \
     ro.adb.secure=0 \
     ro.debuggable=1 \
@@ -109,7 +112,17 @@ ADDITIONAL_DEFAULT_PROPERTIES += \
     cm.service.adb.root=1 \
     service.adb.root=1 \
     persist.service.adb.enable=1 \
-    persist.sys.usb.config=mtp,adb
+    persist.sys.usb.config=mtp,adb \
+    $(filter-out \
+        ro.secure=% \
+        ro.adb.secure=% \
+        ro.debuggable=% \
+        security.perf_harden=% \
+        cm.service.adb.root=% \
+        service.adb.root=% \
+        persist.service.adb.enable=% \
+        persist.sys.usb.config=%, \
+        $(ADDITIONAL_DEFAULT_PROPERTIES))
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
@@ -150,7 +163,7 @@ ENABLE_WEBGL := true
 TARGET_FORCE_CPU_UPLOAD := false
 
 # Recovery
-COMMON_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
+BOARD_NO_SECURE_DISCARD := true
 BOARD_CUSTOM_GRAPHICS := ../../../device/lge/batman_lgu/recovery/graphics.c
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lge/batman_lgu/recovery/recovery_keymapping.c
