@@ -91,6 +91,7 @@ PRODUCT_PACKAGES += \
 	libshim_camera \
 	libshim_omx_venc \
 	libshim_omx_vdec \
+	libshim_thumbnail \
 	copybit.msm8660 \
 	gralloc.msm8660 \
 	hwcomposer.msm8660 \
