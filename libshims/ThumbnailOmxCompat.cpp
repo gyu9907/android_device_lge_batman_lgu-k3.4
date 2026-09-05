@@ -1,6 +1,9 @@
 // Device-local bridge for msm8660's payload-free thumbnail extension.
 #define LOG_TAG "BatmanThumbnailOMX"
 #include <cstring>
+#ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
+#include <cstdlib>
+#endif
 #include <dlfcn.h>
 #include <OMX_Component.h>
 #include <cutils/log.h>
@@ -56,6 +59,9 @@ status_t FFMPEGSoftCodec::setVideoFormat(status_t status,
     err = omx->setParameter(node, index, &header, sizeof(header));
     ALOGI("hardware thumbnail mode: node=%u result=%d", node, err);
     if (err == OK) {
+        // This device's C2D planar path duplicates V into both chroma planes.
+        // Ask for correct NV12 and normalize it in the retriever only.
+        msg->setInt32("color-format", OMX_COLOR_FormatYUV420SemiPlanar);
         // Keep the HAL's native pool counts instead of forcing one input
         // buffer. The legacy VCD validates the complete registered pool.
         for (OMX_U32 port = 0; port < 2; ++port) {
