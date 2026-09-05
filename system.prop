@@ -37,9 +37,6 @@ video.accelerate.hw=1
 debug.egl.hw=1
 debug.composition.type=dyn
 persist.hwc.mdpcomp.enable=true
-# MDP4.1 keeps RGB1 for the primary framebuffer, leaving three overlay pipes.
-# Do not let HWC plan a fourth layer that MSMFB_OVERLAY_SET cannot allocate.
-debug.mdpcomp.maxlayer=3
 debug.mdpcomp.logs=0
 debug.hwc.dynThreshold=1.9
 dev.pm.dyn_samplingrate=1
