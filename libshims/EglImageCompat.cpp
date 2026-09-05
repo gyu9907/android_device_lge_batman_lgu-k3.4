@@ -17,7 +17,7 @@ using CreateImage = EGLImageKHR (*)(EGLDisplay, EGLContext, EGLenum,
 using GetProcAddress = __eglMustCastToProperFunctionPointerType (*)(const char*);
 using GetCurrentContext = EGLContext (*)();
 using QueryContext = EGLBoolean (*)(EGLDisplay, EGLContext, EGLint, EGLint*);
-using Flush = void (*)();
+using Finish = void (*)();
 
 pthread_once_t gOnce = PTHREAD_ONCE_INIT;
 CreateImage gCreateImage;
@@ -42,12 +42,12 @@ void loadVendorEntryPoints() {
     // and vendor-owned EGL objects must remain valid.
 }
 
-Flush loadFlush(const char* path) {
+Finish loadFinish(const char* path) {
     void* client = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     LOG_ALWAYS_FATAL_IF(!client, "Cannot load vendor GLES: %s", dlerror());
-    Flush flush = reinterpret_cast<Flush>(dlsym(client, "glFlush"));
-    LOG_ALWAYS_FATAL_IF(!flush, "Vendor GLES glFlush is missing in %s", path);
-    return flush;
+    Finish finish = reinterpret_cast<Finish>(dlsym(client, "glFinish"));
+    LOG_ALWAYS_FATAL_IF(!finish, "Vendor GLES glFinish is missing in %s", path);
+    return finish;
 }
 
 EGLImageKHR createImage(EGLDisplay display, EGLContext context, EGLenum target,
@@ -57,20 +57,21 @@ EGLImageKHR createImage(EGLDisplay display, EGLContext context, EGLenum target,
     if (image != EGL_NO_IMAGE_KHR && target == EGL_GL_TEXTURE_2D_KHR &&
             context == gGetCurrentContext()) {
         // Adreno 220 can lose a subsequent TexSubImage update unless image
-        // creation has been submitted first. Flushing before creation or after
-        // the update is too late/early; waiting on the consumer fence does not
-        // repair the already empty image. Submit without a glFinish stall.
+        // creation has completed first. glFlush only submits the work: larger
+        // tiles still intermittently read as transparent zeros. Finish here,
+        // before the upload; finishing before creation or after the upload
+        // does not fix the race, even with a satisfied consumer fence.
         // This EGL blob's eglGetProcAddress does not expose core GL functions.
         // Use the matching vendor GLES client; no Android EGL handles or
         // private framework dispatch-table layout are involved.
         EGLint version = 0;
         if (gQueryContext(display, context, EGL_CONTEXT_CLIENT_VERSION, &version)) {
             if (version == 1) {
-                static Flush flush = loadFlush("/system/lib/egl/libGLESv1_CM_adreno200.so");
-                flush();
+                static Finish finish = loadFinish("/system/lib/egl/libGLESv1_CM_adreno200.so");
+                finish();
             } else if (version == 2) {
-                static Flush flush = loadFlush("/system/lib/egl/libGLESv2_adreno200.so");
-                flush();
+                static Finish finish = loadFinish("/system/lib/egl/libGLESv2_adreno200.so");
+                finish();
             }
         }
     }
