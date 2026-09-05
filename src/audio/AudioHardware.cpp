@@ -4326,6 +4326,36 @@ status_t AudioHardware::AudioSessionOutLPA::getPresentationPosition(uint64_t *fr
 #endif
 
 int mFdin = -1;
+
+// AudioPolicy probes the built-in microphone during boot. A transient DSP
+// OPEN_READ timeout must not make that one probe permanently hide the mic.
+// This legacy driver reports the timeout as EINVAL. Keep O_RDONLY and bound
+// retries to boot so ordinary recording errors do not stall the caller.
+static int openPcmInputDuringBoot()
+{
+    char bootCompleted[PROPERTY_VALUE_MAX];
+    property_get("sys.boot_completed", bootCompleted, "0");
+    const int attempts = strcmp(bootCompleted, "1") == 0 ? 1 : 3;
+    for (int attempt = 0; attempt < attempts; ++attempt) {
+        int fd = ::open("/dev/msm_pcm_in", O_RDONLY);
+        if (fd >= 0) {
+            if (attempt > 0)
+                ALOGI("PCM input recovered after boot retry %d", attempt);
+            return fd;
+        }
+        const int error = errno;
+        if (attempt + 1 == attempts ||
+                (error != EINVAL && error != ETIMEDOUT && error != EIO)) {
+            errno = error;
+            return -1;
+        }
+        ALOGW("PCM input boot open failed errno=%d; retry %d/%d",
+                error, attempt + 1, attempts - 1);
+        usleep(250000);
+    }
+    return -1;
+}
+
 AudioHardware::AudioStreamInMSM8x60::AudioStreamInMSM8x60() :
     mHardware(0), mState(AUDIO_INPUT_CLOSED), mRetryCount(0),
     mFormat(AUDIO_HW_IN_FORMAT), mChannels(AUDIO_HW_IN_CHANNELS),
@@ -4368,6 +4398,7 @@ status_t AudioHardware::AudioStreamInMSM8x60::set(
         return -EPERM;
     }
     status_t status =0;
+    bool pcmRecCounted = false;
     struct msm_voicerec_mode voc_rec_cfg;
 #ifdef QCOM_FM_ENABLED
     if(devices == AudioSystem::DEVICE_IN_FM_RX_A2DP) {
@@ -4432,12 +4463,14 @@ status_t AudioHardware::AudioStreamInMSM8x60::set(
             goto Error;
         }
         // open audio input device
-        status = ::open("/dev/msm_pcm_in", O_RDWR);
+        /* msm8660's QDSP6 pcm input node is capture-only. */
+        status = openPcmInputDuringBoot();
         if (status < 0) {
             ALOGE("Cannot open /dev/msm_pcm_in errno: %d", errno);
             goto Error;
         }
         mHardware->mNumPcmRec ++;
+        pcmRecCounted = true;
         mFdin = status;
 
         // configuration
@@ -4569,6 +4602,8 @@ status_t AudioHardware::AudioStreamInMSM8x60::set(
     return NO_ERROR;
 
 Error:
+    if (pcmRecCounted)
+        mHardware->mNumPcmRec --;
     if (mFdin >= 0) {
         ::close(mFdin);
         mFdin = -1;
