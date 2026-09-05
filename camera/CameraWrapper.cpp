@@ -21,11 +21,16 @@
 *
 */
 
-#define LOG_PARAMETERS
+/* Keep parameter dumps disabled: logd's chatty suppression hides crash context. */
 
 #define LOG_TAG "CameraWrapper"
 #include <cutils/log.h>
 
+#include <cerrno>
+#include <climits>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <unistd.h>
 #include <utils/threads.h>
 #include <utils/String8.h>
 #include <hardware/hardware.h>
@@ -34,6 +39,7 @@
 #include <camera/CameraParameters.h>
 
 static android::Mutex gCameraWrapperLock;
+static android::Mutex gMemoryCallbackLock;
 static camera_module_t *gVendorModule = 0;
 
 /*
@@ -91,7 +97,17 @@ typedef struct wrapper_camera_device {
     int id;
     camera_device_t *vendor;
     wrapper_preview_stream_ops_t preview_window;
+    camera_notify_callback notify_cb;
+    camera_data_callback data_cb;
+    camera_data_timestamp_callback data_cb_timestamp;
+    camera_request_memory get_memory;
+    void *callback_user;
+    unsigned int memory_request_count;
+    unsigned int timestamp_callback_count;
+    unsigned int recording_release_count;
 } wrapper_camera_device_t;
+
+static wrapper_camera_device_t *gMemoryCallbackDevice = 0;
 
 #define VENDOR_CALL(device, func, ...) ({ \
     wrapper_camera_device_t *__wrapper_dev = (wrapper_camera_device_t*) device; \
@@ -109,8 +125,23 @@ static int check_vendor_module()
         return 0;
 
     rv = hw_get_module_by_class(CAMERA_HARDWARE_MODULE_ID, "vendor", (const hw_module_t**)&gVendorModule);
-    if (rv)
-        ALOGE("failed to open vendor camera module");
+    if (rv) {
+        ALOGE("failed to open vendor camera module: %d", rv);
+        return rv;
+    }
+
+    /*
+     * The stock module predates camera_common.h.  Validate only the entries
+     * that existed in that ABI before exposing it to Nougat's CameraModule.
+     */
+    if (!gVendorModule->common.methods ||
+            !gVendorModule->common.methods->open ||
+            !gVendorModule->get_number_of_cameras ||
+            !gVendorModule->get_camera_info) {
+        ALOGE("vendor camera module has an incomplete camera1 interface");
+        gVendorModule = NULL;
+        return -EINVAL;
+    }
     return rv;
 }
 
@@ -163,7 +194,7 @@ static char *camera_fixup_getparams(int id, const char *settings)
     return ret;
 }
 
-static char *camera_fixup_setparams(int id, const char *settings, struct camera_device *device)
+static char *camera_fixup_setparams(int id, const char *settings)
 {
     if (!settings)
         return NULL;
@@ -191,6 +222,13 @@ static char *camera_fixup_setparams(int id, const char *settings, struct camera_
     if (id == 0 && previewWidth == 1360 && previewHeight == 768) {
         ALOGI("preview size alias: 1360x768 -> 1280x720");
         params.setPreviewSize(1280, 720);
+    }
+
+    if (id == 0 && params.get("recording-hint") &&
+            !strcmp(params.get("recording-hint"), "true")) {
+        ALOGI("recording parameters: video=%s preview=%s power=%s",
+                params.get("video-size"), params.get("preview-size"),
+                params.get("power-mode"));
     }
 
     android::String8 strParams = params.flatten();
@@ -320,14 +358,19 @@ static int preview_set_timestamp(struct preview_stream_ops *window,
 static int camera_set_preview_window(struct camera_device *device,
         struct preview_stream_ops *window)
 {
-    ALOGV("%s->%08X->%08X", __FUNCTION__, (uintptr_t)device,
-            (uintptr_t)(((wrapper_camera_device_t*)device)->vendor));
+    ALOGI("%s device=%08X vendor=%08X window=%08X", __FUNCTION__, (uintptr_t)device,
+            (uintptr_t)(((wrapper_camera_device_t*)device)->vendor),
+            (uintptr_t)window);
 
     if (!device)
         return -EINVAL;
 
-    if (!window)
+    if (!window) {
+        wrapper_camera_device_t *wrapper_dev =
+                reinterpret_cast<wrapper_camera_device_t *>(device);
+        wrapper_dev->preview_window.vendor = NULL;
         return VENDOR_CALL(device, set_preview_window, window);
+    }
 
     wrapper_camera_device_t *wrapper_dev =
             reinterpret_cast<wrapper_camera_device_t *>(device);
@@ -348,7 +391,99 @@ static int camera_set_preview_window(struct camera_device *device,
     wrapper->base.lock_buffer = preview_lock_buffer;
     wrapper->base.set_timestamp = preview_set_timestamp;
 
-    return VENDOR_CALL(device, set_preview_window, &wrapper->base);
+    int rc = VENDOR_CALL(device, set_preview_window, &wrapper->base);
+    ALOGI("%s vendor returned %d", __FUNCTION__, rc);
+    return rc;
+}
+
+static void wrapper_notify_callback(int32_t msg_type, int32_t ext1,
+        int32_t ext2, void *user)
+{
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(user);
+    if (wrapper && wrapper->notify_cb)
+        wrapper->notify_cb(msg_type, ext1, ext2, wrapper->callback_user);
+}
+
+static void wrapper_data_callback(int32_t msg_type,
+        const camera_memory_t *data, unsigned int index,
+        camera_frame_metadata_t *metadata, void *user)
+{
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(user);
+    camera_memory_t *metadata_memory = NULL;
+
+    /*
+     * The JB Qualcomm HAL sends CAMERA_MSG_PREVIEW_METADATA with a NULL data
+     * buffer.  Nougat's CameraHardwareInterface unconditionally dereferences
+     * data->handle before forwarding every camera1 data callback.  Supply a
+     * one-byte framework-owned buffer for this metadata-only notification.
+     */
+    if (!data && wrapper && wrapper->get_memory &&
+            (msg_type & CAMERA_MSG_PREVIEW_METADATA)) {
+        metadata_memory = wrapper->get_memory(-1, 1, 1,
+                wrapper->callback_user);
+        data = metadata_memory;
+        index = 0;
+    }
+    if (!(msg_type & CAMERA_MSG_PREVIEW_METADATA))
+        ALOGI("data callback: msg=0x%x memory=%p index=%u data=%p size=%u",
+                msg_type, data, index, data ? data->data : NULL,
+                data ? static_cast<unsigned int>(data->size) : 0);
+    if (wrapper && wrapper->data_cb)
+        wrapper->data_cb(msg_type, data, index, metadata,
+                wrapper->callback_user);
+    if (metadata_memory && metadata_memory->release)
+        metadata_memory->release(metadata_memory);
+}
+
+static void wrapper_data_timestamp_callback(int64_t timestamp,
+        int32_t msg_type, const camera_memory_t *data, unsigned int index,
+        void *user)
+{
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(user);
+    unsigned int count = wrapper ? wrapper->timestamp_callback_count++ : 0;
+    if (count < 8 || !(count % 30))
+        ALOGI("timestamp callback[%u]: timestamp=%lld msg=0x%x memory=%p "
+                "index=%u data=%p size=%u", count,
+                static_cast<long long>(timestamp), msg_type, data, index,
+                data ? data->data : NULL,
+                data ? static_cast<unsigned int>(data->size) : 0);
+    if (wrapper && wrapper->data_cb_timestamp)
+        wrapper->data_cb_timestamp(timestamp, msg_type, data, index,
+                wrapper->callback_user);
+}
+
+static camera_memory_t *wrapper_request_memory(int fd, size_t buf_size,
+        unsigned int num_bufs, void *user)
+{
+    /*
+     * This legacy Qualcomm HAL passes QCameraStream* here instead of the
+     * callback cookie registered through set_callbacks().  Nougat normally
+     * ignores this argument, but the wrapper needs its own saved state.
+     */
+    (void)user;
+    android::Mutex::Autolock lock(gMemoryCallbackLock);
+    wrapper_camera_device_t *wrapper = gMemoryCallbackDevice;
+    if (!wrapper || !wrapper->get_memory) {
+        ALOGE("memory request without framework callback: fd=%d size=%u count=%u",
+                fd, static_cast<unsigned int>(buf_size), num_bufs);
+        return NULL;
+    }
+
+    camera_memory_t *memory = wrapper->get_memory(fd, buf_size, num_bufs,
+            wrapper->callback_user);
+    unsigned int count = wrapper->memory_request_count++;
+    if (count < 4 || !(count % 16))
+        ALOGI("memory request[%u]: fd=%d size=%u count=%u result=%p data=%p "
+                "actual=%u handle=%p release=%p", count, fd,
+                static_cast<unsigned int>(buf_size), num_bufs, memory,
+                memory ? memory->data : NULL,
+                memory ? static_cast<unsigned int>(memory->size) : 0,
+                memory ? memory->handle : NULL,
+                memory ? reinterpret_cast<void *>(memory->release) : NULL);
+    return memory;
 }
 
 static void camera_set_callbacks(struct camera_device *device,
@@ -364,8 +499,24 @@ static void camera_set_callbacks(struct camera_device *device,
     if (!device)
         return;
 
-    VENDOR_CALL(device, set_callbacks, notify_cb, data_cb, data_cb_timestamp,
-            get_memory, user);
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(device);
+    wrapper->notify_cb = notify_cb;
+    wrapper->data_cb = data_cb;
+    wrapper->data_cb_timestamp = data_cb_timestamp;
+    wrapper->get_memory = get_memory;
+    wrapper->callback_user = user;
+    wrapper->memory_request_count = 0;
+    wrapper->timestamp_callback_count = 0;
+    wrapper->recording_release_count = 0;
+    {
+        android::Mutex::Autolock lock(gMemoryCallbackLock);
+        gMemoryCallbackDevice = wrapper;
+    }
+
+    VENDOR_CALL(device, set_callbacks, wrapper_notify_callback,
+            wrapper_data_callback, wrapper_data_timestamp_callback,
+            wrapper_request_memory, wrapper);
 }
 
 static void camera_enable_msg_type(struct camera_device *device,
@@ -406,13 +557,41 @@ static int camera_msg_type_enabled(struct camera_device *device,
 
 static int camera_start_preview(struct camera_device *device)
 {
-    ALOGV("%s->%08X->%08X", __FUNCTION__, (uintptr_t)device,
+    ALOGI("%s device=%08X vendor=%08X", __FUNCTION__, (uintptr_t)device,
             (uintptr_t)(((wrapper_camera_device_t*)device)->vendor));
 
     if (!device)
         return -EINVAL;
 
-    return VENDOR_CALL(device, start_preview);
+    /*
+     * Camera2 selects the 1080p video size only after it has already started
+     * a 720p preview.  Reallocating the legacy msm8660 recording stream at
+     * that point requires preview STREAMOFF, which this vendor HAL can
+     * deadlock in while its frame-processing thread owns a buffer.  Seed the
+     * rear camera's recording size before the first preview STREAMON so the
+     * vendor allocates 1280x720 preview and 1920x1088 video buffers together.
+     */
+    if (CAMERA_ID(device) == 0) {
+        char *settings = VENDOR_CALL(device, get_parameters);
+        if (settings) {
+            android::CameraParameters prepared;
+            prepared.unflatten(android::String8(settings));
+            const char *videoSize = prepared.get("video-size");
+            if (!videoSize || strcmp(videoSize, "1920x1088")) {
+                prepared.set("video-size", "1920x1088");
+                android::String8 flattened = prepared.flatten();
+                int setResult = VENDOR_CALL(device, set_parameters,
+                        flattened.string());
+                ALOGI("prepared 1920x1088 video buffers before preview: %d",
+                        setResult);
+            }
+            VENDOR_CALL(device, put_parameters, settings);
+        }
+    }
+
+    int rc = VENDOR_CALL(device, start_preview);
+    ALOGI("%s vendor returned %d", __FUNCTION__, rc);
+    return rc;
 }
 
 static void camera_stop_preview(struct camera_device *device)
@@ -457,6 +636,10 @@ static int camera_start_recording(struct camera_device *device)
     if (!device)
         return EINVAL;
 
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(device);
+    wrapper->timestamp_callback_count = 0;
+    wrapper->recording_release_count = 0;
     return VENDOR_CALL(device, start_recording);
 }
 
@@ -469,6 +652,11 @@ static void camera_stop_recording(struct camera_device *device)
         return;
 
     VENDOR_CALL(device, stop_recording);
+
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(device);
+    ALOGI("recording stopped: timestamps=%u releases=%u",
+            wrapper->timestamp_callback_count, wrapper->recording_release_count);
 }
 
 static int camera_recording_enabled(struct camera_device *device)
@@ -491,6 +679,11 @@ static void camera_release_recording_frame(struct camera_device *device,
     if (!device)
         return;
 
+    wrapper_camera_device_t *wrapper =
+            reinterpret_cast<wrapper_camera_device_t *>(device);
+    unsigned int count = wrapper->recording_release_count++;
+    if (count < 8 || !(count % 30))
+        ALOGI("release recording frame[%u]: opaque=%p", count, opaque);
     VENDOR_CALL(device, release_recording_frame, opaque);
 }
 
@@ -525,6 +718,13 @@ static int camera_take_picture(struct camera_device *device)
     if (!device)
         return -EINVAL;
 
+    /*
+     * Camera2's legacy adapter may leave face detection enabled while taking
+     * a still image.  This JB HAL then waits forever in preview STREAMOFF
+     * while its frame-processing thread is still consuming preview frames.
+     */
+    ALOGI("stopping legacy face detection before still capture");
+    VENDOR_CALL(device, send_command, CAMERA_CMD_STOP_FACE_DETECTION, 0, 0);
     return VENDOR_CALL(device, take_picture);
 }
 
@@ -549,7 +749,20 @@ static int camera_set_parameters(struct camera_device *device,
         return -EINVAL;
 
     char *tmp = NULL;
-    tmp = camera_fixup_setparams(CAMERA_ID(device), params, device);
+    android::CameraParameters incoming;
+    incoming.unflatten(android::String8(params));
+    if (!incoming.get("video-size")) {
+        char *current = VENDOR_CALL(device, get_parameters);
+        if (current) {
+            android::CameraParameters previous;
+            previous.unflatten(android::String8(current));
+            const char *videoSize = previous.get("video-size");
+            if (videoSize && videoSize[0])
+                incoming.set("video-size", videoSize);
+            VENDOR_CALL(device, put_parameters, current);
+        }
+    }
+    tmp = camera_fixup_setparams(CAMERA_ID(device), incoming.flatten().string());
 
     if (!tmp)
         return -EINVAL;
@@ -558,7 +771,42 @@ static int camera_set_parameters(struct camera_device *device,
     __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, tmp);
 #endif
 
+    android::CameraParameters next;
+    next.unflatten(android::String8(tmp));
+
+    bool restartPreview = false;
+    char *oldSettings = VENDOR_CALL(device, get_parameters);
+    if (oldSettings) {
+        android::CameraParameters old;
+        old.unflatten(android::String8(oldSettings));
+        const char *newVideo = next.get("video-size");
+        const char *oldVideo = old.get("video-size");
+        restartPreview = newVideo && newVideo[0] &&
+                (!oldVideo || strcmp(newVideo, oldVideo)) &&
+                VENDOR_CALL(device, preview_enabled) &&
+                !VENDOR_CALL(device, recording_enabled);
+        VENDOR_CALL(device, put_parameters, oldSettings);
+    }
+    if (restartPreview) {
+        ALOGI("reconfiguring preview for video size %s", next.get("video-size"));
+        /*
+         * The legacy frame-processing thread may still own a preview buffer
+         * while CAF/face detection is active.  STREAMOFF then waits forever,
+         * especially when recording is started shortly after opening the
+         * camera.  Quiesce those users before switching to the larger video
+         * buffer layout, as is already required for still capture.
+         */
+        VENDOR_CALL(device, send_command,
+                CAMERA_CMD_STOP_FACE_DETECTION, 0, 0);
+        VENDOR_CALL(device, cancel_auto_focus);
+        VENDOR_CALL(device, stop_preview);
+    }
     int ret = VENDOR_CALL(device, set_parameters, tmp);
+    if (restartPreview) {
+        int previewResult = VENDOR_CALL(device, start_preview);
+        if (!ret)
+            ret = previewResult;
+    }
 
     free(tmp);
 
@@ -610,8 +858,7 @@ static void camera_put_parameters(struct camera_device *device, char *params)
 static int camera_send_command(struct camera_device *device,
             int32_t cmd, int32_t arg1, int32_t arg2)
 {
-    ALOGV("%s->%08X->%08X", __FUNCTION__, (uintptr_t)device,
-            (uintptr_t)(((wrapper_camera_device_t*)device)->vendor));
+    ALOGI("%s cmd=%d arg1=%d arg2=%d", __FUNCTION__, cmd, arg1, arg2);
 
     if (!device)
         return -EINVAL;
@@ -656,7 +903,14 @@ static int camera_device_close(hw_device_t *device)
 
     wrapper_dev = (wrapper_camera_device_t*) device;
 
-    wrapper_dev->vendor->common.close((hw_device_t*)wrapper_dev->vendor);
+    {
+        android::Mutex::Autolock callbackLock(gMemoryCallbackLock);
+        if (gMemoryCallbackDevice == wrapper_dev)
+            gMemoryCallbackDevice = NULL;
+    }
+
+    if (wrapper_dev->vendor)
+        wrapper_dev->vendor->common.close((hw_device_t*)wrapper_dev->vendor);
     if (wrapper_dev->base.ops)
         free(wrapper_dev->base.ops);
     free(wrapper_dev);
@@ -690,11 +944,24 @@ static int camera_device_open(const hw_module_t *module, const char *name,
 
     ALOGV("camera_device open");
 
+    if (!name || !device)
+        return -EINVAL;
+
+    *device = NULL;
+
     if (name != NULL) {
         if (check_vendor_module())
             return -EINVAL;
 
-        cameraid = atoi(name);
+        char *end = NULL;
+        errno = 0;
+        long parsed_id = strtol(name, &end, 10);
+        if (errno || end == name || *end != '\0' || parsed_id < 0 ||
+                parsed_id > INT_MAX) {
+            ALOGE("invalid camera id: %s", name);
+            return -EINVAL;
+        }
+        cameraid = static_cast<int>(parsed_id);
         num_cameras = gVendorModule->get_number_of_cameras();
 
         if (cameraid < 0 || cameraid >= num_cameras) {
@@ -721,6 +988,9 @@ static int camera_device_open(const hw_module_t *module, const char *name,
             ALOGE("vendor camera open fail");
             goto fail;
         }
+
+        // Reserve VIDC only for actual codec instances so
+        // Camera2 can keep this camera open while playing a recorded clip.
         ALOGV("%s: got vendor camera device 0x%08X",
                 __FUNCTION__, (uintptr_t)(camera_device->vendor));
 
@@ -734,7 +1004,7 @@ static int camera_device_open(const hw_module_t *module, const char *name,
         memset(camera_ops, 0, sizeof(*camera_ops));
 
         camera_device->base.common.tag = HARDWARE_DEVICE_TAG;
-        camera_device->base.common.version = 0;
+        camera_device->base.common.version = CAMERA_DEVICE_API_VERSION_1_0;
         camera_device->base.common.module = (hw_module_t *)(module);
         camera_device->base.common.close = camera_device_close;
         camera_device->base.ops = camera_ops;
@@ -770,6 +1040,9 @@ static int camera_device_open(const hw_module_t *module, const char *name,
 
 fail:
     if (camera_device) {
+        if (camera_device->vendor)
+            camera_device->vendor->common.close(
+                    reinterpret_cast<hw_device_t *>(camera_device->vendor));
         free(camera_device);
         camera_device = NULL;
     }
@@ -792,7 +1065,9 @@ static int camera_get_number_of_cameras(void)
 static int camera_get_camera_info(int camera_id, struct camera_info *info)
 {
     ALOGV("%s", __FUNCTION__);
+    if (!info)
+        return -EINVAL;
     if (check_vendor_module())
-        return 0;
+        return -ENODEV;
     return gVendorModule->get_camera_info(camera_id, info);
 }
