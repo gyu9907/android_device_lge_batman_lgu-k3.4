@@ -182,8 +182,6 @@ BOARD_PROVIDES_LIBRIL := true
 BOARD_PROVIDES_LIBREFERENCE_RIL := true
 BOARD_PROVIDES_RILD := true
 BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
-TARGET_RIL_VARIANT_LEGACY := true
-TARGET_RIL_SUPPORT_SEEK := true
 
 # CM 13 uses the Qualcomm power HAL from hardware/qcom/power.
 TARGET_POWERHAL_VARIANT := qcom

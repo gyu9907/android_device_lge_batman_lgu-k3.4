@@ -957,8 +957,21 @@ dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
         goto invalid;
     }
 
-    size = (s_callbacks.version < 6) ? sizeof(simIO.v5) : sizeof(simIO.v6);
-    CALL_ONREQUEST(pRI->pCI->requestNumber, &simIO, size, pRI, pRI->socket_id);
+    // LG's MSM8660 RIL uses the old SEEK ABI: a leading CLA word precedes
+    // the standard SIM_IO fields. Keep the framework Parcel and public RIL
+    // structs unchanged and adapt only the vendor request at this boundary.
+    // Without this word the vendor interprets fileid as the command.
+    {
+        struct LgeSimIo {
+            int cla;
+            RIL_SIM_IO_v6 io;
+        } lgSimIO = {0, simIO.v6};
+        static_assert(sizeof(LgeSimIo) == sizeof(int) + sizeof(RIL_SIM_IO_v6),
+                "LG SIM_IO requires the packed 32-bit vendor layout");
+        size = sizeof(lgSimIO.cla) + ((s_callbacks.version < 6)
+                ? sizeof(simIO.v5) : sizeof(simIO.v6));
+        CALL_ONREQUEST(pRI->pCI->requestNumber, &lgSimIO, size, pRI, pRI->socket_id);
+    }
 
 #ifdef MEMSET_FREED
     memsetString (simIO.v6.path);
