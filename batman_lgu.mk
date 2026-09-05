@@ -87,6 +87,7 @@ PRODUCT_PACKAGES += \
 
 # Graphics
 PRODUCT_PACKAGES += \
+	libEGL_adreno200_compat \
 	camera.msm8660 \
 	libshim_camera \
 	libshim_omx_venc \

@@ -37,7 +37,8 @@ DISM=`egrep -c '(^#|^$)' proprietary-files.txt`
 COUNT=`expr $COUNT - $DISM`
 for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
   FILE=`echo "$ENTRY" | cut -d'|' -f1`
-  if [ "$FILE" = "lib/libtime_genoff.so" ]; then
+  if [ "$FILE" = "lib/libtime_genoff.so" ] || \
+     [ "$FILE" = "lib/egl/libEGL_adreno200.so" ]; then
     COUNT=`expr $COUNT - 1`
     continue
   fi

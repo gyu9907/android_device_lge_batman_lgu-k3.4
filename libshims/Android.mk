@@ -1,6 +1,21 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libEGL_adreno200_compat
+LOCAL_MODULE_RELATIVE_PATH := egl
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := EglImageCompat.cpp
+LOCAL_SHARED_LIBRARIES := libEGL_adreno200 libdl liblog
+# Retain the vendor dependency: dlsym on this driver must find unmodified EGL
+# entry points in it even though our two overrides resolve their originals.
+LOCAL_LDFLAGS := -Wl,--no-as-needed
+LOCAL_CFLAGS := -std=c++11 -fvisibility=hidden
+# q3dtools opens this absolute legacy path. Both discovery names must resolve
+# to the wrapper; the original blob remains outside the driver directory.
+LOCAL_POST_INSTALL_CMD := ln -sf libEGL_adreno200_compat.so $(TARGET_OUT_SHARED_LIBRARIES)/egl/libEGL_adreno200.so
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     CameraCompatShim.cpp
