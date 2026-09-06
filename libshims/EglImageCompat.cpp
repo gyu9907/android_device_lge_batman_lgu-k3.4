@@ -9,6 +9,7 @@
 #include <dlfcn.h>
 #include <pthread.h>
 #include <string.h>
+#include <string>
 #include <cutils/log.h>
 
 namespace {
@@ -20,6 +21,7 @@ using QueryContext = EGLBoolean (*)(EGLDisplay, EGLContext, EGLint, EGLint*);
 using Finish = void (*)();
 using GetConfigAttrib = EGLBoolean (*)(EGLDisplay, EGLConfig, EGLint, EGLint*);
 using ChooseConfig = EGLBoolean (*)(EGLDisplay, const EGLint*, EGLConfig*, EGLint, EGLint*);
+using QueryString = const char* (*)(EGLDisplay, EGLint);
 constexpr EGLint kEs3Bit = EGL_OPENGL_ES3_BIT_KHR;
 
 pthread_once_t gOnce = PTHREAD_ONCE_INIT;
@@ -29,6 +31,7 @@ GetCurrentContext gGetCurrentContext;
 QueryContext gQueryContext;
 GetConfigAttrib gGetConfigAttrib;
 ChooseConfig gChooseConfig;
+QueryString gQueryString;
 
 void loadVendorEntryPoints() {
     // This unmodified blob is also a DT_NEEDED dependency, so dlsym on our
@@ -42,9 +45,10 @@ void loadVendorEntryPoints() {
     gQueryContext = reinterpret_cast<QueryContext>(dlsym(vendor, "eglQueryContext"));
     gGetConfigAttrib = reinterpret_cast<GetConfigAttrib>(dlsym(vendor, "eglGetConfigAttrib"));
     gChooseConfig = reinterpret_cast<ChooseConfig>(dlsym(vendor, "eglChooseConfig"));
+    gQueryString = reinterpret_cast<QueryString>(dlsym(vendor, "eglQueryString"));
     LOG_ALWAYS_FATAL_IF(!gCreateImage || !gGetProcAddress ||
                         !gGetCurrentContext || !gQueryContext ||
-                        !gGetConfigAttrib || !gChooseConfig,
+                        !gGetConfigAttrib || !gChooseConfig || !gQueryString,
                         "Vendor EGL image entry points are missing");
     // Keep the handle for the lifetime of the driver. Returned entry points
     // and vendor-owned EGL objects must remain valid.
@@ -56,6 +60,34 @@ Finish loadFinish(const char* path) {
     Finish finish = reinterpret_cast<Finish>(dlsym(client, "glFinish"));
     LOG_ALWAYS_FATAL_IF(!finish, "Vendor GLES glFinish is missing in %s", path);
     return finish;
+}
+
+std::string filterExtensions(const char* extensions) {
+    std::string result;
+    while (*extensions) {
+        extensions += strspn(extensions, " ");
+        const size_t length = strcspn(extensions, " ");
+        if (!length) break;
+        if (length != sizeof("EGL_KHR_create_context") - 1 ||
+                strncmp(extensions, "EGL_KHR_create_context", length)) {
+            if (!result.empty()) result += ' ';
+            result.append(extensions, length);
+        }
+        extensions += length;
+    }
+    return result;
+}
+
+const char* queryString(EGLDisplay display, EGLint name) {
+    pthread_once(&gOnce, loadVendorEntryPoints);
+    const char* result = gQueryString(display, name);
+    if (!result || name != EGL_EXTENSIONS) return result;
+    // Older ANGLE selects ES3 configs when this extension is advertised and
+    // fails to fall back when eglChooseConfig succeeds with zero matches.
+    // Use the EGL 1.4 ES2 creation path on this ES2-only device. Keep the
+    // vendor query above so invalid displays retain their original errors.
+    static const std::string extensions = filterExtensions(result);
+    return extensions.c_str();
 }
 
 EGLBoolean getConfigAttrib(EGLDisplay display, EGLConfig config,
@@ -118,6 +150,10 @@ EGLImageKHR createImage(EGLDisplay display, EGLContext context, EGLenum target,
 }
 }  // namespace
 
+extern "C" EGLAPI const char* EGLAPIENTRY eglQueryString(EGLDisplay display, EGLint name) {
+    return queryString(display, name);
+}
+
 extern "C" EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigAttrib(
         EGLDisplay display, EGLConfig config, EGLint attribute, EGLint* value) {
     return getConfigAttrib(display, config, attribute, value);
@@ -138,6 +174,9 @@ extern "C" EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(
 extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
         eglGetProcAddress(const char* name) {
     pthread_once(&gOnce, loadVendorEntryPoints);
+    if (name && !strcmp(name, "eglQueryString")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(queryString);
+    }
     if (name && (!strcmp(name, "glGetString") || !strcmp(name, "glRenderbufferStorage"))) {
         static void* client = dlopen("/system/lib/egl/libGLESv2_adreno200_compat.so",
                                     RTLD_NOW | RTLD_LOCAL);
