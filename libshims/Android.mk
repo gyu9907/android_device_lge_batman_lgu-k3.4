@@ -7,7 +7,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := EglImageCompat.cpp
 LOCAL_SHARED_LIBRARIES := libEGL_adreno200 libdl liblog
 # Retain the vendor dependency: dlsym on this driver must find unmodified EGL
-# entry points in it even though our two overrides resolve their originals.
+# entry points in it even though our overrides resolve their originals.
 LOCAL_LDFLAGS := -Wl,--no-as-needed
 LOCAL_CFLAGS := -std=c++11 -fvisibility=hidden
 # q3dtools opens this absolute legacy path. Both discovery names must resolve
