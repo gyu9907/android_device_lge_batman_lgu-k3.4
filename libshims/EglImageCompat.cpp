@@ -138,6 +138,13 @@ extern "C" EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(
 extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
         eglGetProcAddress(const char* name) {
     pthread_once(&gOnce, loadVendorEntryPoints);
+    if (name && (!strcmp(name, "glGetString") || !strcmp(name, "glRenderbufferStorage"))) {
+        static void* client = dlopen("/system/lib/egl/libGLESv2_adreno200_compat.so",
+                                    RTLD_NOW | RTLD_LOCAL);
+        if (client) {
+            return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(dlsym(client, name));
+        }
+    }
     if (name && !strcmp(name, "eglGetConfigAttrib")) {
         return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(getConfigAttrib);
     }

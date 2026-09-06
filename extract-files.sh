@@ -26,6 +26,8 @@ while IFS='|' read -r FILE EXPECTED_HASH; do
             # Our installed EGL path is a compatibility wrapper. Extract the
             # original p930 blob from lib/, with the stock location as fallback.
             CANDIDATES="lib/libEGL_adreno200.so $FILE" ;;
+        lib/egl/libGLESv2_adreno200.so)
+            CANDIDATES="lib/libGLESv2_adreno200.so $FILE" ;;
         lib/hw/sensors.msm8660.so)
             CANDIDATES="lib/hw/sensors.vendor.msm8660.so $FILE" ;;
         lib/hw/camera.msm8660.so)

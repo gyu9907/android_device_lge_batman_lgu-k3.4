@@ -16,6 +16,17 @@ LOCAL_POST_INSTALL_CMD := ln -sf libEGL_adreno200_compat.so $(TARGET_OUT_SHARED_
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libGLESv2_adreno200_compat
+LOCAL_MODULE_RELATIVE_PATH := egl
+LOCAL_MODULE_TAGS := optional
+LOCAL_SRC_FILES := GlesTextureRgCompat.cpp
+LOCAL_SHARED_LIBRARIES := libGLESv2_adreno200 libdl liblog
+LOCAL_LDFLAGS := -Wl,--no-as-needed
+LOCAL_CFLAGS := -std=c++11 -fvisibility=hidden
+LOCAL_POST_INSTALL_CMD := ln -sf libGLESv2_adreno200_compat.so $(TARGET_OUT_SHARED_LIBRARIES)/egl/libGLESv2_adreno200.so
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     CameraCompatShim.cpp
