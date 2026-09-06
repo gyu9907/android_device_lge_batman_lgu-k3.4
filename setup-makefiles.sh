@@ -45,6 +45,8 @@ for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
   DEST=$FILE
   if [ "$FILE" = "lib/hw/sensors.msm8660.so" ]; then
     DEST=lib/hw/sensors.vendor.msm8660.so
+  elif [ "$FILE" = "lib/hw/camera.msm8660.so" ]; then
+    DEST=lib/hw/camera.vendor.msm8660.so
   fi
   COUNT=`expr $COUNT - 1`
   if [ $COUNT = "0" ]; then

@@ -198,21 +198,23 @@ lib/liblgsecclk.so
 lib/liblgtomadrm.so
 lib/liblgtomadrm_sf.so
 
-# Adreno firmware from Batman LGU stock JB
-etc/firmware/leia_pfp_470.fw
-etc/firmware/leia_pm4_470.fw
-etc/firmware/yamato_pfp.fw
-etc/firmware/yamato_pm4.fw
+# Adreno firmware (identical in Batman LGU stock JB and LG P930)
+etc/firmware/leia_pfp_470.fw|46a8ce821d218359ff7e846db5dcc15b31bdd5ca
+etc/firmware/leia_pm4_470.fw|99364b0afd94e496ccc833ca0424dd6853b971d5
+etc/firmware/yamato_pfp.fw|b55a28fe0f6521c611fc82ac70121b08e0fd2c0c
+etc/firmware/yamato_pm4.fw|660195ada4fd0ce2c63aee00482de92cbd094971
 
-# Adreno userspace imported from HTC Pyramid
-lib/libC2D2.so|b380758744d09e3061d3d16cb25a8012045581b3
-lib/libc2d2_z180.so|a8cf1615fdf5d3efc167a835d1eb72776ea1ca7b
-lib/libgsl.so|b5fa047e99d56333a4bad7aa9700f36b67ea5b88
-lib/libOpenVG.so|6328f392afbc79a469bf8485a605818e45a9ce41
-lib/libsc-a2xx.so|38f265a8e59195579bf27cbe3c1bab3f10905f69
-lib/egl/eglsubAndroid.so|a9429be9b815485cea46a2fe66d27445a0608f94
-lib/egl/libEGL_adreno200.so|d71a5e9b384700be86290d35779db01c93153e6d
-lib/egl/libGLESv1_CM_adreno200.so|0719972fc574ac22b6716c3b5f815a5ed0790def
-lib/egl/libGLESv2_adreno200.so|0f486e5cc96c2f4e5f348aab2972ef06987a69f6
-lib/egl/libplayback_adreno200.so|eaca0240f9f5dd2724d9bfe2a34c88bb659901a6
-lib/egl/libq3dtools_adreno200.so|b020398d8736f09a3bc7bffa1ae0a69fbfff3ec8
+# Adreno userspace from LG P930 (V@14.0, CL3896081)
+lib/libC2D2.so|b9f538bf568558e04ca3428c58ca5f7d064d5e95
+lib/libc2d2_z180.so|dc7194a0c3a6df46bc71dbcfcf9f6f6bf3b6fc4e
+lib/libgsl.so|4dd59e1c7f54c157bb1e359316e4fdc682aa3206
+lib/libOpenVG.so|87ce49d1ba46c0d8a2b09ab890d39ccee817334d
+lib/libsc-a2xx.so|dddac484f0809c1a77c1959f44771569e5be9947
+lib/egl/eglsubAndroid.so|8b0b3db6c64ff77f424212e2681d147ca40039f3
+lib/egl/libEGL_adreno200.so|04febb223db01adc1cdb5fedca41ca6ffc3d8e21
+lib/egl/libGLESv1_CM_adreno200.so|98c98138fd40048a86ab038f236bbf615643ea5c
+lib/egl/libGLESv2_adreno200.so|cdd212360ce9ec97b4bc87121f5b95e51ce3318e
+lib/egl/libq3dtools_adreno200.so|de16459637155f380c7a55bf777bf691a00aea7c
+lib/egl/libGLESv2S3D_adreno200.so|5dfe7bd9df242014aa655432d74ff719167afedd
+lib/libCB.so|8a7491fadea428052cad1af3abf9a16f3b04fc42
+lib/libOpenCL.so|20a4845d8fcdc033c0e9d7f5a634a0ad157bb1e9
