@@ -21,8 +21,6 @@
 *
 */
 
-#define LOG_PARAMETERS
-
 #define LOG_TAG "CameraWrapper"
 #include <cutils/log.h>
 
@@ -32,6 +30,7 @@
 #include <hardware/camera.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
+#include "CameraCallbacks.h"
 
 static android::Mutex gCameraWrapperLock;
 static camera_module_t *gVendorModule = 0;
@@ -47,11 +46,6 @@ static camera_module_t *gVendorModule = 0;
 typedef struct wrapper_preview_stream_ops {
     preview_stream_ops_t base;
     preview_stream_ops_t *vendor;
-    int width;
-    int height;
-    int format;
-    int usage;
-    unsigned int dequeue_count;
 } wrapper_preview_stream_ops_t;
 
 static int camera_device_open(const hw_module_t *module, const char *name, hw_device_t **device);
@@ -86,6 +80,7 @@ typedef struct wrapper_camera_device {
     int id;
     camera_device_t *vendor;
     wrapper_preview_stream_ops_t preview_window;
+    CameraCallbacks *callbacks;
 } wrapper_camera_device_t;
 
 #define VENDOR_CALL(device, func, ...) ({ \
@@ -170,15 +165,7 @@ static int preview_dequeue_buffer(struct preview_stream_ops *window,
         buffer_handle_t **buffer, int *stride)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    int rc = wrapper->vendor->dequeue_buffer(wrapper->vendor, buffer, stride);
-    if (rc || wrapper->dequeue_count < 8) {
-        ALOGI("preview dequeue[%u]: rc=%d buffer=%p stride=%d geometry=%dx%d format=0x%x usage=0x%08x",
-                wrapper->dequeue_count, rc, buffer ? *buffer : 0,
-                stride ? *stride : -1, wrapper->width, wrapper->height,
-                wrapper->format, wrapper->usage);
-    }
-    wrapper->dequeue_count++;
-    return rc;
+    return wrapper->vendor->dequeue_buffer(wrapper->vendor, buffer, stride);
 }
 
 static int preview_enqueue_buffer(struct preview_stream_ops *window,
@@ -199,7 +186,6 @@ static int preview_set_buffer_count(struct preview_stream_ops *window,
         int count)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    ALOGI("preview buffer count: %d", count);
     return wrapper->vendor->set_buffer_count(wrapper->vendor, count);
 }
 
@@ -207,11 +193,6 @@ static int preview_set_buffers_geometry(struct preview_stream_ops *window,
         int width, int height, int format)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    wrapper->width = width;
-    wrapper->height = height;
-    wrapper->format = format;
-    wrapper->dequeue_count = 0;
-    ALOGI("preview geometry: %dx%d format=0x%x", width, height, format);
     return wrapper->vendor->set_buffers_geometry(wrapper->vendor, width,
             height, format);
 }
@@ -232,13 +213,7 @@ static int preview_set_usage(struct preview_stream_ops *window, int usage)
     if ((usage & GRALLOC_USAGE_PRIVATE_IOMMU_HEAP) &&
             (usage & GRALLOC_USAGE_PRIVATE_ADSP_HEAP)) {
         fixed_usage &= ~GRALLOC_USAGE_PRIVATE_ADSP_HEAP;
-        ALOGI("preview heap usage fixed: 0x%08x -> 0x%08x", usage,
-                fixed_usage);
     }
-
-    wrapper->usage = fixed_usage;
-    ALOGI("preview usage: requested=0x%08x applied=0x%08x", usage,
-            fixed_usage);
 
     return wrapper->vendor->set_usage(wrapper->vendor, fixed_usage);
 }
@@ -320,8 +295,14 @@ static void camera_set_callbacks(struct camera_device *device,
     if (!device)
         return;
 
-    VENDOR_CALL(device, set_callbacks, notify_cb, data_cb, data_cb_timestamp,
-            get_memory, user);
+    CameraCallbacks *callbacks = ((wrapper_camera_device_t *)device)->callbacks;
+    callbacks->set(notify_cb, data_cb, data_cb_timestamp, user);
+    // This HAL supplies its own stream pointer to get_memory, not the
+    // registered callback cookie. CM11 __get_memory ignores that argument.
+    // Keep this callback direct; it cannot use the notification proxy cookie.
+    VENDOR_CALL(device, set_callbacks, CameraCallbacks::notify,
+            CameraCallbacks::data, CameraCallbacks::timestamp,
+            get_memory, callbacks);
 }
 
 static void camera_enable_msg_type(struct camera_device *device,
@@ -333,6 +314,7 @@ static void camera_enable_msg_type(struct camera_device *device,
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->enable(msg_type);
     VENDOR_CALL(device, enable_msg_type, msg_type);
 }
 
@@ -345,6 +327,7 @@ static void camera_disable_msg_type(struct camera_device *device,
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->disable(msg_type);
     VENDOR_CALL(device, disable_msg_type, msg_type);
 }
 
@@ -368,7 +351,11 @@ static int camera_start_preview(struct camera_device *device)
     if (!device)
         return -EINVAL;
 
-    return VENDOR_CALL(device, start_preview);
+    CameraCallbacks *callbacks = ((wrapper_camera_device_t *)device)->callbacks;
+    callbacks->preview(true);
+    int rc = VENDOR_CALL(device, start_preview);
+    if (rc) callbacks->preview(false);
+    return rc;
 }
 
 static void camera_stop_preview(struct camera_device *device)
@@ -379,6 +366,7 @@ static void camera_stop_preview(struct camera_device *device)
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->preview(false);
     VENDOR_CALL(device, stop_preview);
 }
 
@@ -507,10 +495,6 @@ static int camera_set_parameters(struct camera_device *device,
     char *tmp = NULL;
     tmp = camera_fixup_setparams(CAMERA_ID(device), params, device);
 
-#ifdef LOG_PARAMETERS
-    __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, tmp);
-#endif
-
     int ret = VENDOR_CALL(device, set_parameters, tmp);
 
     return ret;
@@ -526,17 +510,9 @@ static char *camera_get_parameters(struct camera_device *device)
 
     char *params = VENDOR_CALL(device, get_parameters);
 
-#ifdef LOG_PARAMETERS
-    __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, params);
-#endif
-
     char *tmp = camera_fixup_getparams(CAMERA_ID(device), params);
     VENDOR_CALL(device, put_parameters, params);
     params = tmp;
-
-#ifdef LOG_PARAMETERS
-    __android_log_write(ANDROID_LOG_VERBOSE, LOG_TAG, params);
-#endif
 
     return params;
 }
@@ -570,6 +546,7 @@ static void camera_release(struct camera_device *device)
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->preview(false);
     VENDOR_CALL(device, release);
 }
 
@@ -580,8 +557,6 @@ static int camera_dump(struct camera_device *device, int fd)
 
     return VENDOR_CALL(device, dump, fd);
 }
-
-extern "C" void heaptracker_free_leaked_memory(void);
 
 static int camera_device_close(hw_device_t *device)
 {
@@ -599,14 +574,13 @@ static int camera_device_close(hw_device_t *device)
 
     wrapper_dev = (wrapper_camera_device_t*) device;
 
+    wrapper_dev->callbacks->preview(false);
     wrapper_dev->vendor->common.close((hw_device_t*)wrapper_dev->vendor);
+    delete wrapper_dev->callbacks;
     if (wrapper_dev->base.ops)
         free(wrapper_dev->base.ops);
     free(wrapper_dev);
 done:
-#ifdef HEAPTRACKER
-    heaptracker_free_leaked_memory();
-#endif
     return ret;
 }
 
@@ -656,6 +630,14 @@ static int camera_device_open(const hw_module_t *module, const char *name,
         }
         memset(camera_device, 0, sizeof(*camera_device));
         camera_device->id = cameraid;
+
+        camera_device->callbacks = new CameraCallbacks();
+        if (!camera_device->callbacks) {
+            rv = -ENOMEM;
+            goto fail;
+        }
+        rv = camera_device->callbacks->start();
+        if (rv) goto fail;
 
         rv = gVendorModule->common.methods->open(
                     (const hw_module_t*)gVendorModule, name,
@@ -713,6 +695,9 @@ static int camera_device_open(const hw_module_t *module, const char *name,
 
 fail:
     if (camera_device) {
+        if (camera_device->vendor)
+            camera_device->vendor->common.close((hw_device_t*)camera_device->vendor);
+        delete camera_device->callbacks;
         free(camera_device);
         camera_device = NULL;
     }
