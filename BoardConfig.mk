@@ -39,6 +39,12 @@ COMMON_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
 COMMON_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
 COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
 
+# This CM11 backport keeps an Autolock alive across OMXNodeInstance's
+# delete-this. Its destructor then unlocks freed memory and corrupts dlmalloc
+# when camera sounds and video thumbnails release their codecs together.
+# Use the existing build guard without changing the framework sources.
+BOARD_SKIP_CVE_2017_13154 := true
+
 # Audio
 COMMON_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
 TARGET_USES_ION_AUDIO := true
