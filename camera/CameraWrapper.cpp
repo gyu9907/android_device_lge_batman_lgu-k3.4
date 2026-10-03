@@ -35,8 +35,8 @@
 #include <utils/String8.h>
 #include <hardware/hardware.h>
 #include <hardware/camera.h>
-#include <camera/Camera.h>
 #include <camera/CameraParameters.h>
+#include "CameraCallbacks.h"
 
 static android::Mutex gCameraWrapperLock;
 static android::Mutex gMemoryCallbackLock;
@@ -97,6 +97,7 @@ typedef struct wrapper_camera_device {
     int id;
     camera_device_t *vendor;
     wrapper_preview_stream_ops_t preview_window;
+    CameraCallbacks *callbacks;
     camera_notify_callback notify_cb;
     camera_data_callback data_cb;
     camera_data_timestamp_callback data_cb_timestamp;
@@ -423,6 +424,12 @@ static void wrapper_data_callback(int32_t msg_type,
             (msg_type & CAMERA_MSG_PREVIEW_METADATA)) {
         metadata_memory = wrapper->get_memory(-1, 1, 1,
                 wrapper->callback_user);
+        if (!metadata_memory || !metadata_memory->handle) {
+            if (metadata_memory && metadata_memory->release)
+                metadata_memory->release(metadata_memory);
+            ALOGE("cannot allocate preview metadata callback buffer");
+            return;
+        }
         data = metadata_memory;
         index = 0;
     }
@@ -514,9 +521,13 @@ static void camera_set_callbacks(struct camera_device *device,
         gMemoryCallbackDevice = wrapper;
     }
 
-    VENDOR_CALL(device, set_callbacks, wrapper_notify_callback,
-            wrapper_data_callback, wrapper_data_timestamp_callback,
-            wrapper_request_memory, wrapper);
+    wrapper->callbacks->set(wrapper_notify_callback, wrapper_data_callback,
+            wrapper_data_timestamp_callback, wrapper);
+    // Keep Nougat's memory bridge: the vendor supplies a stream pointer
+    // instead of the callback cookie to request_memory.
+    VENDOR_CALL(device, set_callbacks, CameraCallbacks::notify,
+            CameraCallbacks::data, CameraCallbacks::timestamp,
+            wrapper_request_memory, wrapper->callbacks);
 }
 
 static void camera_enable_msg_type(struct camera_device *device,
@@ -528,6 +539,7 @@ static void camera_enable_msg_type(struct camera_device *device,
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->enable(msg_type);
     VENDOR_CALL(device, enable_msg_type, msg_type);
 }
 
@@ -540,6 +552,7 @@ static void camera_disable_msg_type(struct camera_device *device,
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->disable(msg_type);
     VENDOR_CALL(device, disable_msg_type, msg_type);
 }
 
@@ -589,7 +602,10 @@ static int camera_start_preview(struct camera_device *device)
         }
     }
 
+    CameraCallbacks *callbacks = ((wrapper_camera_device_t *)device)->callbacks;
+    callbacks->preview(true);
     int rc = VENDOR_CALL(device, start_preview);
+    if (rc) callbacks->preview(false);
     ALOGI("%s vendor returned %d", __FUNCTION__, rc);
     return rc;
 }
@@ -602,6 +618,7 @@ static void camera_stop_preview(struct camera_device *device)
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->preview(false);
     VENDOR_CALL(device, stop_preview);
 }
 
@@ -799,11 +816,15 @@ static int camera_set_parameters(struct camera_device *device,
         VENDOR_CALL(device, send_command,
                 CAMERA_CMD_STOP_FACE_DETECTION, 0, 0);
         VENDOR_CALL(device, cancel_auto_focus);
+        ((wrapper_camera_device_t *)device)->callbacks->preview(false);
         VENDOR_CALL(device, stop_preview);
     }
     int ret = VENDOR_CALL(device, set_parameters, tmp);
     if (restartPreview) {
+        CameraCallbacks *callbacks = ((wrapper_camera_device_t *)device)->callbacks;
+        callbacks->preview(true);
         int previewResult = VENDOR_CALL(device, start_preview);
+        if (previewResult) callbacks->preview(false);
         if (!ret)
             ret = previewResult;
     }
@@ -874,6 +895,7 @@ static void camera_release(struct camera_device *device)
     if (!device)
         return;
 
+    ((wrapper_camera_device_t *)device)->callbacks->preview(false);
     VENDOR_CALL(device, release);
 }
 
@@ -902,6 +924,7 @@ static int camera_device_close(hw_device_t *device)
     }
 
     wrapper_dev = (wrapper_camera_device_t*) device;
+    wrapper_dev->callbacks->preview(false);
 
     {
         android::Mutex::Autolock callbackLock(gMemoryCallbackLock);
@@ -911,6 +934,7 @@ static int camera_device_close(hw_device_t *device)
 
     if (wrapper_dev->vendor)
         wrapper_dev->vendor->common.close((hw_device_t*)wrapper_dev->vendor);
+    delete wrapper_dev->callbacks;
     if (wrapper_dev->base.ops)
         free(wrapper_dev->base.ops);
     free(wrapper_dev);
@@ -980,6 +1004,13 @@ static int camera_device_open(const hw_module_t *module, const char *name,
         }
         memset(camera_device, 0, sizeof(*camera_device));
         camera_device->id = cameraid;
+        camera_device->callbacks = new CameraCallbacks();
+        if (!camera_device->callbacks) {
+            rv = -ENOMEM;
+            goto fail;
+        }
+        rv = camera_device->callbacks->start();
+        if (rv) goto fail;
 
         rv = gVendorModule->common.methods->open(
                     (const hw_module_t*)gVendorModule, name,
@@ -1043,6 +1074,7 @@ fail:
         if (camera_device->vendor)
             camera_device->vendor->common.close(
                     reinterpret_cast<hw_device_t *>(camera_device->vendor));
+        delete camera_device->callbacks;
         free(camera_device);
         camera_device = NULL;
     }
