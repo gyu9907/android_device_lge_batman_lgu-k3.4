@@ -11,7 +11,6 @@ TARGET_SCREEN_HEIGHT := 1024
 
 # Inherit some common CM stuff.
 #$(call inherit-product, vendor/cm/config/common_full_phone.mk)
-BATMAN_LGU_INSECURE_BRINGUP := true
 $(if $(wildcard device/lge/batman_lgu/stonecold/product/common_full_phone.mk), $(call inherit-product-if-exists, device/lge/batman_lgu/stonecold/product/common_full_phone.mk), $(call inherit-product, vendor/cm/config/common_full_phone.mk))
 
 # Inherit device configuration

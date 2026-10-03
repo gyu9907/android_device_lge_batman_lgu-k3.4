@@ -110,28 +110,6 @@ TARGET_KERNEL_CONFIG := batman_lgu_defconfig
 KERNEL_TOOLCHAIN_PREFIX := arm-eabi-
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.4.3/bin
 
-# Bring-up only. Prepend these values and remove inherited copies because
-# default.prop uses the first occurrence of a duplicated property.
-ADDITIONAL_DEFAULT_PROPERTIES := \
-    ro.secure=0 \
-    ro.adb.secure=0 \
-    ro.debuggable=1 \
-    security.perf_harden=0 \
-    cm.service.adb.root=1 \
-    service.adb.root=1 \
-    persist.service.adb.enable=1 \
-    persist.sys.usb.config=mtp,adb \
-    $(filter-out \
-        ro.secure=% \
-        ro.adb.secure=% \
-        ro.debuggable=% \
-        security.perf_harden=% \
-        cm.service.adb.root=% \
-        service.adb.root=% \
-        persist.service.adb.enable=% \
-        persist.sys.usb.config=%, \
-        $(ADDITIONAL_DEFAULT_PROPERTIES))
-
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <bool name="def_lockscreen_disabled">false</bool>
+
     <!-- The proprietary HAL exposes its flip gesture as TYPE_WAKE_GESTURE,
          but batman_lgu has no supported lift-to-wake feature. -->
     <bool name="def_wake_gesture_enabled">false</bool>

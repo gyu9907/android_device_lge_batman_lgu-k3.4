@@ -123,18 +123,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     com.android.future.usb.accessory
 
-# Keep ADB available from the first USB property trigger during bring-up.
-# These settings are intentionally insecure and must not be used for release builds.
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    ro.secure=0 \
-    ro.adb.secure=0 \
-    ro.debuggable=1 \
-    security.perf_harden=0 \
-    cm.service.adb.root=1 \
-    service.adb.root=1 \
-    persist.service.adb.enable=1 \
-    persist.sys.usb.config=mtp,adb
-
 # Filesystem Management Tools
 PRODUCT_PACKAGES += \
     make_ext4fs \
