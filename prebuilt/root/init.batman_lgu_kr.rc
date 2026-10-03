@@ -467,3 +467,6 @@ service ami304d /system/bin/ami304d
 #    class main
 #    user compass
 #    group system
+
+on property:sys.boot_completed=1
+    write /sys/devices/virtual/graphics/fb1/hdmi_boot_completed 1

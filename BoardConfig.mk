@@ -70,6 +70,7 @@ BOARD_CUSTOM_BT_CONFIG := device/lge/batman_lgu/bluetooth/vnd_bt.txt
 
 # Graphics
 TARGET_QCOM_DISPLAY_VARIANT := caf
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 USE_OPENGL_RENDERER := true
 TARGET_USES_C2D_COMPOSITION := true
 TARGET_USES_ION := true
