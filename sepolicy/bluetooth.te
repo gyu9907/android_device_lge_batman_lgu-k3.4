@@ -1,3 +1,0 @@
-# The sysfs reader opens /data/misc/bd_addr with the Bluetooth caller's credentials.
-allow bluetooth sysfs_batman_bt_addr:file r_file_perms;
-allow bluetooth batman_bt_addr_file:file r_file_perms;
