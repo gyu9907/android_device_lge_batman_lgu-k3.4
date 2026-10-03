@@ -14,6 +14,10 @@ on boot
 # Use the common init.usb.rc handlers for none and adb. The LG 1004:6000
 # identity is reserved for factory cables, not the normal ADB composition.
 
+on property:sys.usb.config=none && property:sys.usb.configfs=0
+    write /sys/class/android_usb/android0/bDeviceSubClass 0
+    write /sys/class/android_usb/android0/bDeviceProtocol 0
+
 on property:sys.usb.config=mass_storage,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor 1004
@@ -55,11 +59,14 @@ on property:sys.usb.config=mtp,adb
     setprop sys.usb.state $sys.usb.config
 
 on property:sys.usb.config=rndis
+    stop adbd
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor 1004
     write /sys/class/android_usb/android0/idProduct 6315
-    write /sys/class/android_usb/android0/functions $sys.usb.config
     write /sys/class/android_usb/android0/bDeviceClass 239
+    write /sys/class/android_usb/android0/bDeviceSubClass 2
+    write /sys/class/android_usb/android0/bDeviceProtocol 1
+    write /sys/class/android_usb/android0/functions $sys.usb.config
     write /sys/class/android_usb/android0/enable 1
     setprop sys.usb.state $sys.usb.config
 
@@ -67,8 +74,10 @@ on property:sys.usb.config=rndis,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor 1004
     write /sys/class/android_usb/android0/idProduct 6315
-    write /sys/class/android_usb/android0/functions $sys.usb.config
     write /sys/class/android_usb/android0/bDeviceClass 239
+    write /sys/class/android_usb/android0/bDeviceSubClass 2
+    write /sys/class/android_usb/android0/bDeviceProtocol 1
+    write /sys/class/android_usb/android0/functions $sys.usb.config
     write /sys/class/android_usb/android0/enable 1
     start adbd
     setprop sys.usb.state $sys.usb.config
