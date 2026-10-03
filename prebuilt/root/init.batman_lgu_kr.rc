@@ -455,8 +455,14 @@ service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
     group bluetooth net_bt_admin
     disabled
 
-on property:dev.bootcomplete=1
-    exec /system/bin/hwaddrs
+# Let the native modem services start normally. This service waits for the
+# published NV RPC endpoint without blocking init or loading the modem itself.
+# Prepare factory address files; only radio initialization waits.
+service hwaddrs /system/bin/hwaddrs
+    class late_start
+    user root
+    group root
+    oneshot
 
 service ami304d /system/bin/ami304d
     class main

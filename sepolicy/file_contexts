@@ -1,0 +1,9 @@
+/system/bin/hwaddrs                         u:object_r:hwaddrs_exec:s0
+/data/misc/bd_addr(\.[A-Za-z0-9]{6})?       u:object_r:batman_bt_addr_file:s0
+/data/misc/wifi/config(\.[A-Za-z0-9]{6})?   u:object_r:batman_wifi_addr_file:s0
+
+/dev/oncrpc                                u:object_r:batman_oncrpc_dir:s0
+/dev/oncrpc/00000000:0                     u:object_r:batman_nv_device:s0
+/dev/oncrpc/3000000e:[0-9a-f]{8}           u:object_r:batman_nv_device:s0
+/dev/smem_log                              u:object_r:batman_smem_log_device:s0
+/dev/diag                                  u:object_r:batman_diag_device:s0

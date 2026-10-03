@@ -1,0 +1,5 @@
+type batman_bt_addr_file, file_type, data_file_type;
+type batman_wifi_addr_file, file_type, data_file_type;
+type sysfs_hwaddrs_ready, fs_type, sysfs_type;
+type sysfs_batman_bt_addr, fs_type, sysfs_type;
+type sysfs_batman_wifi_addr, fs_type, sysfs_type;

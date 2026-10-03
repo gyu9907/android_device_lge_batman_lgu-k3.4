@@ -22,7 +22,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := getmac.c
 
 LOCAL_PRELINK_MODULE := false
-LOCAL_SHARED_LIBRARIES := libcutils
+LOCAL_SHARED_LIBRARIES := libcutils libselinux
 LOCAL_LDFLAGS += \
     -Lvendor/lge/batman_lgu/proprietary/lib \
     -lnv \

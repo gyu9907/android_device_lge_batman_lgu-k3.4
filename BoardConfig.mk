@@ -3,6 +3,8 @@ TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
 BOARD_VENDOR := lge
 
+BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
+
 #BOARD_HAVE_FM_RADIO := true
 #BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 

@@ -1,0 +1,29 @@
+# Prepare the factory address files after the modem publishes its NV endpoint.
+type hwaddrs, domain;
+type hwaddrs_exec, exec_type, file_type;
+init_daemon_domain(hwaddrs)
+
+# The legacy vendor RPC libraries contain text relocations.
+allow hwaddrs system_file:file execmod;
+allow hwaddrs kmsg_device:chr_file { open write };
+allow hwaddrs sysfs_devices_system_cpu:file r_file_perms;
+
+# liboncrpc uses only the router and NV endpoint, plus its diagnostic devices.
+allow hwaddrs batman_oncrpc_dir:dir r_dir_perms;
+allow hwaddrs { batman_nv_device batman_smem_log_device batman_diag_device }:chr_file rw_file_perms;
+
+# Atomic replacement in /data/misc and /data/misc/wifi, followed by directory fsync.
+# Label temporary files on creation so restorecon needs no relabel permission.
+allow hwaddrs self:capability { chown dac_override fowner };
+allow hwaddrs { system_data_file wifi_data_file }:dir { search getattr open read write add_name remove_name };
+type_transition hwaddrs system_data_file:file batman_bt_addr_file;
+type_transition hwaddrs wifi_data_file:file batman_wifi_addr_file;
+allow hwaddrs { batman_bt_addr_file batman_wifi_addr_file }:file { create open read write getattr setattr rename unlink };
+
+# libselinux reads the installed file contexts when checking the final labels.
+allow hwaddrs rootfs:file r_file_perms;
+allow hwaddrs security_file:dir search;
+allow hwaddrs security_file:file r_file_perms;
+
+allow hwaddrs sysfs_hwaddrs_ready:file { open write };
+set_prop(hwaddrs, hwaddrs_prop)
