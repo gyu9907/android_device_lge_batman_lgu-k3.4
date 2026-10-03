@@ -1,16 +1,9 @@
-#ifeq ($(BOARD_SENSOR_CHIP),ami304)
-ifneq ($(TARGET_SIMULATOR),true)
-
-LOCAL_PATH:= $(call my-dir)
-
+LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
-LOCAL_MODULE_PATH := $(TARGET_OUT)/bin
-LOCAL_SRC_FILES:= Middletester.c
-LOCAL_LDFLAGS := $(LOCAL_PATH)/libami304middleware.a
-LOCAL_SHARED_LIBRARIES := libcutils libutils liblog
+# The shipped AMI306 payload requires text relocations; enter sensors through
+# a clean executable before running the preserved vendor binary.
 LOCAL_MODULE := ami304d
+LOCAL_SRC_FILES := ../legacy_daemon/legacy_daemon.c
+LOCAL_CFLAGS := -Wall -Werror -DLEGACY_DAEMON=\"ami304d\"
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
-
-endif	# TARGET_SIMULATOR != true
-#endif	# build for only thunder*

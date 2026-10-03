@@ -3,6 +3,8 @@ TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
 BOARD_VENDOR := lge
 
+# MSM8660 needs the Qualcomm service domains and device labels.
+BOARD_SEPOLICY_DIRS += device/qcom/sepolicy/common vendor/cm/sepolicy/qcom
 BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
 
 #BOARD_HAVE_FM_RADIO := true
@@ -96,9 +98,8 @@ TARGET_USE_SCORPION_PLD_SET := true
 TARGET_SCORPION_BIONIC_PLDOFFS := 6
 TARGET_SCORPION_BIONIC_PLDSIZE := 128
 
-# Bring-up only: keep the serial console available and prevent init from
-# switching SELinux into enforcing mode while early-boot failures are traced.
-BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr androidboot.selinux=permissive kgsl.mmutype=gpummu vmalloc=580M
+# Keep the serial console available while enforcing the device policy.
+BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lgu_kr androidboot.selinux=enforcing kgsl.mmutype=gpummu vmalloc=580M
 TARGET_NO_KERNEL_BUILD_VARIANT := true
 BOARD_KERNEL_BASE := 0x40200000
 BOARD_KERNEL_PAGESIZE := 2048

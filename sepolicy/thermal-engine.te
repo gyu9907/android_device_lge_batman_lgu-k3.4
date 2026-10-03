@@ -1,0 +1,4 @@
+
+# pyramid 8f3f4d9: thermald predates thermal-engine.
+allow thermal-engine self:capability { chown net_admin };
+allow thermal-engine self:netlink_kobject_uevent_socket create_socket_perms;

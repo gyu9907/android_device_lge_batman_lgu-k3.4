@@ -1,4 +1,8 @@
 type batman_oncrpc_dir, dev_type;
 type batman_nv_device, dev_type;
-type batman_smem_log_device, dev_type;
-type batman_diag_device, dev_type;
+
+type batman_rpc_device, dev_type;
+type batman_rmt_device, dev_type;
+type batman_mdm_device, dev_type;
+
+type batman_partition_table_device, dev_type;

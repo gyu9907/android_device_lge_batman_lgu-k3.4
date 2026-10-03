@@ -220,8 +220,6 @@ on boot
     chmod 0775 /system/lib/modules/mwlan_aarp.ko
 
 on init
-    export TMPDIR /data/local/tmp
-
     # Backward compatibility
     symlink /system/bin /bin
 
@@ -240,6 +238,7 @@ on fs
     mount_all /fstab.batman_lgu_kr
 
 on post-fs
+    restorecon_recursive /persist
     symlink /sdcard /mnt/sdcard
     symlink /sdcard /storage/sdcard0
 
@@ -258,6 +257,13 @@ on post-fs
     mkdir /data/wmdrm 0770 lgdrm lgdrm_acc
 
 on post-fs-data
+    restorecon /sys/devices/platform/msm_hsusb/gadget/usb_state
+    restorecon /sys/devices/virtual/android_usb/android0/f_rmnet_smd_sdio/transport
+    restorecon /data/cam_socket0
+    restorecon_recursive /sys/kernel/batman_hwaddrs
+    restorecon_recursive /sys/devices/virtual/graphics
+    restorecon_recursive /sys/devices/system/cpu
+    restorecon_recursive /data/amit /data/gesture /data/time /data/audio
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/wifi/wpa_supplicant 0770 wifi wifi

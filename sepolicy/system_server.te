@@ -1,0 +1,2 @@
+
+allow system_server persist_file:dir search;

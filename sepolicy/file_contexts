@@ -2,8 +2,42 @@
 /data/misc/bd_addr(\.[A-Za-z0-9]{6})?       u:object_r:batman_bt_addr_file:s0
 /data/misc/wifi/config(\.[A-Za-z0-9]{6})?   u:object_r:batman_wifi_addr_file:s0
 
-/dev/oncrpc                                u:object_r:batman_oncrpc_dir:s0
+/dev/oncrpc/?                              u:object_r:batman_oncrpc_dir:s0
 /dev/oncrpc/00000000:0                     u:object_r:batman_nv_device:s0
 /dev/oncrpc/3000000e:[0-9a-f]{8}           u:object_r:batman_nv_device:s0
-/dev/smem_log                              u:object_r:batman_smem_log_device:s0
-/dev/diag                                  u:object_r:batman_diag_device:s0
+
+# Legacy msm8660 nodes (pyramid 8f3f4d9, adapted to LG hardware).
+/dev/kgsl-2d[01]                         u:object_r:gpu_device:s0
+/dev/msm_rotator                         u:object_r:gpu_device:s0
+/dev/msm_vidc_(reg|dec|enc)               u:object_r:video_device:s0
+/dev/msm_camera(/.*)?                    u:object_r:camera_device:s0
+/dev/gemini[0-9]*                        u:object_r:camera_device:s0
+/dev/(ami306|ami306daemon|ami306hal|k3g_misc|k3dh_acc_misc|apds9900) u:object_r:sensors_device:s0
+/dev/oncrpc/.+                          u:object_r:batman_rpc_device:s0
+/dev/rmt_storage                        u:object_r:batman_rmt_device:s0
+/dev/mdm                                u:object_r:batman_mdm_device:s0
+/dev/block/mmcblk0p(10|11|15|16|17|18|19)               u:object_r:modem_efs_partition_device:s0
+/system/bin/ami304d                      u:object_r:sensors_exec:s0
+/system/bin/thermald                     u:object_r:thermal-engine_exec:s0
+/system/bin/bridgemgrd                   u:object_r:batman_bridgemgrd_exec:s0
+/system/bin/qmiproxy                     u:object_r:batman_qmiproxy_exec:s0
+/system/bin/qcks                         u:object_r:batman_kickstart_exec:s0
+/data/(amit|gesture)(/.*)?               u:object_r:sensors_data_file:s0
+/data/cam_socket[0-9]+                   u:object_r:camera_socket:s0
+/data/system/default_values             u:object_r:mpctl_data_file:s0
+/dev/socket/mpctl                       u:object_r:mpctl_socket:s0
+/dev/socket/proxy_tether_connect_socket  u:object_r:qmuxd_socket:s0
+/sys/kernel/batman_hwaddrs/(bt_ready|wifi_ready) u:object_r:sysfs_hwaddrs_ready:s0
+/sys/kernel/batman_hwaddrs/bt_addr        u:object_r:sysfs_batman_bt_addr:s0
+/sys/kernel/batman_hwaddrs/wifi_addr      u:object_r:sysfs_batman_wifi_addr:s0
+
+/dev/sdioctl[0-9]+ u:object_r:smd_device:s0
+/dev/rmnet_mux_ctrl u:object_r:rmnet_device:s0
+
+/data/qcks(/.*)? u:object_r:batman_qcks_data_file:s0
+/dev/tty_sdio_00 u:object_r:serial_device:s0
+
+/dev/ttyHSL1 u:object_r:serial_device:s0
+/dev/block/mmcblk0 u:object_r:batman_partition_table_device:s0
+/sys/devices/platform/msm_hsusb/gadget/usb_state u:object_r:sysfs_batman_usb_state:s0
+/sys/devices/virtual/android_usb/android0/f_rmnet_smd_sdio/transport u:object_r:sysfs_batman_modem_transport:s0

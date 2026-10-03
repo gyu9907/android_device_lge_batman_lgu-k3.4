@@ -1,0 +1,7 @@
+
+allow init tmpfs:lnk_file create;
+allow init camera_socket:sock_file relabelto;
+allow init serial_device:chr_file getattr;
+
+allow init { sysfs_graphics sysfs_hwaddrs_ready sysfs_batman_bt_addr sysfs_batman_wifi_addr
+             sysfs_batman_usb_state sysfs_batman_modem_transport }:file getattr;

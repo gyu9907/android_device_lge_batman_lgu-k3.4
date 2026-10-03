@@ -36,7 +36,8 @@ COUNT=`wc -l proprietary-files.txt | awk {'print $1'}`
 DISM=`egrep -c '(^#|^$)' proprietary-files.txt`
 COUNT=`expr $COUNT - $DISM`
 for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
-  FILE=`echo "$ENTRY" | cut -d'|' -f1`
+  PATHS=${ENTRY%%|*}
+  FILE=${PATHS%%:*}
   if [ "$FILE" = "lib/libtime_genoff.so" ] || \
      [ "$FILE" = "lib/egl/libEGL_adreno200.so" ] || \
      [ "$FILE" = "lib/egl/libGLESv2_adreno200.so" ]; then
@@ -44,6 +45,9 @@ for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
     continue
   fi
   DEST=$FILE
+  case "$PATHS" in
+    *:*) DEST=${PATHS#*:} ;;
+  esac
   if [ "$FILE" = "lib/hw/sensors.msm8660.so" ]; then
     DEST=lib/hw/sensors.vendor.msm8660.so
   elif [ "$FILE" = "lib/hw/camera.msm8660.so" ]; then

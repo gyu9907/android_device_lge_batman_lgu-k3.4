@@ -15,12 +15,16 @@ STAGE=$(mktemp -d "${BASE}.extract.XXXXXX")
 trap 'rm -rf "$STAGE"' EXIT
 trap 'exit 1' HUP INT TERM
 
-while IFS='|' read -r FILE EXPECTED_HASH; do
-    case "$FILE" in
+while IFS='|' read -r ENTRY EXPECTED_HASH; do
+    case "$ENTRY" in
         ''|'#'*) continue ;;
     esac
+    FILE=${ENTRY%%:*}
     mkdir -p "$STAGE/$(dirname "$FILE")"
     CANDIDATES=$FILE
+    case "$ENTRY" in
+        *:*) CANDIDATES="${ENTRY#*:} $FILE" ;;
+    esac
     case "$FILE" in
         lib/egl/libEGL_adreno200.so)
             # Our installed EGL path is a compatibility wrapper. Extract the

@@ -198,3 +198,21 @@ PRODUCT_PACKAGES += \
 
 # Device-local legacy Qualcomm RIL
 $(call project-set-path,ril,device/lge/batman_lgu/ril)
+
+# SELinux entrypoints for vendor executables with text relocations.
+PRODUCT_PACKAGES += \
+    ami304d \
+    batman_legacy_cnd \
+    batman_legacy_ks \
+    batman_legacy_mpdecision \
+    batman_legacy_netmgrd \
+    batman_legacy_qcks \
+    batman_legacy_qmiproxy \
+    batman_legacy_qmuxd \
+    batman_legacy_qseecomd \
+    batman_legacy_rmt_storage \
+    batman_legacy_thermald \
+    batman_legacy_time_daemon \
+    batman_legacy_bridgemgrd \
+    batman_legacy_port-bridge \
+    batman_legacy_mm-qcamera-daemon

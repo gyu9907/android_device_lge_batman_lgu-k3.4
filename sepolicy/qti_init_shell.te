@@ -1,0 +1,2 @@
+# The MSM8660 post-boot script sets CPU frequency and hotplug ownership.
+allow qti_init_shell sysfs_devices_system_cpu:file setattr;

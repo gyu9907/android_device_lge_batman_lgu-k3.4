@@ -1,0 +1,2 @@
+
+allow ueventd graphics_device:chr_file { relabelfrom relabelto };

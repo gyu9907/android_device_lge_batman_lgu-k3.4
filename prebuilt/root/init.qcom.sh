@@ -84,15 +84,10 @@ do
 done
 
 #
-# Start gpsone_daemon for SVLTE Type I & II devices
+# Start the SVLTE bridge. This device does not ship gpsone_daemon.
 #
-case "$target" in
-        "msm7630_fusion")
-        start gpsone_daemon
-esac
 case "$baseband" in
         "svlte2a")
-        start gpsone_daemon
         start bridgemgrd
 esac
 case "$target" in
@@ -266,4 +261,3 @@ case "$target" in
         ;;
 
 esac
-

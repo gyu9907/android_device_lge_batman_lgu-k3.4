@@ -1,19 +1,21 @@
+# Format: source[:installed-path][|SHA-1], relative to /system.
+# Relocated payloads are extracted from installed-path first, then source.
 # Executable files
-bin/ami304d
-bin/cnd
-bin/ks
-bin/mpdecision
-bin/netmgrd
-bin/qcks
-bin/qmiproxy
-bin/qmuxd
-bin/qseecomd
-bin/rmt_storage
-bin/thermald
-bin/time_daemon
+bin/ami304d:vendor/libexec/batman/ami304d
+bin/cnd:vendor/libexec/batman/cnd
+bin/ks:vendor/libexec/batman/ks
+bin/mpdecision:vendor/libexec/batman/mpdecision
+bin/netmgrd:vendor/libexec/batman/netmgrd
+bin/qcks:vendor/libexec/batman/qcks
+bin/qmiproxy:vendor/libexec/batman/qmiproxy
+bin/qmuxd:vendor/libexec/batman/qmuxd
+bin/qseecomd:vendor/libexec/batman/qseecomd
+bin/rmt_storage:vendor/libexec/batman/rmt_storage
+bin/thermald:vendor/libexec/batman/thermald
+bin/time_daemon:vendor/libexec/batman/time_daemon
 bin/btld
-bin/bridgemgrd
-bin/port-bridge
+bin/bridgemgrd:vendor/libexec/batman/bridgemgrd
+bin/port-bridge:vendor/libexec/batman/port-bridge
 bin/libbroadcast_server
 
 # Audio
@@ -23,7 +25,7 @@ lib/libaudcal.so
 lib/libaudioalsa.so
 
 # Camera
-bin/mm-qcamera-daemon
+bin/mm-qcamera-daemon:vendor/libexec/batman/mm-qcamera-daemon
 lib/hw/camera.msm8660.so
 lib/libgemini.so
 lib/libidl.so

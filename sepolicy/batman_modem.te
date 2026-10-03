@@ -1,0 +1,43 @@
+
+type batman_bridgemgrd, domain;
+type batman_bridgemgrd_exec, exec_type, file_type;
+init_daemon_domain(batman_bridgemgrd)
+net_domain(batman_bridgemgrd)
+qmux_socket(batman_bridgemgrd)
+allow batman_bridgemgrd self:netlink_kobject_uevent_socket create_socket_perms;
+allow batman_bridgemgrd { smd_device serial_device diag_device }:chr_file rw_file_perms;
+allow batman_bridgemgrd self:capability net_admin;
+
+type batman_qmiproxy, domain;
+type batman_qmiproxy_exec, exec_type, file_type;
+init_daemon_domain(batman_qmiproxy)
+net_domain(batman_qmiproxy)
+qmux_socket(batman_qmiproxy)
+allow batman_qmiproxy socket_device:dir { write add_name remove_name };
+type_transition batman_qmiproxy socket_device:sock_file qmuxd_socket;
+allow batman_qmiproxy qmuxd:unix_stream_socket { connectto read write };
+allow qmuxd batman_qmiproxy:unix_stream_socket connectto;
+allow batman_qmiproxy { smd_device diag_device }:chr_file rw_file_perms;
+
+type batman_kickstart, domain;
+type batman_kickstart_exec, exec_type, file_type;
+init_daemon_domain(batman_kickstart)
+allow batman_kickstart { batman_mdm_device serial_device }:chr_file rw_file_perms;
+allow batman_kickstart shell_exec:file rx_file_perms;
+allow batman_kickstart toolbox_exec:file rx_file_perms;
+r_dir_file(batman_kickstart, firmware_file)
+allow batman_kickstart block_device:dir search;
+allow batman_kickstart modem_efs_partition_device:blk_file r_file_perms;
+allow batman_kickstart self:capability { setuid setgid };
+
+allow batman_bridgemgrd rmnet_device:chr_file rw_file_perms;
+
+allow batman_kickstart batman_qcks_data_file:dir rw_dir_perms;
+allow batman_kickstart batman_qcks_data_file:file create_file_perms;
+
+allow batman_bridgemgrd batman_qmiproxy:unix_stream_socket connectto;
+allow batman_bridgemgrd sysfs_batman_usb_state:file r_file_perms;
+allow batman_bridgemgrd sysfs_batman_modem_transport:file rw_file_perms;
+allow batman_kickstart mdm_helper_exec:file rx_file_perms;
+allow batman_kickstart proc:file r_file_perms;
+set_prop(batman_qmiproxy, radio_prop)

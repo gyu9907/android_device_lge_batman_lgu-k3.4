@@ -1,0 +1,8 @@
+
+# pyramid 8f3f4d9: the msm8660 camera daemon uses cam_socket0.
+type_transition mm-qcamerad system_data_file:sock_file camera_socket "cam_socket0";
+allow mm-qcamerad camera_socket:sock_file { getattr setattr };
+allow mm-qcamerad system_data_file:dir { write add_name remove_name };
+allow mm-qcamerad { camera_device video_device }:chr_file rw_file_perms;
+allow mm-qcamerad camera_device:dir r_dir_perms;
+allow mediaserver mm-qcamerad:unix_dgram_socket sendto;

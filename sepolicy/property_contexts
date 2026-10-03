@@ -1,1 +1,5 @@
 sys.hwaddrs. u:object_r:hwaddrs_prop:s0
+
+ctl.qmiproxy u:object_r:ctl_qmuxd_prop:s0
+ctl.bridgemgrd u:object_r:ctl_qmuxd_prop:s0
+ctl.thermald u:object_r:mpdecision_prop:s0
