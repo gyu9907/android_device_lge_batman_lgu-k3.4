@@ -29,3 +29,14 @@ allow hwaddrs sysfs_hwaddrs_ready:file { open write };
 set_prop(hwaddrs, hwaddrs_prop)
 
 allow hwaddrs self:capability fsetid;
+
+# Restart only the Bluetooth stack after its saved address changes. The
+# framework restores the previous enabled state; no settings/Binder access.
+allow hwaddrs domain:dir getattr;
+# Unrelated app processes may be hidden by MLS during the UID scan.
+# Keep the denial, but omit the expected directory-attribute audit messages.
+dontaudit hwaddrs { untrusted_app platform_app priv_app }:dir getattr;
+allow hwaddrs bluetooth:dir search;
+allow hwaddrs bluetooth:file { open read };
+allow hwaddrs bluetooth:process signal;
+allow hwaddrs self:capability kill;

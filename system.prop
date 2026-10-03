@@ -40,7 +40,8 @@ persist.hwc.mdpcomp.enable=true
 debug.mdpcomp.logs=0
 debug.hwc.dynThreshold=1.9
 dev.pm.dyn_samplingrate=1
-ro.bt.bdaddr_path=/data/misc/bd_addr
+# Wait for initialization, then read /data/misc/bd_addr through the kernel.
+ro.bt.bdaddr_path=/sys/kernel/batman_hwaddrs/bt_addr
 ro.sf.compbypass.enable=1
 persist.gps.qmienabled=true
 ro.build.target_country=KR
