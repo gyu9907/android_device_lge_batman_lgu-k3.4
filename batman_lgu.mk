@@ -1,5 +1,7 @@
 $(call inherit-product-if-exists, vendor/lge/batman_lgu/batman_lgu-vendor.mk)
 
+PRODUCT_PACKAGES += fs_config_files
+
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_small.mk)
 
 # The gps config appropriate for this device

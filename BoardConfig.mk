@@ -3,6 +3,9 @@ TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
 BOARD_VENDOR := lge
 
+# Preserve executable modes for vendor payloads outside the standard bin paths.
+TARGET_FS_CONFIG_GEN += device/lge/batman_lgu/config.fs
+
 #BOARD_HAVE_FM_RADIO := true
 #BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 
