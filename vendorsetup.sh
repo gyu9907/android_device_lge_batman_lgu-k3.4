@@ -1,1 +1,1 @@
-add_lunch_combo cm_batman_lgu-userdebug
+add_lunch_combo lineage_batman_lgu-userdebug

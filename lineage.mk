@@ -9,19 +9,15 @@ PRODUCT_RELEASE_NAME := OptimusVu
 TARGET_SCREEN_WIDTH := 768
 TARGET_SCREEN_HEIGHT := 1024
 
-# Inherit some common CM stuff.
-#$(call inherit-product, vendor/cm/config/common_full_phone.mk)
-$(if $(wildcard device/lge/batman_lgu/stonecold/product/common_full_phone.mk), $(call inherit-product-if-exists, device/lge/batman_lgu/stonecold/product/common_full_phone.mk), $(call inherit-product, vendor/cm/config/common_full_phone.mk))
+# Inherit the LineageOS phone configuration.
+$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/lge/batman_lgu/batman_lgu.mk)
 
-# Inherit some common StoneCold stuff
-$(call inherit-product-if-exists, device/lge/batman_lgu/stonecold/stonecold.mk)
-
 # Device naming
 PRODUCT_DEVICE := batman_lgu
-PRODUCT_NAME := cm_batman_lgu
+PRODUCT_NAME := lineage_batman_lgu
 PRODUCT_BRAND := LGE
 PRODUCT_MODEL := LG-F100L
 PRODUCT_MANUFACTURER := LGE

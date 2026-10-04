@@ -3,10 +3,6 @@ TARGET_SPECIFIC_HEADER_PATH := device/lge/batman_lgu/include
 
 BOARD_VENDOR := lge
 
-# MSM8660 needs the Qualcomm service domains and device labels.
-BOARD_SEPOLICY_DIRS += device/qcom/sepolicy/common vendor/cm/sepolicy/qcom
-BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
-
 #BOARD_HAVE_FM_RADIO := true
 #BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 
@@ -16,22 +12,30 @@ USE_CAMERA_STUB := false
 -include vendor/lge/batman_lgu/BoardConfigVendor.mk
 
 TARGET_NO_BOOTLOADER := true
+DEVICE_MANIFEST_FILE := device/lge/batman_lgu/manifest.xml
 
 TARGET_BOARD_PLATFORM := msm8660
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
+
+# Use the Oreo Qualcomm policy split, without the optional permissive tests.
+include device/qcom/sepolicy/sepolicy.mk
+BOARD_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy/test,$(BOARD_SEPOLICY_DIRS))
+BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
 
 TARGET_ARCH := arm
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_ARCH_VARIANT := armv7-a-neon
-TARGET_CPU_VARIANT := scorpion
+# Oreo Soong has no Scorpion variant. Use ARMv7/NEON without Krait's
+# VFPv4/LPAE assumptions; the kernel still selects the MSM8660 CPU.
+TARGET_CPU_VARIANT := generic
 ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_CPU_SMP := true
+# Match CONFIG_ANDROID_BINDER_IPC_32BIT and existing 32-bit vendor clients.
+TARGET_USES_64_BIT_BINDER := false
 
 TARGET_BOOTLOADER_BOARD_NAME := BATMAN_LGU
 TARGET_OTA_ASSERT_DEVICE := batman_lgu,batman
-TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
-TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
 BOARD_GLOBAL_CFLAGS += -DQCOM_HARDWARE
 
 # Preload bootanimation
@@ -73,6 +77,8 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/lge/batman_lgu/bluetooth
 BOARD_CUSTOM_BT_CONFIG := device/lge/batman_lgu/bluetooth/vnd_bt.txt
 
 # Graphics
+# Keep the working device-specific lights blob instead of the generic CAF HAL.
+TARGET_PROVIDES_LIBLIGHT := true
 TARGET_QCOM_DISPLAY_VARIANT := caf
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 USE_OPENGL_RENDERER := true
@@ -103,6 +109,7 @@ BOARD_KERNEL_CMDLINE := console=ttyDCC0,115200,n8 androidboot.hardware=batman_lg
 TARGET_NO_KERNEL_BUILD_VARIANT := true
 BOARD_KERNEL_BASE := 0x40200000
 BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_IMAGE_NAME := zImage
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
 
 TARGET_KERNEL_SOURCE := kernel/lge/msm8660
@@ -136,6 +143,8 @@ WIFI_DRIVER_FW_PATH_AP := "/system/etc/firmware/fw_bcmdhd_apsta.bin"
 BOARD_LEGACY_NL80211_STA_EVENTS := true
 
 # GPS
+# The legacy location blobs require loc_read_conf from the vendor implementation.
+BOARD_PROVIDES_LIBGPS_UTILS := true
 TARGET_GPS_HAL_PATH := device/lge/batman_lgu/gps
 BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 50000
 
@@ -157,7 +166,7 @@ TARGET_RECOVERY_FSTAB := device/lge/batman_lgu/prebuilt/root/fstab.batman_lgu_kr
 TARGET_USERIMAGES_USE_EXT4 := true
 
 # CyanogenMod hardware abstraction
-BOARD_HARDWARE_CLASS := device/lge/batman_lgu/cmhw/
+BOARD_HARDWARE_CLASS := device/lge/batman_lgu/lineagehw/
 
 # Legacy LGE Qualcomm RIL compatibility
 BOARD_PROVIDES_LIBRIL := true
@@ -165,5 +174,4 @@ BOARD_PROVIDES_LIBREFERENCE_RIL := true
 BOARD_PROVIDES_RILD := true
 BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
 
-# CM 13 uses the Qualcomm power HAL from hardware/qcom/power.
-TARGET_POWERHAL_VARIANT := qcom
+# Preserve the generic power HAL used by the working CM 14.1 build.

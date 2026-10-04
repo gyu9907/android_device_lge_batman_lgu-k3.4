@@ -24,8 +24,9 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/configs/media_profiles.xml:system/etc/media_profiles.xml \
     $(LOCAL_PATH)/prebuilt/configs/media_codecs.xml:system/etc/media_codecs.xml
 
-#$(call inherit-product, build/target/product/full.mk)
-$(if $(wildcard device/lge/batman_lgu/stonecold/product/full.mk), $(call inherit-product-if-exists, device/lge/batman_lgu/stonecold/product/full.mk), $(call inherit-product, build/target/product/full.mk))
+# Oreo full.mk includes emulator/Treble defaults; use the physical phone base.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base_telephony.mk)
+PRODUCT_FULL_TREBLE_OVERRIDE := false
 
 # root
 PRODUCT_COPY_FILES += \
@@ -43,7 +44,6 @@ PRODUCT_COPY_FILES += \
 
 # Scripts
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/scripts/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
     $(LOCAL_PATH)/prebuilt/scripts/init.qcom.post_boot.sh:system/etc/init.qcom.post_boot.sh
 
 # Configs
@@ -103,14 +103,10 @@ PRODUCT_PACKAGES += \
 	liboverlay \
 	libqdutils \
 	libqservice \
-	libvirtual \
-    libQcomUI \
-    libtilerenderer
+	libvirtual
 
 # OMX
 PRODUCT_PACKAGES += \
-    libdivxdrmdecrypt \
-    libI420colorconvert \
     libmm-omxcore \
     libOmxCore \
     libOmxVdec \
@@ -126,13 +122,13 @@ PRODUCT_PACKAGES += \
 # Filesystem Management Tools
 PRODUCT_PACKAGES += \
     make_ext4fs \
-    setup_fs
+    setup_fs \
+    toybox_vendor
 
-# Bluetooth
+# Bluetooth firmware, UART and PCM setup are handled by libbt-vendor.
 PRODUCT_PACKAGES += \
-    brcm_patchram_plus \
-    hcitool \
-    hciconfig
+    libbt-vendor \
+    android.hardware.bluetooth@1.0-impl
 
 # GPS
 PRODUCT_PACKAGES += \
@@ -161,18 +157,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     sensors.batman_lgu_kr
 
-# Torch, WifiDirect
-PRODUCT_PACKAGES += \
-    Torch \
-    WifiDirect
-
 # Misc
 PRODUCT_PACKAGES += \
-    tcpdump \
-    qrngd
+    tcpdump
 
 # Qualcomm compatibility library
 PRODUCT_PACKAGES += \
+    libcnefeatureconfig \
     libstlport
 
 # src
@@ -204,3 +195,36 @@ PRODUCT_PACKAGES += \
     batman_legacy_bridgemgrd \
     batman_legacy_port-bridge \
     batman_legacy_mm-qcamera-daemon
+
+# Oreo core HIDL services. Keep HWC1; audio/camera/OMX wrappers are enabled
+# separately after their legacy implementations have been ported.
+PRODUCT_PACKAGES += \
+    android.hardware.configstore@1.0-service \
+    android.hardware.graphics.allocator@2.0-impl \
+    android.hardware.graphics.allocator@2.0-service \
+    android.hardware.graphics.mapper@2.0-impl \
+    android.hardware.memtrack@1.0-impl \
+    memtrack.msm8660
+
+# Legacy implementations remain in their existing processes via HIDL passthrough.
+PRODUCT_PACKAGES += \
+    android.hardware.audio@2.0-impl \
+    android.hardware.audio.effect@2.0-impl \
+    android.hardware.camera.provider@2.4-impl \
+    camera.device@1.0-impl \
+    android.hardware.media.omx@1.0-service
+
+# Oreo keymaster adapter, including the software fallback for this device.
+PRODUCT_PACKAGES += android.hardware.keymaster@3.0-impl
+
+# Oreo adapters for the remaining legacy HALs.
+PRODUCT_PACKAGES += \
+    android.hardware.gnss@1.0-impl \
+    android.hardware.light@2.0-impl \
+    android.hardware.power@1.0-impl \
+    power.default \
+    android.hardware.sensors@1.0-impl \
+    android.hardware.vibrator@1.0-impl \
+    vibrator.default \
+    android.hardware.wifi@1.0-service \
+    wificond
