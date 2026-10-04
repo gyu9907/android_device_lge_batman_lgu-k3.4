@@ -1,5 +1,5 @@
 # DHD opens the address file in the context requesting interface initialization.
 # Cover station/P2P, soft AP, and kernel work; none may modify the address file.
-allow { wpa hostapd system_server netd kernel } wifi_data_file:dir search;
-allow { wpa hostapd system_server netd kernel } batman_wifi_addr_file:file r_file_perms;
-allow { wpa hostapd system_server netd kernel } sysfs_batman_wifi_addr:file r_file_perms;
+allow { hal_wifi_supplicant hostapd system_server netd kernel } wifi_data_file:dir search;
+allow { hal_wifi_supplicant hostapd system_server netd kernel } batman_wifi_addr_file:file r_file_perms;
+allow { hal_wifi_supplicant hostapd system_server netd kernel } sysfs_batman_wifi_addr:file r_file_perms;

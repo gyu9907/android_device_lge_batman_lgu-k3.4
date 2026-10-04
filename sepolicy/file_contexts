@@ -8,6 +8,7 @@
 
 # Legacy msm8660 nodes (pyramid 8f3f4d9, adapted to LG hardware).
 /dev/kgsl-2d[01]                         u:object_r:gpu_device:s0
+/dev/genlock                            u:object_r:gpu_device:s0
 /dev/msm_rotator                         u:object_r:gpu_device:s0
 /dev/msm_vidc_(reg|dec|enc)               u:object_r:video_device:s0
 /dev/msm_camera(/.*)?                    u:object_r:camera_device:s0

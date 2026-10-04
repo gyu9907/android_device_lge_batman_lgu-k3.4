@@ -21,9 +21,7 @@ type_transition hwaddrs wifi_data_file:file batman_wifi_addr_file;
 allow hwaddrs { batman_bt_addr_file batman_wifi_addr_file }:file { create open read write getattr setattr rename unlink };
 
 # libselinux reads the installed file contexts when checking the final labels.
-allow hwaddrs rootfs:file r_file_perms;
-allow hwaddrs security_file:dir search;
-allow hwaddrs security_file:file r_file_perms;
+allow hwaddrs file_contexts_file:file r_file_perms;
 
 allow hwaddrs sysfs_hwaddrs_ready:file { open write };
 set_prop(hwaddrs, hwaddrs_prop)

@@ -4,7 +4,7 @@ type batman_bridgemgrd_exec, exec_type, file_type;
 init_daemon_domain(batman_bridgemgrd)
 net_domain(batman_bridgemgrd)
 qmux_socket(batman_bridgemgrd)
-allow batman_bridgemgrd self:netlink_kobject_uevent_socket create_socket_perms;
+allow batman_bridgemgrd self:netlink_kobject_uevent_socket create_socket_perms_no_ioctl;
 allow batman_bridgemgrd { smd_device serial_device diag_device }:chr_file rw_file_perms;
 allow batman_bridgemgrd self:capability net_admin;
 

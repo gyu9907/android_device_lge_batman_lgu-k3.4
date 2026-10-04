@@ -114,7 +114,7 @@ static int save_address(int wifi, const unsigned char *mac, int *changed)
     } while (written < 0 && errno == EINTR);
     if (written == length &&
         fchown(fd, wifi ? AID_WIFI : AID_BLUETOOTH,
-               wifi ? AID_WIFI : AID_NET_BT_STACK) == 0 &&
+               wifi ? AID_WIFI : AID_BLUETOOTH) == 0 &&
         fchmod(fd, 0660) == 0 && fsync(fd) == 0)
         result = 0;
     if (close(fd) != 0)
@@ -243,7 +243,6 @@ int main(void)
 {
     pid_t child, result;
     int elapsed, status = 0;
-    klog_init();
     klog_set_level(KLOG_INFO_LEVEL);
     /* Existing valid Wi-Fi files are usable even if NV is unavailable.
      * This service is asynchronous; neither radio waits for RPC or a file.
