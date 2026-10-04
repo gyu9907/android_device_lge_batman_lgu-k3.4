@@ -11,6 +11,9 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay
 
+# PRODUCT_COPY_FILES payloads outside bin/ need explicit image permissions.
+PRODUCT_PACKAGES += fs_config_files
+
 # This device is xhdpi.  However the platform doesn't
 # currently contain all of the bitmaps at xhdpi density so
 # we do this little trick to fall back to the hdpi version
