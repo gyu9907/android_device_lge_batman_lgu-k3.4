@@ -7,19 +7,12 @@
 #include <new>
 #include <cutils/log.h>
 #include <media/stagefright/MediaCodecList.h>
-#include <media/stagefright/FFMPEGSoftCodec.h>
 #include "ThumbnailColorConverter.h"
 #ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
 #include "ThumbnailColorDiagnostics.h"
 #endif
 
 namespace android {
-// The platform retriever can replace a selected component with FFmpeg after
-// codec-list filtering. Keep that second selection path hardware-only too.
-struct BatmanThumbnailNoSoftwareOverride {
-    static const char *overrideComponentName(uint32_t, const sp<MetaData>&,
-            const char *, bool) { return NULL; }
-};
 // Wait before creating MediaCodec, never inside the OMX open callback where
 // waiting can deadlock Nougat's synchronous resource-reclaim path. This is an
 // availability check, not a transferred reservation: the decoder shim must
@@ -58,6 +51,7 @@ static bool waitForThumbnailVidc()
 }
 
 struct BatmanThumbnailCodecList {
+    enum { kPreferSoftwareCodecs = MediaCodecList::kPreferSoftwareCodecs };
     static void findMatchingCodecs(const char *mime, bool encoder,
             uint32_t flags, Vector<AString> *matches) {
         matches->clear();
@@ -79,7 +73,6 @@ struct BatmanThumbnailCodecList {
 
 #define StagefrightMetadataRetriever BatmanThumbnailRetriever
 #define MediaCodecList BatmanThumbnailCodecList
-#define FFMPEGSoftCodec BatmanThumbnailNoSoftwareOverride
 #ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
 #define ColorConverter BatmanDiagnosticColorConverter
 #else
@@ -88,7 +81,6 @@ struct BatmanThumbnailCodecList {
 #undef LOG_TAG
 #include "frameworks/av/media/libstagefright/StagefrightMetadataRetriever.cpp"
 #undef MediaCodecList
-#undef FFMPEGSoftCodec
 #undef ColorConverter
 #undef StagefrightMetadataRetriever
 

@@ -1,6 +1,6 @@
 # Loaded by mount_all before media services start. Keep the existing legacy
 # shims and select the device retriever only in libmediaplayerservice.
-# Android 7 init sorts this directory and keeps the first service definition.
+# Init sorts this directory and keeps the first service definition.
 # This device-specific media service precedes mediaserver.rc; preserve its
 # options while preloading the retriever before libstagefright is resolved.
 service media /system/bin/mediaserver
