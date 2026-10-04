@@ -142,7 +142,6 @@ lib/libcommondefs.so
 
 # cnd
 lib/libcneutils.so
-lib/libcnefeatureconfig.so
 lib/libcneqmiutils.so
 lib/libxml.so
 
@@ -220,3 +219,6 @@ lib/egl/libq3dtools_adreno200.so|de16459637155f380c7a55bf777bf691a00aea7c
 lib/egl/libGLESv2S3D_adreno200.so|5dfe7bd9df242014aa655432d74ff719167afedd
 lib/libCB.so|8a7491fadea428052cad1af3abf9a16f3b04fc42
 lib/libOpenCL.so|20a4845d8fcdc033c0e9d7f5a634a0ad157bb1e9
+
+# STLport from the working batman_lgu CM 14.1 build (legacy Adreno/DRM ABI).
+lib/libstlport.so|f5763c51ebe757fcfc39b0d27b5657ae49cc9bd5

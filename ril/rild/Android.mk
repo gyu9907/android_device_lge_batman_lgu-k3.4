@@ -20,6 +20,7 @@ LOCAL_WHOLE_STATIC_LIBRARIES := \
 	librilutils_static
 
 LOCAL_CFLAGS := -DRIL_SHLIB
+LOCAL_STATIC_LIBRARIES := libqemu_pipe libbase
 
 ifeq ($(SIM_COUNT), 2)
     LOCAL_CFLAGS += -DANDROID_MULTI_SIM

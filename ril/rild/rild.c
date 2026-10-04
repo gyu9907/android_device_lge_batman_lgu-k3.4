@@ -36,7 +36,7 @@
 #include <libril/ril_ex.h>
 
 #include <private/android_filesystem_config.h>
-#include "hardware/qemu_pipe.h"
+#include <qemu_pipe.h>
 
 #define LIB_PATH_PROPERTY   "rild.libpath"
 #define LIB_ARGS_PROPERTY   "rild.libargs"

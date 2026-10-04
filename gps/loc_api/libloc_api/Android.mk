@@ -20,7 +20,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES:= \
     libloc_api-rpc 
 
-LOCAL_SHARED_LIBRARIES := \
+LOCAL_SHARED_LIBRARIES := liblog \
     librpc \
     libutils \
     libcutils
@@ -43,7 +43,6 @@ LOCAL_CFLAGS += \
 LOCAL_C_INCLUDES:= \
 	$(TARGET_OUT_HEADERS)/libloc_api-rpc \
 	$(TARGET_OUT_HEADERS)/libloc_api-rpc/inc \
-	$(TARGET_OUT_HEADERS)/libcommondefs-rpc/inc \
 	$(TARGET_OUT_HEADERS)/librpc
 
 
