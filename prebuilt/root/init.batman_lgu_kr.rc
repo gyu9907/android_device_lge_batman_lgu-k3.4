@@ -81,6 +81,9 @@ on boot
     chown radio radio /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
 
     setprop wifi.interface wlan0
+    # Oreo's Wi-Fi HAL selects firmware as the wifi user.
+    chown wifi wifi /sys/module/bcmdhd/parameters/firmware_path
+    chmod 0660 /sys/module/bcmdhd/parameters/firmware_path
     setprop ro.telephony.call_ring.multiple false
     setprop net.tcp.buffersize.lte 4094,281250,1220608,4096,140625,1220608
     setprop net.tcp.buffersize.ehrpd 4094,87380,262144,4096,16384,262144
