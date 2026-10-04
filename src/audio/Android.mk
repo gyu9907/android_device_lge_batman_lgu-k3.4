@@ -9,7 +9,8 @@ LOCAL_CFLAGS := -D_POSIX_SOURCE
 
 LOCAL_SRC_FILES := \
     AudioHardware.cpp \
-    audio_hw_hal.cpp
+    audio_hw_hal.cpp \
+    AudioLegacyCompat.cpp
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_CFLAGS += -DWITH_A2DP
@@ -24,6 +25,7 @@ ifeq ($(BOARD_USE_QCOM_LPA),true)
 endif
 
 LOCAL_SHARED_LIBRARIES := \
+    liblog         \
     libcutils       \
     libutils        \
     libmedia        \
@@ -31,22 +33,13 @@ LOCAL_SHARED_LIBRARIES := \
     libacdbloader   \
     libacdbmapper
 
-# hack for prebuilt
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libaudioalsa_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libaudioalsa_intermediates/export_includes)
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libacdbloader_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libacdbloader_intermediates/export_includes)
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libacdbmapper_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libacdbmapper_intermediates/export_includes)
-
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_STATIC_LIBRARIES := \
     libmedia_helper \
-    libaudiohw_legacy \
-    libaudiopolicy_legacy \
+    libaudiohw_legacy
 
 LOCAL_MODULE := audio.primary.batman_lgu_kr
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw

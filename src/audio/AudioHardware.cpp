@@ -2883,7 +2883,9 @@ uint32_t AudioHardware::getInputSampleRate(uint32_t sampleRate)
     uint32_t delta;
 
     for (i = 0, prevDelta = 0xFFFFFFFF; i < sizeof(inputSamplingRates)/sizeof(uint32_t); i++, prevDelta = delta) {
-        delta = abs(sampleRate - inputSamplingRates[i]);
+        delta = sampleRate > inputSamplingRates[i]
+                ? sampleRate - inputSamplingRates[i]
+                : inputSamplingRates[i] - sampleRate;
         if (delta > prevDelta) break;
     }
     // i is always > 0 here
