@@ -1569,22 +1569,13 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
         return 0;
     }
 
-    if (sampleRate == 8000) {
-       return 320*channelCount;
-    } else if (sampleRate == 16000){
-       return 640*channelCount;
-    } else {
-        /*
-            Return pcm record buffer size based on the sampling rate:
-            If sampling rate >= 44.1 Khz, use 512 samples/channel pcm recording and
-            If sampling rate < 44.1 Khz, use 256 samples/channel pcm recording
-        */
-       if(sampleRate >= 44100){
-           return 1024*channelCount;
-       } else {
-           return 512*channelCount;
-       }
-    }
+    // Use a 20 ms period for this legacy blocking PCM input. Sub-12 ms
+    // periods select Oreo's FastCapture pipe, whose normal reader overruns
+    // on this device. Keep the HAL and driver period identical so ordinary
+    // capture is paced by the DSP instead. The driver requires whole pairs
+    // of PCM16 frames (four bytes per channel).
+    const size_t frames = (((sampleRate + 49) / 50) + 1) & ~size_t(1);
+    return frames * channelCount * sizeof(int16_t);
 }
 
 static status_t set_volume_rpc(uint32_t device,
