@@ -214,7 +214,11 @@ int setDelay(sensors_poll_device_t* device, int handle, int64_t ns) {
     ns = std::min(ns, static_cast<int64_t>(sensor->maxDelay) * 1000);
     auto state = wrapper(device)->state;
     std::lock_guard<std::mutex> lock(state->lock);
-    return state->vendor->setDelay(state->vendor, handle, ns);
+    // The LGE iNemo blob returns a nonnegative rate selector on success
+    // (for example 50 for 20 ms), while HIDL requires exactly zero.
+    // Preserve negative errors so failed device writes remain visible.
+    const int result = state->vendor->setDelay(state->vendor, handle, ns);
+    return result < 0 ? result : 0;
 }
 
 int batch(sensors_poll_device_1_t* device, int handle, int flags,

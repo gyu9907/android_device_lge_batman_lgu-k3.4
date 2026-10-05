@@ -1,2 +1,4 @@
 
 allow system_server persist_file:dir search;
+# The legacy sensors HAL runs in SensorService via the passthrough transport.
+allow system_server sensors_device:chr_file rw_file_perms;
