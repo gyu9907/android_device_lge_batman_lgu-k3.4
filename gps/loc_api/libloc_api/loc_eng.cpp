@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <pthread.h>
+#include <mutex>
 #include <arpa/inet.h>
 #include <netinet/in.h>         /* struct sockaddr_in */
 #include <sys/socket.h>
@@ -127,6 +128,10 @@ static const AGpsInterface sLocEngAGpsInterface =
 
 // Global data structure for location engine
 loc_eng_data_s_type loc_eng_data;
+// Oreo can configure SUPL on its handler while the constructor cleans up
+// the initial GPS session. Keep that configuration out of client teardown.
+// Recursive because reinitialization calls cleanup on the same API thread.
+static std::recursive_mutex loc_eng_lifecycle_mutex;
 int loc_eng_inited = 0; /* not initialized */
 
 // Address buffers, for addressing setting before init
@@ -211,6 +216,7 @@ SIDE EFFECTS
 ===========================================================================*/
 static int loc_eng_init(GpsCallbacks* callbacks)
 {
+   std::lock_guard<std::recursive_mutex> guard(loc_eng_lifecycle_mutex);
    LOC_LOGD("loc_eng_init entering");
 
    // Avoid repeated initialization. Call de-init to clean up first.
@@ -353,6 +359,7 @@ SIDE EFFECTS
 ===========================================================================*/
 static void loc_eng_cleanup()
 {
+   std::lock_guard<std::recursive_mutex> guard(loc_eng_lifecycle_mutex);
    if (!loc_eng_inited)
       return;
 
@@ -1491,6 +1498,7 @@ SIDE EFFECTS
 ===========================================================================*/
 static void loc_eng_agps_init(AGpsCallbacks* callbacks)
 {
+   std::lock_guard<std::recursive_mutex> guard(loc_eng_lifecycle_mutex);
    loc_eng_data.agps_status_cb = callbacks->status_cb;
 
    loc_c2k_addr_is_set = 0;
@@ -1923,6 +1931,7 @@ SIDE EFFECTS
 ===========================================================================*/
 static int loc_eng_set_server_proxy(AGpsType type, const char* hostname, int port)
 {
+   std::lock_guard<std::recursive_mutex> guard(loc_eng_lifecycle_mutex);
    if (loc_eng_inited)
    {
       loc_eng_set_server(type, hostname, port);
