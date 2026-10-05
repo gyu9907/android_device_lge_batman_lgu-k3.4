@@ -188,4 +188,4 @@ BOARD_PROVIDES_LIBREFERENCE_RIL := true
 BOARD_PROVIDES_RILD := true
 BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
 
-# Preserve the generic power HAL used by the working CM 14.1 build.
+# Device Power HAL requests bounded ondemand pulses through the Oreo adapter.

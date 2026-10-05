@@ -1,188 +1,125 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2026 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define LOG_TAG "batman PowerHAL"
 #include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-
-#define LOG_TAG "batman_lgu PowerHAL"
-#include <utils/Log.h>
-
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <log/log.h>
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-// Uncomment this if we want to default to the ondemand governor
-#define USING_ONDEMAND
+#define ONDEMAND "/sys/devices/system/cpu/cpufreq/ondemand/"
 
-#define BOOSTPULSE_INTERACTIVE_PATH "/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
-#define BOOSTPULSE_ONDEMAND_PATH "/sys/devices/system/cpu/cpufreq/ondemand/boostpulse"
-#ifdef USING_ONDEMAND
-#define SAMPLING_RATE_ONDEMAND "/sys/devices/system/cpu/cpufreq/ondemand/sampling_rate"
-#define SAMPLING_RATE_SCREEN_ON "50000"
-#define SAMPLING_RATE_SCREEN_OFF "500000"
-#endif
+/* CPU frequency floors in kHz and pulse durations in microseconds. */
+struct boost_profile { unsigned int freq; unsigned int duration; };
+static const struct boost_profile normal = { 1512000, 40000 };
+static const struct boost_profile saver = { 810000, 80000 };
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static bool interactive = true;
+static bool low_power;
+static bool configured;
+static bool error_reported;
 
-struct batman_lgu_power_module {
-    struct power_module base;
-    pthread_mutex_t lock;
-    int boostpulse_fd;
-    int boostpulse_warned;
-};
-
-static void sysfs_write(char *path, char *s)
+static bool write_value(const char *path, unsigned int value)
 {
-    char buf[80];
-    int len;
-    int fd = open(path, O_WRONLY);
-
-    if (fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error opening %s: %s\n", path, buf);
-        return;
+    char buf[24];
+    int len = snprintf(buf, sizeof(buf), "%u", value);
+    int fd = open(path, O_WRONLY | O_CLOEXEC);
+    int error = errno;
+    bool ok = false;
+    if (fd >= 0) {
+        ssize_t result;
+        do { result = write(fd, buf, len); } while (result < 0 && errno == EINTR);
+        error = result < 0 ? errno : EIO;
+        ok = result == len;
+        close(fd);
     }
-
-    len = write(fd, s, strlen(s));
-    if (len < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error writing to %s: %s\n", path, buf);
+    if (!ok && !error_reported) {
+        ALOGE("Cannot write %s: %s", path, strerror(error));
+        error_reported = true;
     }
-
-    close(fd);
+    return ok;
 }
 
-static int boostpulse_open(struct batman_lgu_power_module *batman_lgu)
+/* Called with lock held. A mode change cancels the previous pulse first. */
+static bool configure(void)
 {
-    char buf[80];
+    const struct boost_profile *profile = low_power ? &saver : &normal;
+    configured = false;
+    if (!write_value(ONDEMAND "boostpulse", 0) ||
+        !write_value(ONDEMAND "boostpulse_duration", profile->duration) ||
+        !write_value(ONDEMAND "boost_freq", interactive ? profile->freq : 0))
+        return false;
+    configured = true;
+    error_reported = false;
+    return true;
+}
 
-    pthread_mutex_lock(&batman_lgu->lock);
+static void power_init(struct power_module *module __attribute__((unused)))
+{
+    pthread_mutex_lock(&lock);
+    configure();
+    pthread_mutex_unlock(&lock);
+}
 
-    if (batman_lgu->boostpulse_fd < 0) {
-        batman_lgu->boostpulse_fd = open(BOOSTPULSE_ONDEMAND_PATH, O_WRONLY);
-        if (batman_lgu->boostpulse_fd < 0) {
-            batman_lgu->boostpulse_fd = open(BOOSTPULSE_INTERACTIVE_PATH, O_WRONLY);
+static void power_set_interactive(struct power_module *module __attribute__((unused)), int on)
+{
+    pthread_mutex_lock(&lock);
+    if (interactive != !!on || !configured) {
+        interactive = !!on;
+        configure();
+    }
+    pthread_mutex_unlock(&lock);
+}
 
-            if (batman_lgu->boostpulse_fd < 0 && !batman_lgu->boostpulse_warned) {
-                strerror_r(errno, buf, sizeof(buf));
-                ALOGE("Error opening boostpulse: %s\n", buf);
-                batman_lgu->boostpulse_warned = 1;
-            }
+static void power_hint(struct power_module *module __attribute__((unused)),
+                       power_hint_t hint, void *data)
+{
+    pthread_mutex_lock(&lock);
+    if (hint == POWER_HINT_LOW_POWER) {
+        bool enabled = data && *(int *)data;
+        if (enabled != low_power || !configured) {
+            low_power = enabled;
+            configure();
+        }
+    } else if (hint == POWER_HINT_INTERACTION && interactive) {
+        /* Duration hints do not extend the device's bounded pulse policy. */
+        if (configured || configure()) {
+            if (!write_value(ONDEMAND "boostpulse", 1))
+                configured = false;
         }
     }
-
-    pthread_mutex_unlock(&batman_lgu->lock);
-    return batman_lgu->boostpulse_fd;
+    pthread_mutex_unlock(&lock);
 }
 
-#ifdef USING_ONDEMAND
-
-static void batman_lgu_power_init(struct power_module *module)
-{
-    sysfs_write(SAMPLING_RATE_ONDEMAND, SAMPLING_RATE_SCREEN_ON);
-}
-
-static void batman_lgu_power_set_interactive(struct power_module *module, int on)
-{
-    sysfs_write(SAMPLING_RATE_ONDEMAND,
-            on ? SAMPLING_RATE_SCREEN_ON : SAMPLING_RATE_SCREEN_OFF);
-}
-
-#else // interactive
-
-static void batman_lgu_power_init(struct power_module *module)
-{
-    /*
-     * cpufreq interactive governor: timer 20ms, min sample 60ms,
-     * hispeed 700MHz at load 50%.
-     */
-
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/timer_rate",
-                "20000");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/min_sample_time",
-                "60000");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/hispeed_freq",
-                "702000");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load",
-                "50");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
-                "100000");
-}
-
-static void batman_lgu_power_set_interactive(struct power_module *module, int on)
-{
-    /*
-     * Lower maximum frequency when screen is off.  CPU 0 and 1 share a
-     * cpufreq policy.
-     */
-
-    sysfs_write("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq",
-                on ? "1512000" : "702000");
-}
-
-#endif
-
-static void batman_lgu_power_hint(struct power_module *module, power_hint_t hint,
-                            void *data)
-{
-    struct batman_lgu_power_module *batman_lgu = (struct batman_lgu_power_module *) module;
-    char buf[80];
-    int len;
-
-    switch (hint) {
-    case POWER_HINT_INTERACTION:
-        if (boostpulse_open(batman_lgu) >= 0) {
-	    len = write(batman_lgu->boostpulse_fd, "1", 1);
-
-	    if (len < 0) {
-	        strerror_r(errno, buf, sizeof(buf));
-		ALOGE("Error writing to boostpulse: %s\n", buf);
-	    }
-	}
-        break;
-
-    case POWER_HINT_VSYNC:
-        break;
-
-    default:
-        break;
-    }
-}
-
-static struct hw_module_methods_t power_module_methods = {
-    .open = NULL,
-};
-
-struct batman_lgu_power_module HAL_MODULE_INFO_SYM = {
-    base: {
-        common: {
-            tag: HARDWARE_MODULE_TAG,
-            module_api_version: POWER_MODULE_API_VERSION_0_2,
-            hal_api_version: HARDWARE_HAL_API_VERSION,
-            id: POWER_HARDWARE_MODULE_ID,
-            name: "BATMAN_LGU Power HAL",
-            author: "The Android Open Source Project",
-            methods: &power_module_methods,
-        },
-
-       init: batman_lgu_power_init,
-       setInteractive: batman_lgu_power_set_interactive,
-       powerHint: batman_lgu_power_hint,
+static struct hw_module_methods_t methods = { .open = NULL };
+struct power_module HAL_MODULE_INFO_SYM = {
+    .common = {
+        .tag = HARDWARE_MODULE_TAG,
+        .module_api_version = POWER_MODULE_API_VERSION_0_2,
+        .hal_api_version = HARDWARE_HAL_API_VERSION,
+        .id = POWER_HARDWARE_MODULE_ID,
+        .name = "Batman interaction and battery saver Power HAL",
+        .author = "The LineageOS Project",
+        .methods = &methods,
     },
-
-    lock: PTHREAD_MUTEX_INITIALIZER,
-    boostpulse_fd: -1,
-    boostpulse_warned: 0,
+    .init = power_init,
+    .setInteractive = power_set_interactive,
+    .powerHint = power_hint,
 };

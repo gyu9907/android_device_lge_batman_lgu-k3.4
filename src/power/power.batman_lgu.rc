@@ -1,0 +1,6 @@
+# ondemand is selected by the device's post-boot script before boot completes.
+on property:sys.boot_completed=1
+    chown system system /sys/devices/system/cpu/cpufreq/ondemand/boostpulse
+    chmod 0200 /sys/devices/system/cpu/cpufreq/ondemand/boostpulse
+    chown system system /sys/devices/system/cpu/cpufreq/ondemand/boost_freq
+    chown system system /sys/devices/system/cpu/cpufreq/ondemand/boostpulse_duration
