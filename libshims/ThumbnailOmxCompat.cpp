@@ -1,5 +1,6 @@
 // Device-local Oreo thumbnail configuration. The Nougat FFMPEGSoftCodec
-// entry point no longer exists. This shim is preloaded only by mediaserver.
+// entry point no longer exists. The device linker mapping loads this shim
+// only for mediaserver, including when its domain transition sets AT_SECURE.
 #define LOG_TAG "BatmanThumbnailOMX"
 #include <cstring>
 #include <OMX_Video.h>
@@ -18,7 +19,8 @@ status_t MediaCodec::configure(const sp<AMessage>& format,
     AString component;
     if (format != NULL && surface == NULL && crypto == NULL && flags == 0 &&
             getName(&component) == OK &&
-            component == "OMX.qcom.video.decoder.avc") {
+            (component == "OMX.qcom.video.decoder.avc" ||
+             component == "OMX.qcom.video.decoder.mpeg4")) {
         // Omit the retriever's one-buffer hints: the legacy VCD requires its
         // complete registered input/output pools. changesFrom preserves every
         // other format entry without relying on AMessage's private layout.
@@ -29,6 +31,12 @@ status_t MediaCodec::configure(const sp<AMessage>& format,
         if (format->findInt32("android._num-output-buffers", &count))
             hints->setInt32("android._num-output-buffers", count);
         config = format->changesFrom(hints);
+        // A sync-frame thumbnail can use the driver's existing IDR-only mode.
+        // Retain the complete pools reported for that mode; forcing one input
+        // buffer independently of the driver can stall legacy VCD.
+        if (component == "OMX.qcom.video.decoder.avc" &&
+                format->findInt32("android._num-output-buffers", &count) && count == 1)
+            config->setInt32("vendor.qcom.sync-frame", 1);
         // This Oreo changesFrom implementation reads float/double entries via
         // the integer union member. Preserve their actual values explicitly.
         for (size_t i = 0; i < format->countEntries(); ++i) {

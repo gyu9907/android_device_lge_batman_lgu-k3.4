@@ -1,0 +1,2 @@
+# Legacy Qualcomm OMX reads camera configuration during component setup.
+get_prop(mediacodec, camera_prop)

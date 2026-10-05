@@ -1,0 +1,3 @@
+# External storage uses FUSE on this kernel. As for app_data_file, permit
+# reading a descriptor supplied by the caller without directory/open access.
+allow mediaextractor fuse:file { getattr read };
