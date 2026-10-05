@@ -49,6 +49,16 @@ USE_DEVICE_SPECIFIC_CAMERA := true
 BOARD_NEEDS_MEMORYHEAPPMEM := true
 TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
+# Oreo's linker reads shim mappings from the product configuration at build
+# time; init's LD_SHIM_LIBS environment variable is no longer consulted.
+TARGET_LD_SHIM_LIBS := \
+    /system/lib/hw/camera.vendor.msm8660.so|libshim_camera.so \
+    /system/lib/libOmxVenc.so|libshim_omx_venc.so \
+    /system/lib/libOmxVdec.so|libshim_omx_vdec.so \
+    /system/lib/libmediaplayerservice.so|libshim_thumbnail.so
+# A mediaserver domain transition sets AT_SECURE in enforcing mode, so
+# LD_PRELOAD is ignored. The service library mapping loads the thumbnail shim
+# before its dependencies while keeping normal linker security checks.
 BOARD_GLOBAL_CFLAGS += -DMR0_CAMERA_BLOB
 BOARD_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
 BOARD_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK

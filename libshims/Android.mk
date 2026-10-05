@@ -60,7 +60,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libshim_thumbnail
-LOCAL_INIT_RC := ../prebuilt/configs/batman-thumbnail.rc
 LOCAL_SRC_FILES := ThumbnailRetrieverShim.cpp ThumbnailOmxCompat.cpp
 LOCAL_C_INCLUDES := $(TOP) frameworks/av/media/libstagefright frameworks/av/include/media frameworks/av/media/libavextensions frameworks/native/include/media/openmax
 LOCAL_SHARED_LIBRARIES := libstagefright libstagefright_foundation libmedia libmediautils libutils libbinder liblog libgui libcutils libicuuc libicui18n libdl android.hardware.cas.native@1.0

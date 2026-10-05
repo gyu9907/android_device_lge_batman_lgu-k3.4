@@ -1,9 +1,5 @@
 import /init.batman_lgu.usb.rc
 
-on init
-    # Inject legacy libutils ABI symbols only into the stock camera blob.
-    export LD_SHIM_LIBS "/system/lib/hw/camera.vendor.msm8660.so|libshim_camera.so:/system/lib/libOmxVenc.so|libshim_omx_venc.so:/system/lib/libOmxVdec.so|libshim_omx_vdec.so"
-
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
