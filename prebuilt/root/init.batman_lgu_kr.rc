@@ -5,6 +5,12 @@ on early-boot
     setrlimit 8 67108864 67108864
 
 on boot
+    # Keep CFS latency stable across mpdecision hotplug and shorten runnable waits.
+    write /proc/sys/kernel/sched_tunable_scaling 0
+    write /proc/sys/kernel/sched_latency_ns 3000000
+    write /proc/sys/kernel/sched_min_granularity_ns 375000
+    write /proc/sys/kernel/sched_wakeup_granularity_ns 500000
+
     # Start the stock Qualcomm camera server explicitly.
     start qcamerasvr
 
