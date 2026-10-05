@@ -1,5 +1,7 @@
 # DHD opens the address file in the context requesting interface initialization.
 # Cover station/P2P, soft AP, and kernel work; none may modify the address file.
-allow { hal_wifi_supplicant hostapd system_server netd kernel } wifi_data_file:dir search;
-allow { hal_wifi_supplicant hostapd system_server netd kernel } batman_wifi_addr_file:file r_file_perms;
-allow { hal_wifi_supplicant hostapd system_server netd kernel } sysfs_batman_wifi_addr:file r_file_perms;
+allow { hal_wifi_default hal_wifi_supplicant hostapd system_server netd kernel } wifi_data_file:dir search;
+allow { hal_wifi_default hal_wifi_supplicant hostapd system_server netd kernel } batman_wifi_addr_file:file r_file_perms;
+allow { hal_wifi_default hal_wifi_supplicant hostapd system_server netd kernel } sysfs_batman_wifi_addr:file r_file_perms;
+# DHD loads the firmware synchronously in the requesting Wi-Fi HAL context.
+r_dir_file(hal_wifi_default, firmware_file)
