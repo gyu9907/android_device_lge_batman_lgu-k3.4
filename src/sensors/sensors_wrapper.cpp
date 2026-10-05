@@ -27,7 +27,7 @@
 
 namespace {
 
-const char kVendorHalPath[] = "/system/lib/hw/sensors.vendor.msm8660.so";
+const char kVendorHalPath[] = "/vendor/lib/hw/sensors.vendor.msm8660.so";
 
 void* gVendorHandle;
 sensors_module_t* gVendorModule;

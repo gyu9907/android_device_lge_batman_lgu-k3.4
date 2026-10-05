@@ -410,7 +410,7 @@ service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
     user root
     disabled
 
-service thermald /system/bin/thermald
+service thermald /system/bin/thermald -c /vendor/etc/thermald.conf
     class main
     user root
     group root

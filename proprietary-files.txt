@@ -19,16 +19,16 @@ bin/port-bridge:vendor/libexec/batman/port-bridge
 bin/libbroadcast_server
 
 # Audio
-lib/libacdbloader.so
-lib/libacdbmapper.so
-lib/libaudcal.so
-lib/libaudioalsa.so
+lib/libacdbloader.so:vendor/lib/libacdbloader.so
+lib/libacdbmapper.so:vendor/lib/libacdbmapper.so
+lib/libaudcal.so:vendor/lib/libaudcal.so
+lib/libaudioalsa.so:vendor/lib/libaudioalsa.so
 
 # Camera
 bin/mm-qcamera-daemon:vendor/libexec/batman/mm-qcamera-daemon
 lib/hw/camera.msm8660.so
 lib/libgemini.so
-lib/libidl.so
+lib/libidl.so:vendor/lib/libidl.so
 lib/libimage-jpeg-dec-omx-comp.so
 lib/libimage-jpeg-enc-omx-comp.so
 lib/libimage-omx-common.so
@@ -99,35 +99,35 @@ bin/BCM4330B14.hcd
 lib/libbt-aptx-4.0.3.so
 
 # Thermal
-lib/libthermal_mitigation.so
-lib/libthermal_mitigation_fusion.so
+lib/libthermal_mitigation.so:vendor/lib/libthermal_mitigation.so
+lib/libthermal_mitigation_fusion.so:vendor/lib/libthermal_mitigation_fusion.so
 
 # Radio
-lib/libril-qc-qmi-1.so
-lib/libril-qcril-hook-oem.so
-lib/libdiag.so
-lib/libdsi_netctrl.so
-lib/libdsm.so
-lib/libdsutils.so
-lib/libnetmgr.so
-lib/libnv.so
-lib/liboncrpc.so
+lib/libril-qc-qmi-1.so:vendor/lib/libril-qc-qmi-1.so
+lib/libril-qcril-hook-oem.so:vendor/lib/libril-qcril-hook-oem.so
+lib/libdiag.so:vendor/lib/libdiag.so
+lib/libdsi_netctrl.so:vendor/lib/libdsi_netctrl.so
+lib/libdsm.so:vendor/lib/libdsm.so
+lib/libdsutils.so:vendor/lib/libdsutils.so
+lib/libnetmgr.so:vendor/lib/libnetmgr.so
+lib/libnv.so:vendor/lib/libnv.so
+lib/liboncrpc.so:vendor/lib/liboncrpc.so
 lib/libqc-opt.so
-lib/libqdi.so
-lib/libqdp.so
-lib/libqmi.so
-lib/libqmi_client_qmux.so
-lib/libqcci_legacy.so
-lib/libqmiservices.so
-lib/libqueue.so
+lib/libqdi.so:vendor/lib/libqdi.so
+lib/libqdp.so:vendor/lib/libqdp.so
+lib/libqmi.so:vendor/lib/libqmi.so
+lib/libqmi_client_qmux.so:vendor/lib/libqmi_client_qmux.so
+lib/libqcci_legacy.so:vendor/lib/libqcci_legacy.so
+lib/libqmiservices.so:vendor/lib/libqmiservices.so
+lib/libqueue.so:vendor/lib/libqueue.so
 lib/libtime_genoff.so
-lib/libtime_remote_atom.so
+lib/libtime_remote_atom.so:vendor/lib/libtime_remote_atom.so
 
 # Sensors
-lib/hw/sensors.msm8660.so
+lib/hw/sensors.msm8660.so:vendor/lib/hw/sensors.vendor.msm8660.so
 
 # Lights
-lib/hw/lights.msm8660.so
+lib/hw/lights.msm8660.so:vendor/lib/hw/lights.msm8660.so
 
 # NFC
 etc/nfcee_access.xml
@@ -141,13 +141,13 @@ lib/libloc_eng.so
 lib/libcommondefs.so
 
 # cnd
-lib/libcneutils.so
-lib/libcneqmiutils.so
-lib/libxml.so
+lib/libcneutils.so:vendor/lib/libcneutils.so
+lib/libcneqmiutils.so:vendor/lib/libcneqmiutils.so
+lib/libxml.so:vendor/lib/libxml.so
 
 # rild
-lib/liboem_rapi.so
-lib/liboem_rapi_fusion.so
+lib/liboem_rapi.so:vendor/lib/liboem_rapi.so
+lib/liboem_rapi_fusion.so:vendor/lib/liboem_rapi_fusion.so
 
 # firmware
 etc/firmware/dsps_fluid.b00
@@ -155,18 +155,18 @@ etc/firmware/dsps_fluid.b01
 etc/firmware/dsps_fluid.b02
 etc/firmware/dsps_fluid.b03
 etc/firmware/dsps_fluid.mdt
-etc/firmware/fw_bcmdhd.bin
-etc/firmware/fw_bcmdhd_apsta.bin
-etc/firmware/fw_bcmdhd_mfg.bin
-etc/firmware/fw_bcmdhd_p2p.bin
+etc/firmware/fw_bcmdhd.bin:vendor/firmware/fw_bcmdhd.bin
+etc/firmware/fw_bcmdhd_apsta.bin:vendor/firmware/fw_bcmdhd_apsta.bin
+etc/firmware/fw_bcmdhd_mfg.bin:vendor/firmware/fw_bcmdhd_mfg.bin
+etc/firmware/fw_bcmdhd_p2p.bin:vendor/firmware/fw_bcmdhd_p2p.bin
 etc/firmware/vidc_1080p.fw
 
 # Wifi
 etc/wifi/wpa_supplicant.conf
-etc/wifi/bcmdhd.cal
+etc/wifi/bcmdhd.cal:vendor/etc/wifi/bcmdhd.cal
 
 # Thermald
-etc/thermald.conf
+etc/thermald.conf:vendor/etc/thermald.conf
 
 # Key
 #usr/keylayout/atcmd_virtual_kbd.kl
@@ -221,4 +221,4 @@ lib/libCB.so|8a7491fadea428052cad1af3abf9a16f3b04fc42
 lib/libOpenCL.so|20a4845d8fcdc033c0e9d7f5a634a0ad157bb1e9
 
 # STLport from the working batman_lgu CM 14.1 build (legacy Adreno/DRM ABI).
-lib/libstlport.so|f5763c51ebe757fcfc39b0d27b5657ae49cc9bd5
+lib/libstlport.so:vendor/lib/libstlport.so|f5763c51ebe757fcfc39b0d27b5657ae49cc9bd5

@@ -5,6 +5,7 @@ init_daemon_domain(hwaddrs)
 
 # The legacy vendor RPC libraries contain text relocations.
 allow hwaddrs system_file:file execmod;
+allow hwaddrs vendor_file:file { read open getattr map execute execmod };
 allow hwaddrs kmsg_device:chr_file { open write };
 allow hwaddrs sysfs_devices_system_cpu:file r_file_perms;
 

@@ -10,3 +10,12 @@ allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
         qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
         port-bridge mm-qcamerad } system_file:file execmod;
 allow { audioserver cameraserver mediaserver system_server rild } system_file:file execmod;
+
+# The legacy sensor HAL is loaded in-process from /vendor by system_server.
+allow system_server vendor_file:file execmod;
+
+# Legacy audio calibration libraries are loaded from /vendor.
+allow audioserver vendor_file:file execmod;
+
+# RIL also loads the shared legacy RPC/QMI libraries from /vendor.
+allow rild vendor_file:file execmod;
