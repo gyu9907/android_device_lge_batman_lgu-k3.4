@@ -53,11 +53,6 @@ static camera_module_t *gVendorModule = 0;
 typedef struct wrapper_preview_stream_ops {
     preview_stream_ops_t base;
     preview_stream_ops_t *vendor;
-    int width;
-    int height;
-    int format;
-    int usage;
-    unsigned int dequeue_count;
 } wrapper_preview_stream_ops_t;
 
 static int camera_device_open(const hw_module_t *module, const char *name, hw_device_t **device);
@@ -103,9 +98,6 @@ typedef struct wrapper_camera_device {
     camera_data_timestamp_callback data_cb_timestamp;
     camera_request_memory get_memory;
     void *callback_user;
-    unsigned int memory_request_count;
-    unsigned int timestamp_callback_count;
-    unsigned int recording_release_count;
 } wrapper_camera_device_t;
 
 static wrapper_camera_device_t *gMemoryCallbackDevice = 0;
@@ -221,13 +213,13 @@ static char *camera_fixup_setparams(int id, const char *settings)
     int previewHeight = 0;
     params.getPreviewSize(&previewWidth, &previewHeight);
     if (id == 0 && previewWidth == 1360 && previewHeight == 768) {
-        ALOGI("preview size alias: 1360x768 -> 1280x720");
+        ALOGV("preview size alias: 1360x768 -> 1280x720");
         params.setPreviewSize(1280, 720);
     }
 
     if (id == 0 && params.get("recording-hint") &&
             !strcmp(params.get("recording-hint"), "true")) {
-        ALOGI("recording parameters: video=%s preview=%s power=%s",
+        ALOGV("recording parameters: video=%s preview=%s power=%s",
                 params.get("video-size"), params.get("preview-size"),
                 params.get("power-mode"));
     }
@@ -253,15 +245,7 @@ static int preview_dequeue_buffer(struct preview_stream_ops *window,
         buffer_handle_t **buffer, int *stride)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    int rc = wrapper->vendor->dequeue_buffer(wrapper->vendor, buffer, stride);
-    if (rc || wrapper->dequeue_count < 8) {
-        ALOGI("preview dequeue[%u]: rc=%d buffer=%p stride=%d geometry=%dx%d format=0x%x usage=0x%08x",
-                wrapper->dequeue_count, rc, buffer ? *buffer : 0,
-                stride ? *stride : -1, wrapper->width, wrapper->height,
-                wrapper->format, wrapper->usage);
-    }
-    wrapper->dequeue_count++;
-    return rc;
+    return wrapper->vendor->dequeue_buffer(wrapper->vendor, buffer, stride);
 }
 
 static int preview_enqueue_buffer(struct preview_stream_ops *window,
@@ -282,7 +266,7 @@ static int preview_set_buffer_count(struct preview_stream_ops *window,
         int count)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    ALOGI("preview buffer count: %d", count);
+    ALOGV("preview buffer count: %d", count);
     return wrapper->vendor->set_buffer_count(wrapper->vendor, count);
 }
 
@@ -290,11 +274,6 @@ static int preview_set_buffers_geometry(struct preview_stream_ops *window,
         int width, int height, int format)
 {
     wrapper_preview_stream_ops_t *wrapper = get_wrapper_window(window);
-    wrapper->width = width;
-    wrapper->height = height;
-    wrapper->format = format;
-    wrapper->dequeue_count = 0;
-    ALOGI("preview geometry: %dx%d format=0x%x", width, height, format);
     return wrapper->vendor->set_buffers_geometry(wrapper->vendor, width,
             height, format);
 }
@@ -315,13 +294,9 @@ static int preview_set_usage(struct preview_stream_ops *window, int usage)
     if ((usage & GRALLOC_USAGE_PRIVATE_IOMMU_HEAP) &&
             (usage & GRALLOC_USAGE_PRIVATE_ADSP_HEAP)) {
         fixed_usage &= ~GRALLOC_USAGE_PRIVATE_ADSP_HEAP;
-        ALOGI("preview heap usage fixed: 0x%08x -> 0x%08x", usage,
+        ALOGV("preview heap usage fixed: 0x%08x -> 0x%08x", usage,
                 fixed_usage);
     }
-
-    wrapper->usage = fixed_usage;
-    ALOGI("preview usage: requested=0x%08x applied=0x%08x", usage,
-            fixed_usage);
 
     return wrapper->vendor->set_usage(wrapper->vendor, fixed_usage);
 }
@@ -359,7 +334,7 @@ static int preview_set_timestamp(struct preview_stream_ops *window,
 static int camera_set_preview_window(struct camera_device *device,
         struct preview_stream_ops *window)
 {
-    ALOGI("%s device=%08X vendor=%08X window=%08X", __FUNCTION__, (uintptr_t)device,
+    ALOGV("%s device=%08X vendor=%08X window=%08X", __FUNCTION__, (uintptr_t)device,
             (uintptr_t)(((wrapper_camera_device_t*)device)->vendor),
             (uintptr_t)window);
 
@@ -393,7 +368,7 @@ static int camera_set_preview_window(struct camera_device *device,
     wrapper->base.set_timestamp = preview_set_timestamp;
 
     int rc = VENDOR_CALL(device, set_preview_window, &wrapper->base);
-    ALOGI("%s vendor returned %d", __FUNCTION__, rc);
+    ALOGV("%s vendor returned %d", __FUNCTION__, rc);
     return rc;
 }
 
@@ -433,10 +408,6 @@ static void wrapper_data_callback(int32_t msg_type,
         data = metadata_memory;
         index = 0;
     }
-    if (!(msg_type & CAMERA_MSG_PREVIEW_METADATA))
-        ALOGI("data callback: msg=0x%x memory=%p index=%u data=%p size=%u",
-                msg_type, data, index, data ? data->data : NULL,
-                data ? static_cast<unsigned int>(data->size) : 0);
     if (wrapper && wrapper->data_cb)
         wrapper->data_cb(msg_type, data, index, metadata,
                 wrapper->callback_user);
@@ -450,13 +421,6 @@ static void wrapper_data_timestamp_callback(int64_t timestamp,
 {
     wrapper_camera_device_t *wrapper =
             reinterpret_cast<wrapper_camera_device_t *>(user);
-    unsigned int count = wrapper ? wrapper->timestamp_callback_count++ : 0;
-    if (count < 8 || !(count % 30))
-        ALOGI("timestamp callback[%u]: timestamp=%lld msg=0x%x memory=%p "
-                "index=%u data=%p size=%u", count,
-                static_cast<long long>(timestamp), msg_type, data, index,
-                data ? data->data : NULL,
-                data ? static_cast<unsigned int>(data->size) : 0);
     if (wrapper && wrapper->data_cb_timestamp)
         wrapper->data_cb_timestamp(timestamp, msg_type, data, index,
                 wrapper->callback_user);
@@ -481,16 +445,7 @@ static camera_memory_t *wrapper_request_memory(int fd, size_t buf_size,
 
     camera_memory_t *memory = wrapper->get_memory(fd, buf_size, num_bufs,
             wrapper->callback_user);
-    unsigned int count = wrapper->memory_request_count++;
-    if (count < 4 || !(count % 16))
-        ALOGI("memory request[%u]: fd=%d size=%u count=%u result=%p data=%p "
-                "actual=%u handle=%p release=%p", count, fd,
-                static_cast<unsigned int>(buf_size), num_bufs, memory,
-                memory ? memory->data : NULL,
-                memory ? static_cast<unsigned int>(memory->size) : 0,
-                memory ? memory->handle : NULL,
-                memory ? reinterpret_cast<void *>(memory->release) : NULL);
-    return memory;
+    return CameraCallbacks::wrapMemory(memory, buf_size, num_bufs);
 }
 
 static void camera_set_callbacks(struct camera_device *device,
@@ -513,16 +468,13 @@ static void camera_set_callbacks(struct camera_device *device,
     wrapper->data_cb_timestamp = data_cb_timestamp;
     wrapper->get_memory = get_memory;
     wrapper->callback_user = user;
-    wrapper->memory_request_count = 0;
-    wrapper->timestamp_callback_count = 0;
-    wrapper->recording_release_count = 0;
     {
         android::Mutex::Autolock lock(gMemoryCallbackLock);
         gMemoryCallbackDevice = wrapper;
     }
 
     wrapper->callbacks->set(wrapper_notify_callback, wrapper_data_callback,
-            wrapper_data_timestamp_callback, wrapper);
+            wrapper_data_timestamp_callback, wrapper, get_memory, user);
     // Keep Nougat's memory bridge: the vendor supplies a stream pointer
     // instead of the callback cookie to request_memory.
     VENDOR_CALL(device, set_callbacks, CameraCallbacks::notify,
@@ -570,7 +522,7 @@ static int camera_msg_type_enabled(struct camera_device *device,
 
 static int camera_start_preview(struct camera_device *device)
 {
-    ALOGI("%s device=%08X vendor=%08X", __FUNCTION__, (uintptr_t)device,
+    ALOGV("%s device=%08X vendor=%08X", __FUNCTION__, (uintptr_t)device,
             (uintptr_t)(((wrapper_camera_device_t*)device)->vendor));
 
     if (!device)
@@ -595,7 +547,7 @@ static int camera_start_preview(struct camera_device *device)
                 android::String8 flattened = prepared.flatten();
                 int setResult = VENDOR_CALL(device, set_parameters,
                         flattened.string());
-                ALOGI("prepared 1920x1088 video buffers before preview: %d",
+                ALOGV("prepared 1920x1088 video buffers before preview: %d",
                         setResult);
             }
             VENDOR_CALL(device, put_parameters, settings);
@@ -606,7 +558,7 @@ static int camera_start_preview(struct camera_device *device)
     callbacks->preview(true);
     int rc = VENDOR_CALL(device, start_preview);
     if (rc) callbacks->preview(false);
-    ALOGI("%s vendor returned %d", __FUNCTION__, rc);
+    ALOGV("%s vendor returned %d", __FUNCTION__, rc);
     return rc;
 }
 
@@ -653,10 +605,6 @@ static int camera_start_recording(struct camera_device *device)
     if (!device)
         return EINVAL;
 
-    wrapper_camera_device_t *wrapper =
-            reinterpret_cast<wrapper_camera_device_t *>(device);
-    wrapper->timestamp_callback_count = 0;
-    wrapper->recording_release_count = 0;
     return VENDOR_CALL(device, start_recording);
 }
 
@@ -670,10 +618,6 @@ static void camera_stop_recording(struct camera_device *device)
 
     VENDOR_CALL(device, stop_recording);
 
-    wrapper_camera_device_t *wrapper =
-            reinterpret_cast<wrapper_camera_device_t *>(device);
-    ALOGI("recording stopped: timestamps=%u releases=%u",
-            wrapper->timestamp_callback_count, wrapper->recording_release_count);
 }
 
 static int camera_recording_enabled(struct camera_device *device)
@@ -696,11 +640,6 @@ static void camera_release_recording_frame(struct camera_device *device,
     if (!device)
         return;
 
-    wrapper_camera_device_t *wrapper =
-            reinterpret_cast<wrapper_camera_device_t *>(device);
-    unsigned int count = wrapper->recording_release_count++;
-    if (count < 8 || !(count % 30))
-        ALOGI("release recording frame[%u]: opaque=%p", count, opaque);
     VENDOR_CALL(device, release_recording_frame, opaque);
 }
 
@@ -740,7 +679,8 @@ static int camera_take_picture(struct camera_device *device)
      * a still image.  This JB HAL then waits forever in preview STREAMOFF
      * while its frame-processing thread is still consuming preview frames.
      */
-    ALOGI("stopping legacy face detection before still capture");
+    ((wrapper_camera_device_t *)device)->callbacks->preview(false);
+    ALOGV("stopping legacy face detection before still capture");
     VENDOR_CALL(device, send_command, CAMERA_CMD_STOP_FACE_DETECTION, 0, 0);
     return VENDOR_CALL(device, take_picture);
 }
@@ -805,7 +745,7 @@ static int camera_set_parameters(struct camera_device *device,
         VENDOR_CALL(device, put_parameters, oldSettings);
     }
     if (restartPreview) {
-        ALOGI("reconfiguring preview for video size %s", next.get("video-size"));
+        ALOGV("reconfiguring preview for video size %s", next.get("video-size"));
         /*
          * The legacy frame-processing thread may still own a preview buffer
          * while CAF/face detection is active.  STREAMOFF then waits forever,
@@ -879,7 +819,7 @@ static void camera_put_parameters(struct camera_device *device, char *params)
 static int camera_send_command(struct camera_device *device,
             int32_t cmd, int32_t arg1, int32_t arg2)
 {
-    ALOGI("%s cmd=%d arg1=%d arg2=%d", __FUNCTION__, cmd, arg1, arg2);
+    ALOGV("%s cmd=%d arg1=%d arg2=%d", __FUNCTION__, cmd, arg1, arg2);
 
     if (!device)
         return -EINVAL;
