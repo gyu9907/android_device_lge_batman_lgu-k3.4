@@ -5,7 +5,7 @@ LOCAL_MODULE := libEGL_adreno200_compat
 LOCAL_MODULE_RELATIVE_PATH := egl
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := EglImageCompat.cpp
-LOCAL_SHARED_LIBRARIES := libEGL_adreno200 libdl liblog
+LOCAL_SHARED_LIBRARIES := libEGL_adreno200 libdl liblog libnativewindow
 # Retain the vendor dependency: dlsym on this driver must find unmodified EGL
 # entry points in it even though our overrides resolve their originals.
 LOCAL_LDFLAGS := -Wl,--no-as-needed

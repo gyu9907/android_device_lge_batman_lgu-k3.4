@@ -12,6 +12,14 @@
 #include <string>
 #include <cutils/log.h>
 
+static bool bufferAgeEnabled();
+static EGLBoolean querySurfaceWithBufferAge(EGLDisplay,EGLSurface,EGLint,EGLint*);
+static EGLBoolean setSurfaceAttributeWithBufferAge(EGLDisplay,EGLSurface,EGLint,EGLint);
+static EGLSurface createWindowWithBufferAge(EGLDisplay,EGLConfig,EGLNativeWindowType,const EGLint*);
+static EGLBoolean destroySurfaceWithBufferAge(EGLDisplay,EGLSurface);
+static EGLBoolean swapWithBufferAge(EGLDisplay,EGLSurface);
+static EGLBoolean terminateWithBufferAge(EGLDisplay);
+
 namespace {
 using CreateImage = EGLImageKHR (*)(EGLDisplay, EGLContext, EGLenum,
                                     EGLClientBuffer, const EGLint*);
@@ -75,6 +83,7 @@ std::string filterExtensions(const char* extensions) {
         }
         extensions += length;
     }
+    if (bufferAgeEnabled()) result += " EGL_EXT_buffer_age";
     return result;
 }
 
@@ -174,6 +183,24 @@ extern "C" EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(
 extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
         eglGetProcAddress(const char* name) {
     pthread_once(&gOnce, loadVendorEntryPoints);
+    if (name && !strcmp(name, "eglQuerySurface")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(querySurfaceWithBufferAge);
+    }
+    if (name && !strcmp(name, "eglSurfaceAttrib")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(setSurfaceAttributeWithBufferAge);
+    }
+    if (name && !strcmp(name, "eglCreateWindowSurface")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(createWindowWithBufferAge);
+    }
+    if (name && !strcmp(name, "eglDestroySurface")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(destroySurfaceWithBufferAge);
+    }
+    if (name && !strcmp(name, "eglSwapBuffers")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(swapWithBufferAge);
+    }
+    if (name && !strcmp(name, "eglTerminate")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(terminateWithBufferAge);
+    }
     if (name && !strcmp(name, "eglQueryString")) {
         return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(queryString);
     }
@@ -197,3 +224,5 @@ extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
     }
     return gGetProcAddress(name);
 }
+
+#include "EglBufferAgeCompat.inc"
