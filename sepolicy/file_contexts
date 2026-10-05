@@ -1,4 +1,5 @@
 /system/bin/hwaddrs                         u:object_r:hwaddrs_exec:s0
+/system/bin/rild                            u:object_r:rild_exec:s0
 /data/misc/bd_addr(\.[A-Za-z0-9]{6})?       u:object_r:batman_bt_addr_file:s0
 /data/misc/wifi/config(\.[A-Za-z0-9]{6})?   u:object_r:batman_wifi_addr_file:s0
 
@@ -28,6 +29,7 @@
 /data/system/default_values             u:object_r:mpctl_data_file:s0
 /dev/socket/mpctl                       u:object_r:mpctl_socket:s0
 /dev/socket/proxy_tether_connect_socket  u:object_r:qmuxd_socket:s0
+/dev/socket/sap_uim_socket1              u:object_r:rild_socket:s0
 /sys/kernel/batman_hwaddrs/(bt_ready|wifi_ready) u:object_r:sysfs_hwaddrs_ready:s0
 /sys/kernel/batman_hwaddrs/bt_addr        u:object_r:sysfs_batman_bt_addr:s0
 /sys/kernel/batman_hwaddrs/wifi_addr      u:object_r:sysfs_batman_wifi_addr:s0

@@ -1,6 +1,7 @@
 # Copyright 2013 The Android Open Source Project
 
-LOCAL_PATH:= $(call my-dir)
+# Match the platform transport and its generated SAP include paths.
+LOCAL_PATH := hardware/ril/librilutils
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \

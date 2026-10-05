@@ -25,6 +25,7 @@
 #include <errno.h>
 
 #include <telephony/ril.h>
+#include "LgeRilCompat.h"
 #define LOG_TAG "RILD"
 #include <utils/Log.h>
 #include <cutils/properties.h>
@@ -48,8 +49,6 @@ static void usage(const char *argv0) {
     exit(EXIT_FAILURE);
 }
 
-extern char rild[MAX_SOCKET_NAME_LENGTH] __attribute__((weak));
-
 extern void RIL_register (const RIL_RadioFunctions *callbacks);
 
 extern void RIL_register_socket (RIL_RadioFunctions *(*rilUimInit)
@@ -59,8 +58,6 @@ extern void RIL_onRequestComplete(RIL_Token t, RIL_Errno e,
         void *response, size_t responselen);
 
 extern void RIL_onRequestAck(RIL_Token t);
-
-extern void RIL_setRilSocketName(char *);
 
 #if defined(ANDROID_MULTI_SIM)
 extern void RIL_onUnsolicitedResponse(int unsolResponse, const void *data,
@@ -73,8 +70,6 @@ extern void RIL_onUnsolicitedResponse(int unsolResponse, const void *data,
 extern void RIL_requestTimedCallback (RIL_TimedCallback callback,
         void *param, const struct timeval *relativeTime);
 
-extern void RIL_setRilSocketName(char * s) __attribute__((weak));
-
 static struct RIL_Env s_rilEnv = {
     RIL_onRequestComplete,
     RIL_onUnsolicitedResponse,
@@ -83,6 +78,7 @@ static struct RIL_Env s_rilEnv = {
 };
 
 extern void RIL_startEventLoop();
+extern void rilc_thread_pool();
 
 static int make_argv(char * args, char ** argv) {
     // Note: reserve argv[0]
@@ -183,13 +179,9 @@ int main(int argc, char **argv) {
         RLOGE("Max Number of rild's supported is: %d", MAX_RILDS);
         exit(0);
     }
-    if (strncmp(clientId, "0", MAX_CLIENT_ID_LENGTH)) {
-        strlcat(rild, clientId, MAX_SOCKET_NAME_LENGTH);
-        if (RIL_setRilSocketName) {
-            RIL_setRilSocketName(rild);
-        } else {
-            RLOGE("Trying to instantiate multiple rild sockets without a compatible libril!");
-        }
+    if (strcmp(clientId, "0") != 0) {
+        RLOGE("batman_lgu supports only radio slot1");
+        exit(EXIT_FAILURE);
     }
 
     if (rilLibPath == NULL) {
@@ -365,13 +357,17 @@ OpenLib:
     }
 
     rilArgv[argc++] = "-c";
-    rilArgv[argc++] = clientId;
+    rilArgv[argc++] = (char *)clientId;
     RLOGD("RIL_Init argc = %d clientId = %s", argc, rilArgv[argc-1]);
 
     // Make sure there's a reasonable argv[0]
     rilArgv[0] = argv[0];
 
-    funcs = rilInit(&s_rilEnv, argc, rilArgv);
+    funcs = LGE_RIL_Init(rilInit, &s_rilEnv, argc, rilArgv);
+    if (funcs == NULL) {
+        RLOGE("LGE RIL initialization failed");
+        exit(EXIT_FAILURE);
+    }
     RLOGD("RIL_Init rilInit completed");
 
     RIL_register(funcs);
@@ -386,6 +382,8 @@ OpenLib:
     RLOGD("RIL_register_socket completed");
 
 done:
+
+    rilc_thread_pool();
 
     RLOGD("RIL_Init starting sleep loop");
     while (true) {
