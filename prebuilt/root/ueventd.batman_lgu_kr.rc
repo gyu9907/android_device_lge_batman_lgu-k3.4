@@ -26,7 +26,8 @@
 #
 
 # the DIAG device node is not world writable/readable.
-/dev/diag                 0660   system     qcom_diag
+# Keep the LOS 14.1 QCOM_DIAG GID through Bionic's OEM identity mapping.
+/dev/diag                 0660   system     oem_2950
 
 /dev/genlock              0666   system     system
 /dev/kgsl                 0666   system     system

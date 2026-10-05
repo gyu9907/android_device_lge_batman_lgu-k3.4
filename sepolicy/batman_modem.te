@@ -22,6 +22,7 @@ allow batman_qmiproxy { smd_device diag_device }:chr_file rw_file_perms;
 type batman_kickstart, domain;
 type batman_kickstart_exec, exec_type, file_type;
 init_daemon_domain(batman_kickstart)
+wakelock_use(batman_kickstart)
 allow batman_kickstart { batman_mdm_device serial_device }:chr_file rw_file_perms;
 allow batman_kickstart shell_exec:file rx_file_perms;
 allow batman_kickstart toolbox_exec:file rx_file_perms;
