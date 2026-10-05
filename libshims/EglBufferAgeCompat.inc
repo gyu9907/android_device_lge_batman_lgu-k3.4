@@ -5,6 +5,7 @@
  * Buffer-age compatibility for the validated p930 EGL driver on Adreno 220.
  */
 #include <system/window.h>
+static void finishPartialTiles(EGLDisplay,EGLSurface,bool);
 #include <map>
 #include <mutex>
 namespace {
@@ -119,6 +120,7 @@ static EGLBoolean querySurfaceWithBufferAge(EGLDisplay display,EGLSurface surfac
     return EGL_TRUE;
 }
 static EGLBoolean setSurfaceAttributeWithBufferAge(EGLDisplay display,EGLSurface surface,EGLint attr,EGLint value) {
+    if (attr==EGL_SWAP_BEHAVIOR) finishPartialTiles(display,surface,false);
     EGLBoolean result=ageAttrib()(display,surface,attr,value);
     if (result && attr==EGL_SWAP_BEHAVIOR) {
         std::lock_guard<std::mutex> lock(gWindowMutex);
@@ -135,6 +137,9 @@ extern "C" EGLAPI EGLBoolean EGLAPIENTRY eglSurfaceAttrib(EGLDisplay d,EGLSurfac
 }
 
 static EGLBoolean terminateWithBufferAge(EGLDisplay display) {
+    using Surface=EGLSurface (*)(EGLint);
+    static auto currentSurface=reinterpret_cast<Surface>(ageLookup("eglGetCurrentSurface"));
+    finishPartialTiles(display,currentSurface(EGL_DRAW),false);
     using F=EGLBoolean (*)(EGLDisplay);
     static auto fn=reinterpret_cast<F>(ageLookup("eglTerminate"));
     EGLBoolean result=fn(display);
@@ -163,6 +168,7 @@ static EGLSurface createWindowWithBufferAge(EGLDisplay display,EGLConfig config,
     return surface;
 }
 static EGLBoolean destroySurfaceWithBufferAge(EGLDisplay display,EGLSurface surface) {
+    finishPartialTiles(display,surface,false);
     using F = EGLBoolean (*)(EGLDisplay,EGLSurface);
     static F fn = reinterpret_cast<F>(ageLookup("eglDestroySurface"));
     EGLBoolean result = fn(display,surface);
@@ -176,6 +182,7 @@ static EGLBoolean destroySurfaceWithBufferAge(EGLDisplay display,EGLSurface surf
 static EGLBoolean swapWithBufferAge(EGLDisplay display,EGLSurface surface) {
     using F=EGLBoolean (*)(EGLDisplay,EGLSurface);
     static auto fn=reinterpret_cast<F>(ageLookup("eglSwapBuffers"));
+    finishPartialTiles(display,surface,true);
     if (!endBufferAgeFrame(display,surface)) return EGL_FALSE;
     EGLBoolean result=fn(display,surface);
     finishBufferAgeSwap(display,surface,result);

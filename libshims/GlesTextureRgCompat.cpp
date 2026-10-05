@@ -81,3 +81,5 @@ extern "C" GL_APICALL void GL_APIENTRY glRenderbufferStorage(
     }
     vendorStorage(target, format, width, height);
 }
+
+#include "GlesPartialTiles.inc"

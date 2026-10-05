@@ -13,6 +13,11 @@
 #include <cutils/log.h>
 
 static bool bufferAgeEnabled();
+static bool partialTilesEnabled();
+static void bindFramebufferWithPartialTiles(unsigned int,unsigned int);
+static void bindFramebufferOesWithPartialTiles(unsigned int,unsigned int);
+static EGLBoolean makeCurrentWithPartialTiles(EGLDisplay,EGLSurface,EGLSurface,EGLContext);
+static EGLBoolean setPartialDamage(EGLDisplay,EGLSurface,EGLint*,EGLint);
 static EGLBoolean querySurfaceWithBufferAge(EGLDisplay,EGLSurface,EGLint,EGLint*);
 static EGLBoolean setSurfaceAttributeWithBufferAge(EGLDisplay,EGLSurface,EGLint,EGLint);
 static EGLSurface createWindowWithBufferAge(EGLDisplay,EGLConfig,EGLNativeWindowType,const EGLint*);
@@ -84,6 +89,7 @@ std::string filterExtensions(const char* extensions) {
         extensions += length;
     }
     if (bufferAgeEnabled()) result += " EGL_EXT_buffer_age";
+    if (partialTilesEnabled()) result += " EGL_KHR_partial_update";
     return result;
 }
 
@@ -183,6 +189,18 @@ extern "C" EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(
 extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
         eglGetProcAddress(const char* name) {
     pthread_once(&gOnce, loadVendorEntryPoints);
+    if (name && !strcmp(name, "glBindFramebuffer") && partialTilesEnabled()) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(bindFramebufferWithPartialTiles);
+    }
+    if (name && !strcmp(name, "glBindFramebufferOES") && partialTilesEnabled() && gGetProcAddress(name)) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(bindFramebufferOesWithPartialTiles);
+    }
+    if (name && !strcmp(name, "eglMakeCurrent")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(makeCurrentWithPartialTiles);
+    }
+    if (name && !strcmp(name, "eglSetDamageRegionKHR")) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(setPartialDamage);
+    }
     if (name && !strcmp(name, "eglQuerySurface")) {
         return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(querySurfaceWithBufferAge);
     }
@@ -226,3 +244,4 @@ extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
 }
 
 #include "EglBufferAgeCompat.inc"
+#include "EglPartialTiles.inc"
