@@ -213,19 +213,20 @@ static int loc_eng_init(GpsCallbacks* callbacks)
 {
    LOC_LOGD("loc_eng_init entering");
 
-   // Start the LOC api RPC service (if not started yet)
-   loc_api_glue_init();
-   callbacks->set_capabilities_cb(GPS_CAPABILITY_SCHEDULING | GPS_CAPABILITY_MSA | GPS_CAPABILITY_MSB);
    // Avoid repeated initialization. Call de-init to clean up first.
    if (loc_eng_inited == 1)
    {
-      loc_eng_deinit();       /* stop the active client */
+      loc_eng_cleanup();
 #ifdef FEATURE_GNSS_BIT_API
       gpsone_loc_api_server_unblock();
       gpsone_loc_api_server_join();
 #endif /* FEATURE_GNSS_BIT_API */
       loc_eng_inited = 0;
    }
+
+   // Start the LOC api RPC service after the previous client has exited.
+   loc_api_glue_init();
+   callbacks->set_capabilities_cb(GPS_CAPABILITY_SCHEDULING | GPS_CAPABILITY_MSA | GPS_CAPABILITY_MSB);
 
    // Process gps.conf
    loc_read_gps_conf();
@@ -352,8 +353,8 @@ SIDE EFFECTS
 ===========================================================================*/
 static void loc_eng_cleanup()
 {
-   // clean up
-   loc_eng_deinit();
+   if (!loc_eng_inited)
+      return;
 
    if (loc_eng_data.deferred_action_thread)
    {
@@ -369,6 +370,10 @@ static void loc_eng_cleanup()
       pthread_join(loc_eng_data.deferred_action_thread, &ignoredValue);
       loc_eng_data.deferred_action_thread = NULL;
    }
+
+   // The worker uses the RPC client for its initial and final privacy lock.
+   // Keep the client and callback dispatcher alive until the worker exits.
+   loc_eng_deinit();
 
    pthread_mutex_destroy (&loc_eng_data.xtra_module_data.lock);
    pthread_mutex_destroy (&loc_eng_data.deferred_stop_mutex);
@@ -948,6 +953,13 @@ static int32 loc_event_cb
 
    loc_eng_callback_log(loc_event, loc_event_payload);
    pthread_mutex_lock(&loc_eng_data.deferred_action_mutex);
+   // The RPC client remains alive for the worker's final privacy-lock call.
+   // Once shutdown starts, no callback may queue work or reacquire its wake lock.
+   if (loc_eng_data.deferred_action_flags & DEFERRED_ACTION_QUIT)
+   {
+      pthread_mutex_unlock(&loc_eng_data.deferred_action_mutex);
+      return RPC_LOC_API_SUCCESS;
+   }
    loc_eng_data.loc_event = loc_event;
    memcpy(&loc_eng_data.loc_event_payload, loc_event_payload, sizeof(*loc_event_payload));
    /* hold a wake lock while events are pending for deferred_action_thread */
@@ -2251,7 +2263,6 @@ static void loc_eng_deferred_action_thread(void* arg)
 #endif
    LOC_LOGD("loc_eng_deferred_action_thread exiting\n");
    loc_eng_data.release_wakelock_cb();
-   loc_eng_data.deferred_action_thread = 0;
 }
 
 // for gps.c
@@ -2259,4 +2270,3 @@ extern "C" const GpsInterface* get_gps_interface()
 {
     return &sLocEngInterface;
 }
-

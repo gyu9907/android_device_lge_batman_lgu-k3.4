@@ -73,6 +73,8 @@ extern void svc_set_in_reset(void* xprt, int val);
 extern void svc_reset_cb(void* xprt, enum rpc_reset_event event);
 
 static pthread_mutex_t rx_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t rx_stopped = PTHREAD_COND_INITIALIZER;
+static int rx_stopping;
 static pthread_t rx_thread;
 static volatile unsigned int num_clients;
 static volatile struct CLIENT *clients;
@@ -230,9 +232,13 @@ static void *rx_context(void *__u __attribute__((unused)))
     unsigned int num_clients_cached = 0;
     CLIENT *client;
 
-    while(num_clients) {
+    for (;;) {
         /* setup file poll structure */
         pthread_mutex_lock(&rx_mutex);
+        if (!num_clients) {
+            pthread_mutex_unlock(&rx_mutex);
+            break;
+        }
         if (pbits == NULL || num_clients_cached != num_clients) {
             if (pbits != NULL)
                 free(pbits);
@@ -264,9 +270,6 @@ static void *rx_context(void *__u __attribute__((unused)))
             read(wakeup_pipe[0], &ch, 1);
             LIBRPC_DEBUG("wakeup[0]=%x\n", pbits[0].revents);
         }
-
-        if (!num_clients)
-            break;
 
         if (n < 0) {
             E("poll() error %s (%d)\n", strerror(errno), errno);
@@ -690,6 +693,10 @@ CLIENT *clnt_create(
             vers &= 0xFFFF0000;
 
         pthread_mutex_lock(&rx_mutex);
+        /* The last client releases rx_mutex while joining the old receiver.
+         * Do not replace its thread, pipe or router until teardown finishes. */
+        while (rx_stopping)
+            pthread_cond_wait(&rx_stopped, &rx_mutex);
 
 	if (!num_clients) {
 	    /* Open the router device to load the modem */
@@ -787,21 +794,9 @@ void clnt_destroy(CLIENT *client) {
           client->xdr->x_vers);
 
 
-        if (!client->cb_stop) {
-            /* The callback thread is running, we need to stop it */
-            client->cb_stop = 1;
-            D("%08x:%08x stopping callback thread\n",
-              client->xdr->x_prog,
-              client->xdr->x_vers);
-            pthread_mutex_lock(&client->wait_cb_lock);
-            pthread_cond_signal(&client->wait_cb);
-            pthread_mutex_unlock(&client->wait_cb_lock);
-            D("%08x:%08x joining callback thread\n",
-              client->xdr->x_prog,
-              client->xdr->x_vers);
-            pthread_join(client->cb_thread, NULL);
-        }
-
+        /* Remove the client from RX dispatch before checking cb_stop. Otherwise
+         * RX can start its first callback thread after that check and race the
+         * destruction of the client and its callback targets. */
         pthread_mutex_lock(&rx_mutex); /* sync access to the client list */
         {
             CLIENT *trav = (CLIENT *)clients, *prev = NULL;
@@ -825,16 +820,36 @@ void clnt_destroy(CLIENT *client) {
             if (write(wakeup_pipe[1], "d", 1) < 0)
 	        E("error writing to pipe\n");
 
+            rx_stopping = 1;
+            pthread_mutex_unlock(&rx_mutex);
             D("stopping rx thread!\n");
             pthread_join(rx_thread, NULL);
+            pthread_mutex_lock(&rx_mutex);
             D("stopped rx thread\n");
 
             close(wakeup_pipe[0]);
             close(wakeup_pipe[1]);
 	    r_close(router_fd);
+            rx_stopping = 0;
+            pthread_cond_broadcast(&rx_stopped);
         }
         pthread_mutex_unlock(&rx_mutex); /* sync access to the client list */
  
+        if (!client->cb_stop) {
+            /* The callback thread is running, we need to stop it */
+            client->cb_stop = 1;
+            D("%08x:%08x stopping callback thread\n",
+              client->xdr->x_prog,
+              client->xdr->x_vers);
+            pthread_mutex_lock(&client->wait_cb_lock);
+            pthread_cond_signal(&client->wait_cb);
+            pthread_mutex_unlock(&client->wait_cb_lock);
+            D("%08x:%08x joining callback thread\n",
+              client->xdr->x_prog,
+              client->xdr->x_vers);
+            pthread_join(client->cb_thread, NULL);
+        }
+
         pthread_mutex_destroy(&client->input_xdr_lock);
         pthread_cond_destroy(&client->input_xdr_wait);
 

@@ -343,6 +343,11 @@ int32 loc_close
 
    stat = RPC_FUNC_VERSION(rpc_loc_close_, RPC_LOC_CLOSE_VERSION)(&args, &rets, loc_api_clnt);
 
+   /* Drain callbacks before clearing their targets. A callback may already
+    * have passed the table check when the close reply arrives. */
+   clnt_destroy(loc_api_clnt);
+   loc_api_clnt = NULL;
+
    /* Clean the client's callback function in callback table */
    int i;
    for (i = 0; i < LOC_API_CB_MAX_CLIENTS; i++)
@@ -362,11 +367,6 @@ int32 loc_close
    }
 
    LOC_GLUE_CHECK_RESULT(stat, int32);
-
-   if (loc_api_clnt != NULL)
-       clnt_destroy(loc_api_clnt);
-
-   loc_api_clnt = NULL;
 
    return (int32) rets.loc_close_result;
 }
