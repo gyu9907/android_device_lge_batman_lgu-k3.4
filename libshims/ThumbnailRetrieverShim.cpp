@@ -8,9 +8,6 @@
 #include <cutils/log.h>
 #include <media/stagefright/MediaCodecList.h>
 #include "ThumbnailColorConverter.h"
-#ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
-#include "ThumbnailColorDiagnostics.h"
-#endif
 
 namespace android {
 // Wait before creating MediaCodec, never inside the OMX open callback where
@@ -55,13 +52,6 @@ struct BatmanThumbnailCodecList {
     static void findMatchingCodecs(const char *mime, bool encoder,
             uint32_t flags, Vector<AString> *matches) {
         matches->clear();
-#ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
-        if (getenv("BATMAN_SOFTWARE_REFERENCE")) {
-            MediaCodecList::findMatchingCodecs(mime, encoder,
-                    MediaCodecList::kPreferSoftwareCodecs, matches);
-            return;
-        }
-#endif
         if (!waitForThumbnailVidc())
             return;
         MediaCodecList::findMatchingCodecs(mime, encoder,
@@ -73,11 +63,7 @@ struct BatmanThumbnailCodecList {
 
 #define StagefrightMetadataRetriever BatmanThumbnailRetriever
 #define MediaCodecList BatmanThumbnailCodecList
-#ifdef BATMAN_THUMBNAIL_COLOR_DIAGNOSTICS
-#define ColorConverter BatmanDiagnosticColorConverter
-#else
 #define ColorConverter BatmanThumbnailColorConverter
-#endif
 #undef LOG_TAG
 #include "frameworks/av/media/libstagefright/StagefrightMetadataRetriever.cpp"
 #undef MediaCodecList
