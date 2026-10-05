@@ -1,7 +1,12 @@
 
-# Only the service payloads need legacy executable mappings. The entrypoint
-# wrappers remain exec_type and never require execmod themselves.
+# PIE entrypoints in /system/bin establish the service domain, then execute
+# the legacy payload in /vendor/libexec/batman. Payloads retain vendor_file:
+# Oreo's platform-text-relocation exception excludes custom file types.
 allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
         qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
-        port-bridge mm-qcamerad } system_file:file { execute_no_trans execmod };
+        port-bridge mm-qcamerad } vendor_file:file { execute_no_trans execmod };
+# Legacy shared libraries also contain text relocations.
+allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
+        qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
+        port-bridge mm-qcamerad } system_file:file execmod;
 allow { audioserver cameraserver mediaserver system_server rild } system_file:file execmod;

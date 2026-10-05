@@ -4,3 +4,6 @@ allow mpdecision system_data_file:dir { write add_name };
 type_transition mpdecision socket_device:sock_file mpctl_socket;
 type_transition mpdecision system_data_file:file mpctl_data_file "default_values";
 allow mpdecision socket_device:dir { write add_name remove_name };
+# MSM8660 hotplug decisions inspect and select CPU idle modes.
+r_dir_file(mpdecision, sysfs_batman_power)
+allow mpdecision sysfs_batman_power:file w_file_perms;

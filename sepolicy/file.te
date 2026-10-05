@@ -8,3 +8,5 @@ type batman_qcks_data_file, file_type, data_file_type;
 
 type sysfs_batman_usb_state, fs_type, sysfs_type;
 type sysfs_batman_modem_transport, fs_type, sysfs_type;
+type sysfs_batman_power, fs_type, sysfs_type;
+type sysfs_batman_rpm_power, fs_type, sysfs_type;

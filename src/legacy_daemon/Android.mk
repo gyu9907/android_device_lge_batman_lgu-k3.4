@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
-# The entrypoint must have an exec_type label, whereas Android 7 permits
-# legacy text relocations only on system_file. Keep the vendor payloads
+# The entrypoint must have an exec_type label, whereas Oreo permits legacy
+# text relocations on vendor_file with the platform exception. Keep the payloads
 # separate and enter their service domains through these PIE wrappers.
 define batman-legacy-daemon
 include $$(CLEAR_VARS)

@@ -357,6 +357,7 @@ service qcamerasvr /system/bin/mm-qcamera-daemon
     group camera system inet input
 
 service qcom-c_core-sh /system/bin/sh /init.qcom.class_core.sh
+    seclabel u:r:qti_init_shell:s0
     class core
     user root
     oneshot
@@ -367,6 +368,7 @@ service qseecomd /system/bin/qseecomd
     group system
 
 service qcom-c_main-sh /system/bin/sh /init.qcom.class_main.sh
+    seclabel u:r:qti_init_shell:s0
     class main
     user root
     oneshot
@@ -375,11 +377,13 @@ on property:vold.decrypt=trigger_restart_framework
     start qcom-c_main-sh
 
 service qcom-sh /system/bin/sh /init.qcom.sh
+    seclabel u:r:qti_init_shell:s0
     class late_start
     user root
     oneshot
 
 service qcom-post-boot /system/bin/sh /system/etc/init.qcom.post_boot.sh
+    seclabel u:r:qti_init_shell:s0
     class main
     user root
     disabled

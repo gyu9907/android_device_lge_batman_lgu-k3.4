@@ -1,2 +1,11 @@
 # The MSM8660 post-boot script sets CPU frequency and hotplug ownership.
 allow qti_init_shell sysfs_devices_system_cpu:file setattr;
+
+# These legacy init scripts invoke the platform shell and utilities.
+allow qti_init_shell shell_exec:file { rx_file_perms entrypoint };
+allow qti_init_shell toolbox_exec:file rx_file_perms;
+# post_boot configures legacy CPU idle modes and RPM resource collapse.
+allow qti_init_shell { sysfs_batman_power sysfs_batman_rpm_power }:dir r_dir_perms;
+allow qti_init_shell { sysfs_batman_power sysfs_batman_rpm_power }:file rw_file_perms;
+# init.qcom.sh enumerates network-interface configuration directories.
+allow qti_init_shell proc_net:dir r_dir_perms;
