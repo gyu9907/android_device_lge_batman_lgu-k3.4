@@ -5,6 +5,7 @@ genfscon sysfs /kernel/batman_hwaddrs/wifi_addr  u:object_r:sysfs_batman_wifi_ad
 genfscon sysfs /module/bcmdhd/parameters/firmware_path u:object_r:sysfs_wlan_fwpath:s0
 genfscon sysfs /module/pm_8x60/modes u:object_r:sysfs_batman_power:s0
 genfscon sysfs /module/rpm_resources/enable_low_power u:object_r:sysfs_batman_rpm_power:s0
+genfscon sysfs /devices/platform/bt_power/rfkill u:object_r:sysfs_bluetooth_writable:s0
 
 # Legacy bluesleep userspace power-management controls.
 genfscon proc /bluetooth/sleep/lpm u:object_r:proc_bluetooth_writable:s0
