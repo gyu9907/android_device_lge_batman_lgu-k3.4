@@ -60,7 +60,9 @@ TARGET_LD_SHIM_LIBS := \
 # LD_PRELOAD is ignored. The service library mapping loads the thumbnail shim
 # before its dependencies while keeping normal linker security checks.
 BOARD_GLOBAL_CFLAGS += -DMR0_CAMERA_BLOB
-BOARD_GLOBAL_CFLAGS += -DQCOM_BSP_CAMERA_ABI_HACK
+# Keep the gralloc handle layout used by the stock camera. Oreo no longer
+# propagates BOARD_GLOBAL_CFLAGS into display and video modules.
+TARGET_QCOM_BSP_CAMERA_ABI_HACK := true
 BOARD_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
 BOARD_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
 # The legacy P930 HAL emits a null preview data callback before its first
