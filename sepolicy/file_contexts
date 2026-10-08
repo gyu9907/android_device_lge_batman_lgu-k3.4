@@ -1,5 +1,11 @@
 /system/bin/hwaddrs                         u:object_r:hwaddrs_exec:s0
 /system/bin/rild                            u:object_r:rild_exec:s0
+
+# The msm8660 libdiag blob has text relocations. Override the common QCOM
+# same_process_hal_file label so existing vendor_file execmod rules apply.
+/system/vendor/lib/libdiag\.so             u:object_r:vendor_file:s0
+/vendor/lib/libdiag\.so                    u:object_r:vendor_file:s0
+
 /data/misc/bd_addr(\.[A-Za-z0-9]{6})?       u:object_r:batman_bt_addr_file:s0
 /data/misc/wifi/config(\.[A-Za-z0-9]{6})?   u:object_r:batman_wifi_addr_file:s0
 
