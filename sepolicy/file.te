@@ -10,6 +10,9 @@ type sysfs_batman_usb_state, fs_type, sysfs_type;
 type sysfs_batman_modem_transport, fs_type, sysfs_type;
 type sysfs_batman_power, fs_type, sysfs_type;
 type sysfs_batman_rpm_power, fs_type, sysfs_type;
+type batman_mpt_file, file_type;
+type batman_acc_calibration_file, file_type;
+type batman_prox_calibration_file, file_type;
 
 # Legacy camera daemon sockets under /data; retained from Oreo common policy.
 type camera_socket, file_type, data_file_type, core_data_file_type;

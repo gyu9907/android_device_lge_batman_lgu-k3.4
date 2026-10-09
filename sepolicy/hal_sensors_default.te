@@ -4,3 +4,6 @@ allow hal_sensors_default sensors_device:chr_file rw_file_perms;
 # Access existing calibration files only. Do not allow creating files in /data.
 allow hal_sensors_default system_data_file:dir search;
 allow hal_sensors_default batman_sensor_calibration_file:file rw_file_perms;
+allow hal_sensors_default batman_mpt_file:dir search;
+allow hal_sensors_default batman_acc_calibration_file:file r_file_perms;
+allow hal_sensors_default batman_prox_calibration_file:file r_file_perms;

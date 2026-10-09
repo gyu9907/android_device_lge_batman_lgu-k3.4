@@ -289,6 +289,7 @@ on post-fs-data
     mkdir /data/misc/audio 0770 audio audio
     mkdir /data/misc/location 0770 gps gps
     mkdir /data/time 0700 system system
+    restorecon /mpt /mpt/acc_calibration.dat /mpt/prox_calibration.dat
     mkdir /data/audio 0770 media audio
     chmod 2770 /data/audio
     chown system system /persist
