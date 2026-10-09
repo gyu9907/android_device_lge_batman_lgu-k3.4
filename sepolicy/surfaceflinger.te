@@ -1,0 +1,2 @@
+# MSM8660 HWC selects hardware behavior using the original SoC identifier.
+allow surfaceflinger sysfs_socinfo:file r_file_perms;

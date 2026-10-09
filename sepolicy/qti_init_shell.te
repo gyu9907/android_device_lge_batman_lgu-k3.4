@@ -9,3 +9,8 @@ allow qti_init_shell { sysfs_batman_power sysfs_batman_rpm_power }:dir r_dir_per
 allow qti_init_shell { sysfs_batman_power sysfs_batman_rpm_power }:file rw_file_perms;
 # init.qcom.sh enumerates network-interface configuration directories.
 allow qti_init_shell proc_net:dir r_dir_perms;
+
+# Retained init scripts start the legacy modem proxy and thermal daemon.
+set_prop(qti_init_shell, ctl_qmuxd_prop)
+set_prop(qti_init_shell, mpdecision_prop)
+allow qti_init_shell sysfs_mpdecision:file { rw_file_perms setattr };

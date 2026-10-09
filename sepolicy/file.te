@@ -10,6 +10,8 @@ type sysfs_batman_usb_state, fs_type, sysfs_type;
 type sysfs_batman_modem_transport, fs_type, sysfs_type;
 type sysfs_batman_power, fs_type, sysfs_type;
 type sysfs_batman_rpm_power, fs_type, sysfs_type;
+type sysfs_batman_boot_control, fs_type, sysfs_type;
+type sysfs_batman_init_control, fs_type, sysfs_type;
 type batman_mpt_file, file_type;
 type batman_acc_calibration_file, file_type;
 type batman_prox_calibration_file, file_type;

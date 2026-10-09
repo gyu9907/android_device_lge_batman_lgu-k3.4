@@ -11,3 +11,11 @@ allow mpdecision socket_device:dir { write add_name remove_name };
 # MSM8660 hotplug decisions inspect and select CPU idle modes.
 r_dir_file(mpdecision, sysfs_batman_power)
 allow mpdecision sysfs_batman_power:file w_file_perms;
+
+# The legacy hotplug loop receives uevents and updates its deferred timer.
+allow mpdecision self:netlink_kobject_uevent_socket read;
+allow mpdecision sysfs_mpdecision:file rw_file_perms;
+allow mpdecision mpctl_socket:sock_file { create setattr };
+allow mpdecision self:netlink_kobject_uevent_socket { create setopt bind };
+# Ownership of the existing mpctl socket is assigned to its system client.
+allow mpdecision self:capability { chown fsetid };

@@ -1,0 +1,2 @@
+# The retained in-process camera HAL initializes its ZSL queue property.
+set_prop(mediaserver, camera_prop)

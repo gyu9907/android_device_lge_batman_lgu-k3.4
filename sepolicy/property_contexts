@@ -3,3 +3,8 @@ sys.hwaddrs. u:object_r:hwaddrs_prop:s0
 ctl.qmiproxy u:object_r:ctl_qmuxd_prop:s0
 ctl.bridgemgrd u:object_r:ctl_qmuxd_prop:s0
 ctl.thermald u:object_r:mpdecision_prop:s0
+ctl.qmuxd u:object_r:ctl_qmuxd_prop:s0
+ctl.netmgrd u:object_r:ctl_vendor_netmgrd_prop:s0
+ctl.mpdecision u:object_r:mpdecision_prop:s0
+persist.camera.zsl.queuedepth u:object_r:camera_prop:s0
+persist.camera.snapshot.number u:object_r:camera_prop:s0

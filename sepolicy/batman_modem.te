@@ -41,4 +41,7 @@ allow batman_bridgemgrd sysfs_batman_usb_state:file r_file_perms;
 allow batman_bridgemgrd sysfs_batman_modem_transport:file rw_file_perms;
 allow batman_kickstart mdm_helper_exec:file rx_file_perms;
 allow batman_kickstart proc:file r_file_perms;
+# qcks reads the boot command line to select the external modem path.
+allow batman_kickstart proc_cmdline:file r_file_perms;
+allow batman_bridgemgrd sysfs_android_usb:dir search;
 set_prop(batman_qmiproxy, radio_prop)
