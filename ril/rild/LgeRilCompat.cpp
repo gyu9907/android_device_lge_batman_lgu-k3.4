@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <string.h>
 #include <map>
+#include <new>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -157,9 +158,57 @@ void unsolicited(int response, const void *data, size_t size) {
     frameworkEnv.OnUnsolicitedResponse(response, data, size);
 }
 
+// LGE v7 power, subscription and screen-state handlers dereference their
+// DMS/NAS/PBM clients before checking readiness. RIL_CONNECTED can arrive
+// while those clients are still being initialized.
+// Keep the original request and payload on the existing RIL event loop until
+// the vendor reports a usable radio state; never acknowledge an unsent request.
+struct PendingRadioRequest {
+    RIL_Token token;
+    int code;
+    int value;
+    unsigned int attempts;
+};
+
+void request(int code, void *data, size_t size, RIL_Token token);
+
+void retryRadioRequest(void *opaque) {
+    auto pending = static_cast<PendingRadioRequest *>(opaque);
+    if (vendor->onStateRequest() != RADIO_STATE_UNAVAILABLE) {
+        request(pending->code, &pending->value, sizeof(pending->value), pending->token);
+        delete pending;
+        return;
+    }
+    if (++pending->attempts >= 120) {
+        frameworkEnv.OnRequestComplete(pending->token,
+                RIL_E_RADIO_NOT_AVAILABLE, nullptr, 0);
+        delete pending;
+        return;
+    }
+    const timeval retry = {0, 250000};
+    frameworkEnv.RequestTimedCallback(retryRadioRequest, pending, &retry);
+}
+
 void request(int code, void *data, size_t size, RIL_Token token) {
     if (!supported(code)) {
         frameworkEnv.OnRequestComplete(token, RIL_E_REQUEST_NOT_SUPPORTED, nullptr, 0);
+        return;
+    }
+    if ((code == RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE ||
+            code == RIL_REQUEST_RADIO_POWER || code == RIL_REQUEST_SCREEN_STATE) &&
+            vendor->onStateRequest() == RADIO_STATE_UNAVAILABLE) {
+        if (!data || size != sizeof(int)) {
+            frameworkEnv.OnRequestComplete(token, RIL_E_GENERIC_FAILURE, nullptr, 0);
+            return;
+        }
+        auto pending = new (std::nothrow) PendingRadioRequest{
+                token, code, *static_cast<const int *>(data), 0};
+        if (!pending) {
+            frameworkEnv.OnRequestComplete(token, RIL_E_NO_MEMORY, nullptr, 0);
+            return;
+        }
+        const timeval retry = {0, 250000};
+        frameworkEnv.RequestTimedCallback(retryRadioRequest, pending, &retry);
         return;
     }
     {
@@ -200,7 +249,8 @@ extern "C" const RIL_RadioFunctions *LGE_RIL_Init(
     vendorEnv.OnRequestComplete = complete;
     vendorEnv.OnUnsolicitedResponse = unsolicited;
     vendor = init(&vendorEnv, argc, argv);
-    if (!vendor || vendor->version != 7 || !vendor->onRequest || !vendor->supports) {
+    if (!vendor || vendor->version != 7 || !vendor->onRequest || !vendor->supports ||
+            !vendor->onStateRequest) {
         ALOGE("Expected the LGE v7 vendor RIL");
         return nullptr;
     }
