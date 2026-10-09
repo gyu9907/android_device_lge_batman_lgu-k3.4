@@ -86,6 +86,9 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml
 
+# Camera
+PRODUCT_PACKAGES += Snap
+
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
