@@ -36,6 +36,7 @@
 #include <hardware/hardware.h>
 #include <hardware/camera.h>
 #include <camera/CameraParameters.h>
+#include "CameraArea.h"
 #include "CameraCallbacks.h"
 
 static android::Mutex gCameraWrapperLock;
@@ -164,6 +165,13 @@ static char *camera_fixup_getparams(int id, const char *settings)
     params.unflatten(android::String8(settings));
 
     ALOGV("%s: original parameters:", __FUNCTION__);
+
+    // Normalize legacy tuple formatting without changing area coordinates.
+    const char *areaKeys[] = {"focus-areas", "metering-areas"};
+    for (const char *key : areaKeys) {
+        const char *area = params.get(key);
+        if (area) params.set(key, cameraCompactArea(area).c_str());
+    }
 
     if (id >= 0 && id < static_cast<int>(sizeof(iso_values) /
             sizeof(iso_values[0])))
