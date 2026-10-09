@@ -56,6 +56,10 @@ esac
 
 case "$target" in
     "msm8660")
+         # Configure before handing these controls back to the system UID.
+         chown root /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
+         chown root /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+         chown root /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
 	 echo 1 > /sys/module/rpm_resources/enable_low_power/L2_cache
 	 echo 1 > /sys/module/rpm_resources/enable_low_power/pxo
 	 echo 2 > /sys/module/rpm_resources/enable_low_power/vdd_dig

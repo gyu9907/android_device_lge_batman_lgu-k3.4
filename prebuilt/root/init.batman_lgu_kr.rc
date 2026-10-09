@@ -211,8 +211,7 @@ on boot
     chown system camera /sys/class/leds/spotlight/brightness
     chmod 0660 /sys/class/leds/spotlight/brightness
 
-    # PowerHAL perms
-    chown system system /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
+    # post_boot assigns sampling_rate to system after its initial configuration.
 
     # NFC Property and driver permission
 	chmod 0660 /dev/pn544
@@ -288,7 +287,8 @@ on post-fs-data
 
     mkdir /data/misc/audio 0770 audio audio
     mkdir /data/misc/location 0770 gps gps
-    mkdir /data/time 0700 system system
+    # time_daemon reads saved offsets before dropping root to system.
+    mkdir /data/time 0710 system system
     restorecon /mpt /mpt/acc_calibration.dat /mpt/prox_calibration.dat
     mkdir /data/audio 0770 media audio
     chmod 2770 /data/audio
@@ -429,13 +429,13 @@ service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
 service thermald /system/bin/thermald -c /vendor/etc/thermald.conf
     class main
     user root
-    group root
+    group root oem_2950
     disabled
 
 service time_daemon /system/bin/time_daemon
     class late_start
     user root
-    group root qcom_oncrpc oem_2950
+    group root system radio qcom_oncrpc oem_2950
 
 service dhcpcd_wlan0 /system/bin/dhcpcd -aBKAL
     class core

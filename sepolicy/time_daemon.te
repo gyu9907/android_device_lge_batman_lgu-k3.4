@@ -1,5 +1,5 @@
 
-# The stock daemon drops to system:system before using /data/time.
+# The stock daemon drops to system:system before updating /data/time.
 # Keep its existing core-data label rather than broad DAC bypass.
 allow time_daemon time_data_file:dir rw_dir_perms;
 allow time_daemon time_data_file:file create_file_perms;
