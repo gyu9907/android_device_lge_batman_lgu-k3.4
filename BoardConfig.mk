@@ -122,6 +122,8 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/lge/batman_lgu/bluetooth
 BOARD_CUSTOM_BT_CONFIG := device/lge/batman_lgu/bluetooth/vnd_bt.txt
 
 # Graphics
+# Preserve the legacy OMX decoder's uncached-buffer request through Gralloc2.
+TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x02000000
 # Keep the working device-specific lights blob instead of the generic CAF HAL.
 TARGET_PROVIDES_LIBLIGHT := true
 TARGET_QCOM_DISPLAY_VARIANT := caf
