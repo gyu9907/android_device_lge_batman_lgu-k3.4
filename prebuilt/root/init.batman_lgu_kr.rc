@@ -322,6 +322,7 @@ service cnd /system/bin/cnd
 service rmt_storage /system/bin/rmt_storage
     class core
     user root
+    group root system
     disabled
 
 # CM11 preserves androidboot.emmc=true instead of normalizing it to 1.
@@ -355,6 +356,8 @@ service qmuxd /system/bin/qmuxd
 
 service netmgrd /system/bin/netmgrd
     class main
+    user root
+    group root radio oem_2950
     disabled
 
 service qcamerasvr /system/bin/mm-qcamera-daemon
@@ -425,7 +428,7 @@ service thermald /system/bin/thermald -c /vendor/etc/thermald.conf
 service time_daemon /system/bin/time_daemon
     class late_start
     user root
-    group root qcom_oncrpc
+    group root qcom_oncrpc oem_2950
 
 service dhcpcd_wlan0 /system/bin/dhcpcd -aBKAL
     class core
@@ -480,7 +483,8 @@ service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
 service hwaddrs /system/bin/hwaddrs
     class late_start
     user root
-    group root readproc
+    # /data/misc, address files and /dev/diag without CAP_DAC_OVERRIDE.
+    group root readproc misc wifi bluetooth oem_2950
     oneshot
 
 service ami304d /system/bin/ami304d

@@ -1,12 +1,21 @@
-type batman_bt_addr_file, file_type, data_file_type;
-type batman_wifi_addr_file, file_type, data_file_type;
+type batman_bt_addr_file, file_type, data_file_type, core_data_file_type;
+type batman_wifi_addr_file, file_type, data_file_type, core_data_file_type;
 type sysfs_hwaddrs_ready, fs_type, sysfs_type;
 type sysfs_batman_bt_addr, fs_type, sysfs_type;
 type sysfs_batman_wifi_addr, fs_type, sysfs_type;
 
-type batman_qcks_data_file, file_type, data_file_type;
+type batman_qcks_data_file, file_type, data_file_type, core_data_file_type;
 
 type sysfs_batman_usb_state, fs_type, sysfs_type;
 type sysfs_batman_modem_transport, fs_type, sysfs_type;
 type sysfs_batman_power, fs_type, sysfs_type;
 type sysfs_batman_rpm_power, fs_type, sysfs_type;
+
+# Legacy camera daemon sockets under /data; retained from Oreo common policy.
+type camera_socket, file_type, data_file_type, core_data_file_type;
+
+# Calibration files for the retained AMI sensor daemon.
+type sensors_data_file, file_type, data_file_type, core_data_file_type;
+
+# This legacy QCOM type labels /data/system/default_values on batman.
+typeattribute mpctl_data_file core_data_file_type;

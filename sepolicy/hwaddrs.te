@@ -15,7 +15,7 @@ allow hwaddrs { batman_nv_device smem_log_device diag_device }:chr_file rw_file_
 
 # Atomic replacement in /data/misc and /data/misc/wifi, followed by directory fsync.
 # Label temporary files on creation so restorecon needs no relabel permission.
-allow hwaddrs self:capability { chown dac_override fowner };
+allow hwaddrs self:capability { chown fowner };
 allow hwaddrs { system_data_file wifi_data_file }:dir { search getattr open read write add_name remove_name };
 type_transition hwaddrs system_data_file:file batman_bt_addr_file;
 type_transition hwaddrs wifi_data_file:file batman_wifi_addr_file;

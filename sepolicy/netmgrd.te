@@ -1,4 +1,4 @@
 
-allow netmgrd self:capability dac_override;
+# QMUX and diagnostic access use the radio and legacy diagnostic groups.
 # The legacy network manager invokes platform networking utilities via sh.
 allow netmgrd { shell_exec toolbox_exec }:file rx_file_perms;

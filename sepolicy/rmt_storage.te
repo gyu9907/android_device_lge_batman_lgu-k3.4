@@ -1,5 +1,5 @@
 
 allow rmt_storage batman_rmt_device:chr_file rw_file_perms;
-allow rmt_storage self:capability { dac_override dac_read_search };
+# Partition nodes are system:system 0660; init supplies the system group.
 
 allow rmt_storage batman_partition_table_device:blk_file r_file_perms;

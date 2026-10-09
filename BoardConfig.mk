@@ -51,6 +51,30 @@ USE_DEVICE_SPECIFIC_CAMERA := true
 BOARD_NEEDS_MEMORYHEAPPMEM := true
 # Retain the SELinux text-relocation compatibility policy.
 TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
+# Lineage Pie linker compatibility for the verified legacy blob hosts only.
+# HAL1 camera runs in mediaserver; AMI has its own exec payload. Match /proc/self/exe,
+# including the actual payload path after the native wrapper calls execv().
+# Never apply this to app_process/system_server or arbitrary applications.
+TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
+    /system/bin/audioserver=22 \
+    /system/bin/mediaserver=22 \
+    /system/bin/rild=22 \
+    /system/bin/hwaddrs=22 \
+    /system/vendor/libexec/batman/cnd=22 \
+    /system/vendor/libexec/batman/ks=22 \
+    /system/vendor/libexec/batman/mpdecision=22 \
+    /system/vendor/libexec/batman/netmgrd=22 \
+    /system/vendor/libexec/batman/qcks=22 \
+    /system/vendor/libexec/batman/qmiproxy=22 \
+    /system/vendor/libexec/batman/qmuxd=22 \
+    /system/vendor/libexec/batman/qseecomd=22 \
+    /system/vendor/libexec/batman/rmt_storage=22 \
+    /system/vendor/libexec/batman/thermald=22 \
+    /system/vendor/libexec/batman/time_daemon=22 \
+    /system/vendor/libexec/batman/bridgemgrd=22 \
+    /system/vendor/libexec/batman/port-bridge=22 \
+    /system/vendor/libexec/batman/mm-qcamera-daemon=22 \
+    /system/vendor/libexec/batman/ami304d=22
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 # Oreo's linker reads shim mappings from the product configuration at build
 # time; init's LD_SHIM_LIBS environment variable is no longer consulted.
