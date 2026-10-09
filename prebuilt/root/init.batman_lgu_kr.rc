@@ -311,9 +311,9 @@ on post-fs-data
     write /sys/module/subsystem_restart/parameters/enable_ramdumps 1
     setprop vold.post_fs_data_done 1
 
-# Parsed before the default OMX service rc. Legacy VIDC and audio encoder
-# devices belong to the audio group, which the default Oreo service omits.
-service mediacodec /vendor/bin/hw/android.hardware.media.omx@1.0-service
+# Match the Pie OMX service name so the existing audio-group definition
+# replaces the default service instead of starting a second OMX process.
+service vendor.media.omx /vendor/bin/hw/android.hardware.media.omx@1.0-service
     class main
     user mediacodec
     group camera audio drmrpc mediadrm
