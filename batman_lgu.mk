@@ -13,6 +13,9 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay
 
+# Override the common Lineage DocumentsUI start root for physical storage.
+PRODUCT_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay-product
+
 # This device is xhdpi.  However the platform doesn't
 # currently contain all of the bitmaps at xhdpi density so
 # we do this little trick to fall back to the hdpi version

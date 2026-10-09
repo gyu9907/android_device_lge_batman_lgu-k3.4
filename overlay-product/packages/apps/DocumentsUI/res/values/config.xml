@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The physical primary volume has a filesystem UUID, not the emulated
+         "primary" root ID. Keep Oreo's Downloads start location; all storage
+         roots remain available in the navigation drawer. -->
+    <string name="default_root_uri" translatable="false">content://com.android.providers.downloads.documents/root/downloads</string>
+</resources>
