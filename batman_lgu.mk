@@ -13,6 +13,8 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay
 
+# Keep the platform boot profile and add the device color-extraction hot path.
+PRODUCT_DEX_PREOPT_BOOT_IMAGE_PROFILE_LOCATION := $(OUT_DIR)/target/product/batman_lgu/obj/ETC/batman_boot_image_profile_intermediates/boot-image-profile.txt
 # Override the common Lineage DocumentsUI start root for physical storage.
 PRODUCT_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay-product
 
