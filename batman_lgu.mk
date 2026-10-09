@@ -200,12 +200,12 @@ PRODUCT_PACKAGES += \
     batman_legacy_port-bridge \
     batman_legacy_mm-qcamera-daemon
 
-# Oreo core HIDL services. Keep HWC1; audio/camera/OMX wrappers are enabled
-# separately after their legacy implementations have been ported.
+# Pie core HIDL services. Preserve the device-specific HWC1 and legacy wrappers.
 PRODUCT_PACKAGES += \
-    android.hardware.configstore@1.0-service \
+    android.hardware.configstore@1.1-service \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
+    android.hardware.graphics.composer@2.1-impl \
     android.hardware.graphics.mapper@2.0-impl \
     android.hardware.memtrack@1.0-impl \
     memtrack.msm8660
