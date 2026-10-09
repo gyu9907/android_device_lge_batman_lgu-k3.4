@@ -173,10 +173,10 @@ PRODUCT_PACKAGES += \
 # src
 PRODUCT_PACKAGES += \
     hwaddrs \
-    firmware_init
+    firmware_init \
+    lights.msm8660
 #    ami304d \
 #    audio.primary.batman_lgu \
-#    lights.batman_lgu \
 #    power.batman_lgu
 
 # Device-local legacy Qualcomm RIL

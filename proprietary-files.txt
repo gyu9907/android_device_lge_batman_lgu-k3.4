@@ -127,7 +127,6 @@ lib/libtime_remote_atom.so:vendor/lib/libtime_remote_atom.so
 lib/hw/sensors.msm8660.so:vendor/lib/hw/sensors.vendor.msm8660.so
 
 # Lights
-lib/hw/lights.msm8660.so:vendor/lib/hw/lights.msm8660.so
 
 # NFC
 etc/nfcee_access.xml

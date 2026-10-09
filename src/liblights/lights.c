@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2017 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,408 +15,233 @@
  * limitations under the License.
  */
 
-
-// #define LOG_NDEBUG 0
-#define LOG_TAG "lights"
-
-#include <cutils/log.h>
-
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
+/*
+ * State/handler organization follows the Apache-2.0 LineageOS references:
+ * mako: 5b211791f83b63a22c0d6055d256de71b484345b, liblight/lights.c
+ * g2-common: 5e4b5a576e27597ede4628f9259934583afb0209, lights/Light.cpp
+ * Hardware behavior is reconstructed from batman's original lights.msm8660.so
+ * SHA256 bddcf3e92153d68cffbd4394b3207fe30c53c98a3f3fcf2937d5dbb9a18da5f9.
+ * Do not substitute Mako's LED PWM/lock or G2's gamma/blink-pattern interfaces.
+ */
+#define LOG_TAG "lights.msm8660"
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
-
-#include <sys/ioctl.h>
-#include <sys/types.h>
-
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <hardware/lights.h>
+#include <log/log.h>
 
-/******************************************************************************/
+static const char LCD_FILE[] = "/sys/class/leds/lcd-backlight/brightness";
+static const char BUTTON_FILE[] = "/sys/class/leds/button-backlight/brightness";
+/* This kernel name denotes the power-button LED, not a physical keyboard. */
+static const char KEYBOARD_FILE[] = "/sys/class/leds/keyboard-backlight/brightness";
+static const char RED_FILE[] = "/sys/class/leds/red/brightness";
+static const char GREEN_FILE[] = "/sys/class/leds/green/brightness";
+static const char BLUE_FILE[] = "/sys/class/leds/blue/brightness";
 
-static pthread_once_t g_init = PTHREAD_ONCE_INIT;
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
-static int g_haveTrackballLight = 0;
-static struct light_state_t g_notification;
-static struct light_state_t g_battery;
-static int g_backlight = 255;
-static int g_trackball = -1;
-static int g_buttons = 0;
-static int g_attention = 0;
-static int g_haveAmberLed = 0;
+static pthread_once_t g_once = PTHREAD_ONCE_INIT;
+static pthread_mutex_t g_lock;
+static struct {
+    struct light_state_t battery;
+    struct light_state_t notification;
+    int32_t attention;
+    uint32_t buttons;
+} g_state;
+static int g_warned;
 
-char const*const TRACKBALL_FILE
-        = "/sys/class/leds/jogball-backlight/brightness";
-
-char const*const RED_LED_FILE
-        = "/sys/class/leds/red/brightness";
-
-char const*const GREEN_LED_FILE
-        = "/sys/class/leds/green/brightness";
-
-char const*const BLUE_LED_FILE
-        = "/sys/class/leds/blue/brightness";
-
-char const*const AMBER_LED_FILE
-        = "/sys/class/leds/amber/brightness";
-
-char const*const LCD_FILE
-        = "/sys/class/leds/lcd-backlight/brightness";
-
-char const*const RED_FREQ_FILE
-        = "/sys/class/leds/red/device/grpfreq";
-
-char const*const RED_PWM_FILE
-        = "/sys/class/leds/red/device/grppwm";
-
-char const*const RED_BLINK_FILE
-        = "/sys/class/leds/red/device/blink";
-
-char const*const AMBER_BLINK_FILE
-        = "/sys/class/leds/amber/blink";
-
-char const*const KEYBOARD_FILE
-        = "/sys/class/leds/keyboard-backlight/brightness";
-
-char const*const BUTTON_FILE
-        = "/sys/class/leds/button-backlight/brightness";
-
-/**
- * device methods
- */
-
-void init_globals(void)
+static void initialize(void)
 {
-    // init the mutex
     pthread_mutex_init(&g_lock, NULL);
-
-    // figure out if we have the trackball LED or not
-    g_haveTrackballLight = (access(TRACKBALL_FILE, W_OK) == 0) ? 1 : 0;
-
-    /* figure out if we have the amber LED or not.
-       If yes, just support green and amber.         */
-    g_haveAmberLed = (access(AMBER_LED_FILE, W_OK) == 0) ? 1 : 0;
 }
 
-static int
-write_int(char const* path, int value)
+/* Preserve the blob's single-record I/O and legacy return-value convention.
+ * In particular, short writes and close failures did not change a successful
+ * write's result. Shared RGB callers below intentionally ignore this result.
+ */
+static int write_node(const char *path, int32_t value)
 {
-    int fd;
-    static int already_warned = 0;
-
-    fd = open(path, O_RDWR);
-    if (fd >= 0) {
-        char buffer[20];
-        int bytes = sprintf(buffer, "%d\n", value);
-        int amt = write(fd, buffer, bytes);
-        close(fd);
-        return amt == -1 ? -errno : 0;
-    } else {
-        if (already_warned == 0) {
-            ALOGE("write_int failed to open %s\n", path);
-            already_warned = 1;
+    int fd = open(path, O_RDWR);
+    if (fd < 0) {
+        if (!g_warned) {
+            ALOGE("write_int failed to open %s", path);
+            g_warned = 1;
         }
         return -errno;
     }
+    char buffer[20];
+    int length = snprintf(buffer, sizeof(buffer), "%d\n", value);
+    ssize_t written = write(fd, buffer, (size_t)length);
+    close(fd);
+    return written == -1 ? -errno : 0;
 }
 
-static int
-is_lit(struct light_state_t const* state)
+static int32_t two_level(uint32_t component)
 {
-    return state->color & 0x00ffffff;
+    return component > 128 ? 2 : component != 0;
 }
 
-static int
-handle_trackball_light_locked(struct light_device_t* dev)
+static void write_shared_rgb(const struct light_state_t *state)
 {
-    int mode = g_attention;
+    int32_t red = two_level((state->color >> 16) & 255);
+    int32_t green = two_level((state->color >> 8) & 255);
+    int32_t blue = state->color & 255;
+    /* The original ARM code's low-blue branch changes RED to 1 and leaves
+     * BLUE at 1..128. Preserve this observable quirk rather than "fixing" it.
+     * Blob: 0xa94..0xaa6, confirmed by emulated syscall traces.
+     */
+    if (blue > 128)
+        blue = 2;
+    else if (blue != 0)
+        red = 1;
 
-    if (mode == 7 && g_backlight) {
-        mode = 0;
+    write_node(RED_FILE, red);
+    write_node(GREEN_FILE, green);
+    write_node(BLUE_FILE, blue);
+    if (state->flashMode == LIGHT_FLASH_TIMED &&
+        state->flashOnMS > 0 && state->flashOffMS > 0) {
+        /* ARM adds modulo 2^32 before signed division. No C signed overflow. */
+        int32_t total = (int32_t)((uint32_t)state->flashOnMS +
+                                 (uint32_t)state->flashOffMS);
+        /* The blob writes the period to red/brightness, not a PWM node. */
+        write_node(RED_FILE, total / 50);
     }
-    ALOGV("%s g_backlight = %d, mode = %d, g_attention = %d\n",
-        __func__, g_backlight, mode, g_attention);
-
-    // If the value isn't changing, don't set it, because this
-    // can reset the timer on the breathing mode, which looks bad.
-    if (g_trackball == mode) {
-        return 0;
-    }
-
-    return write_int(TRACKBALL_FILE, mode);
 }
 
-static int
-rgb_to_brightness(struct light_state_t const* state)
+static void update_shared(void)
 {
-    int color = state->color & 0x00ffffff;
-    return ((77*((color>>16)&0x00ff))
-            + (150*((color>>8)&0x00ff)) + (29*(color&0x00ff))) >> 8;
+    /* Blob 0xafc selects the battery state before the notification state. */
+    write_shared_rgb((g_state.battery.color & 0x00ffffff) ?
+                     &g_state.battery : &g_state.notification);
 }
 
-static int
-set_light_backlight(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_backlight(struct light_device_t *device,
+                         const struct light_state_t *state)
 {
-    int err = 0;
-    int brightness = rgb_to_brightness(state);
+    (void)device;
+    if (!state) return -EINVAL;
+    uint32_t color = state->color;
+    int32_t value = (77 * ((color >> 16) & 255) +
+                     150 * ((color >> 8) & 255) + 29 * (color & 255)) >> 8;
     pthread_mutex_lock(&g_lock);
-    g_backlight = brightness;
-    err = write_int(LCD_FILE, brightness);
-    if (g_haveTrackballLight) {
-        handle_trackball_light_locked(dev);
-    }
+    int result = write_node(LCD_FILE, value);
     pthread_mutex_unlock(&g_lock);
-    return err;
+    return result;
 }
 
-static int
-set_light_keyboard(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_buttons(struct light_device_t *device,
+                       const struct light_state_t *state)
 {
-    int err = 0;
-    int on = is_lit(state);
+    (void)device;
+    if (!state) return -EINVAL;
     pthread_mutex_lock(&g_lock);
-    err = write_int(KEYBOARD_FILE, on?255:0);
+    g_state.buttons = state->color & 0x00ffffff;
+    int result = write_node(BUTTON_FILE, g_state.buttons ? 255 : 0);
     pthread_mutex_unlock(&g_lock);
-    return err;
+    return result;
 }
 
-static int
-set_light_buttons(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_keyboard(struct light_device_t *device,
+                        const struct light_state_t *state)
 {
-    int err = 0;
-    int on = is_lit(state);
+    (void)device;
+    if (!state) return -EINVAL;
     pthread_mutex_lock(&g_lock);
-    g_buttons = on;
-    err = write_int(BUTTON_FILE, on?255:0);
+    int result = write_node(KEYBOARD_FILE, (state->color & 0x00ffffff) ? 255 : 0);
     pthread_mutex_unlock(&g_lock);
-    return err;
+    return result;
 }
 
-static int
-set_speaker_light_locked(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_battery(struct light_device_t *device,
+                       const struct light_state_t *state)
 {
-    int len;
-    int alpha, red, green, blue;
-    int blink, freq, pwm;
-    int onMS, offMS;
-    unsigned int colorRGB;
-
-    switch (state->flashMode) {
-        case LIGHT_FLASH_TIMED:
-            onMS = state->flashOnMS;
-            offMS = state->flashOffMS;
-            break;
-        case LIGHT_FLASH_NONE:
-        default:
-            onMS = 0;
-            offMS = 0;
-            break;
-    }
-
-    colorRGB = state->color;
-
-#if 0
-    ALOGD("set_speaker_light_locked colorRGB=%08X, onMS=%d, offMS=%d\n",
-            colorRGB, onMS, offMS);
-#endif
-
-    red = (colorRGB >> 16) & 0xFF;
-    green = (colorRGB >> 8) & 0xFF;
-    blue = colorRGB & 0xFF;
-
-    if (!g_haveAmberLed) {
-        write_int(RED_LED_FILE, red);
-        write_int(GREEN_LED_FILE, green);
-        write_int(BLUE_LED_FILE, blue);
-    } else {
-        /* all of related red led is replaced by amber */
-        if (red) {
-            write_int(AMBER_LED_FILE, 1);
-            write_int(GREEN_LED_FILE, 0);
-        } else if (green) {
-            write_int(AMBER_LED_FILE, 0);
-            write_int(GREEN_LED_FILE, 1);
-        } else {
-            write_int(GREEN_LED_FILE, 0);
-            write_int(AMBER_LED_FILE, 0);
-        }
-    }
-
-    if (onMS > 0 && offMS > 0) {
-        int totalMS = onMS + offMS;
-
-        // the LED appears to blink about once per second if freq is 20
-        // 1000ms / 20 = 50
-        freq = totalMS / 50;
-        // pwm specifies the ratio of ON versus OFF
-        // pwm = 0 -> always off
-        // pwm = 255 => always on
-        pwm = (onMS * 255) / totalMS;
-
-        // the low 4 bits are ignored, so round up if necessary
-        if (pwm > 0 && pwm < 16)
-            pwm = 16;
-
-        blink = 1;
-    } else {
-        blink = 0;
-        freq = 0;
-        pwm = 0;
-    }
-
-    if (!g_haveAmberLed) {
-        if (blink) {
-            write_int(RED_FREQ_FILE, freq);
-            write_int(RED_PWM_FILE, pwm);
-        }
-        write_int(RED_BLINK_FILE, blink);
-    } else {
-        write_int(AMBER_BLINK_FILE, blink);
-    }
-
-    return 0;
-}
-
-static void
-handle_speaker_battery_locked(struct light_device_t* dev)
-{
-    if (is_lit(&g_battery)) {
-        set_speaker_light_locked(dev, &g_battery);
-    } else {
-        set_speaker_light_locked(dev, &g_notification);
-    }
-}
-
-static int
-set_light_battery(struct light_device_t* dev,
-        struct light_state_t const* state)
-{
+    (void)device;
+    if (!state) return -EINVAL;
     pthread_mutex_lock(&g_lock);
-    g_battery = *state;
-    if (g_haveTrackballLight) {
-        set_speaker_light_locked(dev, state);
-    }
-    handle_speaker_battery_locked(dev);
+    g_state.battery = *state;
+    update_shared();
     pthread_mutex_unlock(&g_lock);
     return 0;
 }
 
-static int
-set_light_notifications(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_notification(struct light_device_t *device,
+                            const struct light_state_t *state)
 {
+    (void)device;
+    if (!state) return -EINVAL;
     pthread_mutex_lock(&g_lock);
-    g_notification = *state;
-    ALOGV("set_light_notifications g_trackball=%d color=0x%08x",
-            g_trackball, state->color);
-    if (g_haveTrackballLight) {
-        handle_trackball_light_locked(dev);
-    }
-    handle_speaker_battery_locked(dev);
+    g_state.notification = *state;
+    update_shared();
     pthread_mutex_unlock(&g_lock);
     return 0;
 }
 
-static int
-set_light_attention(struct light_device_t* dev,
-        struct light_state_t const* state)
+static int set_attention(struct light_device_t *device,
+                         const struct light_state_t *state)
 {
+    (void)device;
+    if (!state) return -EINVAL;
     pthread_mutex_lock(&g_lock);
-    ALOGV("set_light_attention g_trackball=%d color=0x%08x",
-            g_trackball, state->color);
-    if (state->flashMode == LIGHT_FLASH_HARDWARE) {
-        g_attention = state->flashOnMS;
-    } else if (state->flashMode == LIGHT_FLASH_NONE) {
-        g_attention = 0;
-    }
-    if (g_haveTrackballLight) {
-        handle_trackball_light_locked(dev);
-    }
+    if (state->flashMode == LIGHT_FLASH_HARDWARE)
+        g_state.attention = state->flashOnMS;
+    else if (state->flashMode == LIGHT_FLASH_NONE)
+        g_state.attention = 0;
+    /* The blob stores attention but does not use it to select RGB output. */
+    update_shared();
     pthread_mutex_unlock(&g_lock);
     return 0;
 }
 
-
-/** Close the lights device */
-static int
-close_lights(struct light_device_t *dev)
+static int close_lights(struct hw_device_t *device)
 {
-    if (dev) {
-        free(dev);
-    }
+    free(device);
     return 0;
 }
 
-
-/******************************************************************************/
-
-/**
- * module methods
- */
-
-/** Open a new instance of a lights device using name */
-static int open_lights(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
-{
-    int (*set_light)(struct light_device_t* dev,
-            struct light_state_t const* state);
-
-    if (0 == strcmp(LIGHT_ID_BACKLIGHT, name)) {
-        set_light = set_light_backlight;
-    }
-    else if (0 == strcmp(LIGHT_ID_KEYBOARD, name)) {
-        set_light = set_light_keyboard;
-    }
-    else if (0 == strcmp(LIGHT_ID_BUTTONS, name)) {
-        set_light = set_light_buttons;
-    }
-    else if (0 == strcmp(LIGHT_ID_BATTERY, name)) {
-        set_light = set_light_battery;
-    }
-    else if (0 == strcmp(LIGHT_ID_NOTIFICATIONS, name)) {
-        set_light = set_light_notifications;
-    }
-    else if (0 == strcmp(LIGHT_ID_ATTENTION, name)) {
-        set_light = set_light_attention;
-    }
-    else {
-        return -EINVAL;
-    }
-
-    pthread_once(&g_init, init_globals);
-
-    struct light_device_t *dev = malloc(sizeof(struct light_device_t));
-    memset(dev, 0, sizeof(*dev));
-
-    dev->common.tag = HARDWARE_DEVICE_TAG;
-    dev->common.version = 0;
-    dev->common.module = (struct hw_module_t*)module;
-    dev->common.close = (int (*)(struct hw_device_t*))close_lights;
-    dev->set_light = set_light;
-
-    *device = (struct hw_device_t*)dev;
-    return 0;
-}
-
-
-static struct hw_module_methods_t lights_module_methods = {
-    .open =  open_lights,
+static const struct {
+    const char *name;
+    int (*set)(struct light_device_t *, const struct light_state_t *);
+} handlers[] = {
+    { LIGHT_ID_BACKLIGHT, set_backlight },
+    { LIGHT_ID_KEYBOARD, set_keyboard },
+    { LIGHT_ID_BUTTONS, set_buttons },
+    { LIGHT_ID_BATTERY, set_battery },
+    { LIGHT_ID_NOTIFICATIONS, set_notification },
+    { LIGHT_ID_ATTENTION, set_attention },
 };
 
-/*
- * The lights Module
- */
+static int open_lights(const struct hw_module_t *module, const char *name,
+                       struct hw_device_t **device)
+{
+    if (!device) return -EINVAL;
+    *device = NULL;
+    if (!module || !name) return -EINVAL;
+    for (size_t i = 0; i < sizeof(handlers) / sizeof(handlers[0]); ++i) {
+        if (strcmp(name, handlers[i].name) != 0) continue;
+        pthread_once(&g_once, initialize);
+        struct light_device_t *light = calloc(1, sizeof(*light));
+        if (!light) return -ENOMEM;
+        light->common.tag = HARDWARE_DEVICE_TAG;
+        light->common.version = 0;
+        light->common.module = (struct hw_module_t *)module;
+        light->common.close = close_lights;
+        light->set_light = handlers[i].set;
+        *device = &light->common;
+        return 0;
+    }
+    return -EINVAL;
+}
+
+static struct hw_module_methods_t methods = { .open = open_lights };
 struct hw_module_t HAL_MODULE_INFO_SYM = {
     .tag = HARDWARE_MODULE_TAG,
     .version_major = 1,
     .version_minor = 0,
     .id = LIGHTS_HARDWARE_MODULE_ID,
-    .name = "QCT MSM7K lights Module",
-    .author = "Google, Inc.",
-    .methods = &lights_module_methods,
+    .name = "LGE batman lights module",
+    .author = "The Android Open Source Project, The LineageOS Project",
+    .methods = &methods,
 };
