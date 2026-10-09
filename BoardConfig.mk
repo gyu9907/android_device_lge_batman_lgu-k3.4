@@ -20,9 +20,11 @@ DEVICE_MANIFEST_FILE := device/lge/batman_lgu/manifest.xml
 TARGET_BOARD_PLATFORM := msm8660
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 
-# Use the Oreo Qualcomm policy split, without the optional permissive tests.
+# Preserve the current Qualcomm policy baseline and exclude Pie test domains.
+# The broad legacy include requires a separate neverallow compatibility audit.
 include device/qcom/sepolicy/sepolicy.mk
-BOARD_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy/test,$(BOARD_SEPOLICY_DIRS))
+BOARD_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy/vendor/test,$(BOARD_SEPOLICY_DIRS))
+SELINUX_IGNORE_NEVERALLOWS := false
 BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
 
 TARGET_ARCH := arm
@@ -47,6 +49,7 @@ TARGET_BOOTANIMATION_PRELOAD := true
 # Camera
 USE_DEVICE_SPECIFIC_CAMERA := true
 BOARD_NEEDS_MEMORYHEAPPMEM := true
+# Retain the SELinux text-relocation compatibility policy.
 TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 # Oreo's linker reads shim mappings from the product configuration at build
@@ -75,6 +78,8 @@ BOARD_GLOBAL_CFLAGS += -DQCOM_ACDB_ENABLED -DLEGACY_QCOM_VOICE
 TARGET_USES_ION_AUDIO := true
 TARGET_QCOM_AUDIO_VARIANT := caf
 BOARD_USES_LEGACY_ALSA_AUDIO := true
+# Use the msm8660 policy implementation instead of the shared QCOM policy HAL.
+USE_LEGACY_AUDIO_POLICY := 1
 AUDIO_FEATURE_ENABLED_COMPRESS_VOIP := false
 AUDIO_FEATURE_ENABLED_PROXY_DEVICE := false
 
@@ -129,7 +134,8 @@ BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
 TARGET_KERNEL_SOURCE := kernel/lge/msm8660
 TARGET_KERNEL_CONFIG := batman_lgu_defconfig
 TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
-KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_PREBUILT_TAG)/arm/arm-eabi-4.8/bin
+TARGET_KERNEL_ADDITIONAL_FLAGS := -j16
+KERNEL_TOOLCHAIN := $(abspath prebuilts/gcc/$(HOST_PREBUILT_TAG)/arm/arm-eabi-4.8/bin)
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
@@ -180,7 +186,7 @@ TARGET_RECOVERY_FSTAB := device/lge/batman_lgu/prebuilt/root/fstab.batman_lgu_kr
 TARGET_USERIMAGES_USE_EXT4 := true
 
 # CyanogenMod hardware abstraction
-BOARD_HARDWARE_CLASS := device/lge/batman_lgu/lineagehw/
+JAVA_SOURCE_OVERLAYS := org.lineageos.hardware|device/lge/batman_lgu/lineagehw|**/*.java
 
 # Legacy LGE Qualcomm RIL compatibility
 BOARD_PROVIDES_LIBRIL := true

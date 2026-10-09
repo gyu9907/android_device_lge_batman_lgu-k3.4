@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage.mk
+    lineage_batman_lgu:$(LOCAL_DIR)/lineage.mk
