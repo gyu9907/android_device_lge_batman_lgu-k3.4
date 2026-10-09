@@ -6,7 +6,7 @@ VENDOR=lge
 DEVICE=batman_lgu
 OUTDIR=vendor/$VENDOR/$DEVICE
 MAKEFILE=../../../$OUTDIR/$DEVICE-vendor-blobs.mk
-LINK_LIBRARIES="liboncrpc libnv libaudioalsa libacdbloader libacdbmapper libstlport libgps.utils"
+LINK_LIBRARIES="liboncrpc libnv libaudioalsa libacdbloader libacdbmapper libstlport libgps.utils libpn544_fw"
 
 (cat << EOF) > $MAKEFILE
 # Copyright (C) 2011 The CyanogenMod Project
@@ -40,7 +40,7 @@ for ENTRY in `egrep -v '(^#|^$)' proprietary-files.txt`; do
     continue
   fi
   case "$FILE" in
-    lib/liboncrpc.so|lib/libnv.so|lib/libaudioalsa.so|lib/libacdbloader.so|lib/libacdbmapper.so|lib/libstlport.so|lib/libgps.utils.so)
+    lib/liboncrpc.so|lib/libnv.so|lib/libaudioalsa.so|lib/libacdbloader.so|lib/libacdbmapper.so|lib/libstlport.so|lib/libgps.utils.so|vendor/firmware/libpn544_fw.so)
       continue
       ;;
   esac
