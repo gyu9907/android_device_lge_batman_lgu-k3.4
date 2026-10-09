@@ -159,4 +159,6 @@
 
     <!-- The legacy sensor HAL does not provide reliable event timestamps. -->
     <bool name="config_useSystemClockforRotationSensor">true</bool>
+    <!-- Legacy camera service runs inside mediaserver on this HAL1 device. -->
+    <bool name="config_allowMediaUidForCameraServiceProxy">true</bool>
 </resources>
