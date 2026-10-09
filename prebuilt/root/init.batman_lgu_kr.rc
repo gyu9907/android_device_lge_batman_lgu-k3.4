@@ -262,6 +262,8 @@ on post-fs
     mkdir /data/wmdrm 0770 lgdrm lgdrm_acc
 
 on post-fs-data
+    # Relabel existing legacy calibration files; do not create or truncate them.
+    restorecon /data/st_compass.dat /data/st_gbias.dat
     restorecon /sys/devices/platform/msm_hsusb/gadget/usb_state
     restorecon /sys/devices/virtual/android_usb/android0/f_rmnet_smd_sdio/transport
     restorecon /data/cam_socket0

@@ -41,6 +41,7 @@
 /system/bin/port-bridge                  u:object_r:port-bridge_exec:s0
 /system/bin/mm-qcamera-daemon            u:object_r:mm-qcamerad_exec:s0
 /data/(amit|gesture)(/.*)?               u:object_r:sensors_data_file:s0
+/data/st_(compass|gbias)\.dat            u:object_r:batman_sensor_calibration_file:s0
 /data/cam_socket[0-9]+                   u:object_r:camera_socket:s0
 /data/system/default_values             u:object_r:mpctl_data_file:s0
 /dev/socket/mpctl                       u:object_r:mpctl_socket:s0
@@ -60,3 +61,8 @@
 /dev/block/mmcblk0 u:object_r:batman_partition_table_device:s0
 /sys/devices/platform/msm_hsusb/gadget/usb_state u:object_r:sysfs_batman_usb_state:s0
 /sys/devices/virtual/android_usb/android0/f_rmnet_smd_sdio/transport u:object_r:sysfs_batman_modem_transport:s0
+
+# LGE input sensor controls; ueventd restores these exact attributes on coldplug.
+/sys/devices/virtual/input/input[0-9]+/(enable|poll_delay|proximity_enable|light_enable) u:object_r:sysfs_sensors:s0
+# Keep the dedicated service distinct from the platform's default module.
+/(vendor|system/vendor)/bin/hw/android\.hardware\.sensors@1\.0-service\.batman u:object_r:hal_sensors_default_exec:s0

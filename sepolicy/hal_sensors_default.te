@@ -1,0 +1,6 @@
+# Preserve the hardware access formerly exercised inside system_server.
+allow hal_sensors_default sensors_device:chr_file rw_file_perms;
+# Shared hal_sensors policy provides read-only input and labeled sensor sysfs rw.
+# Access existing calibration files only. Do not allow creating files in /data.
+allow hal_sensors_default system_data_file:dir search;
+allow hal_sensors_default batman_sensor_calibration_file:file rw_file_perms;

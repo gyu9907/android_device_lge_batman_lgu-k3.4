@@ -227,6 +227,7 @@ PRODUCT_PACKAGES += \
     android.hardware.power@1.0-impl \
     power.batman_lgu_kr \
     android.hardware.sensors@1.0-impl \
+    android.hardware.sensors@1.0-service.batman \
     android.hardware.vibrator@1.0-impl \
     vibrator.default \
     android.hardware.wifi@1.0-service \

@@ -74,7 +74,8 @@ TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
     /system/vendor/libexec/batman/bridgemgrd=22 \
     /system/vendor/libexec/batman/port-bridge=22 \
     /system/vendor/libexec/batman/mm-qcamera-daemon=22 \
-    /system/vendor/libexec/batman/ami304d=22
+    /system/vendor/libexec/batman/ami304d=22 \
+    /system/vendor/bin/hw/android.hardware.sensors@1.0-service.batman=22
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 # Oreo's linker reads shim mappings from the product configuration at build
 # time; init's LD_SHIM_LIBS environment variable is no longer consulted.

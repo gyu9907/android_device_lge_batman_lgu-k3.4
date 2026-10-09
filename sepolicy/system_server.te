@@ -1,4 +1,3 @@
 
-allow system_server persist_file:dir search;
-# The legacy sensors HAL runs in SensorService via the passthrough transport.
-allow system_server sensors_device:chr_file rw_file_perms;
+# No legacy sensor path uses /persist; keep vendor persist outside system_server.
+# Hardware access belongs to the separate hal_sensors_default process.

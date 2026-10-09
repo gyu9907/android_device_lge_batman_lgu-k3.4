@@ -25,6 +25,8 @@
 #include <pthread.h>
 #include <set>
 
+#include "calibration_validation.h"
+
 namespace {
 
 const char kVendorHalPath[] = "/vendor/lib/hw/sensors.vendor.msm8660.so";
@@ -33,6 +35,28 @@ void* gVendorHandle;
 sensors_module_t* gVendorModule;
 sensor_t* gFilteredSensors;
 int gFilteredSensorCount = -1;
+std::once_flag gCalibrationCheck;
+bool gCalibrationUsable = false;
+
+bool calibrationUsable() {
+    std::call_once(gCalibrationCheck, [] {
+        const char* gyro = batman::validateCalibration(
+                "/data/st_gbias.dat", batman::CalibrationKind::Gyro);
+        const char* compass = batman::validateCalibration(
+                "/data/st_compass.dat", batman::CalibrationKind::Compass);
+        gCalibrationUsable = gyro == nullptr && compass == nullptr;
+        if (!gCalibrationUsable) {
+            // Reject malformed existing data before entering the legacy blob,
+            // whose fread calls ignore short reads. Report failure to the caller.
+            // Missing files are allowed: the blob initializes and saves its own bias.
+            // Latch this decision until process restart; do not fabricate data.
+            ALOGE("Invalid legacy sensor calibration: gyro=%s; compass=%s. "
+                  "Calibration files were left unchanged.",
+                  gyro ? gyro : "valid", compass ? compass : "valid");
+        }
+    });
+    return gCalibrationUsable;
+}
 
 int loadVendorModule() {
     if (gVendorModule != NULL) {
@@ -57,6 +81,11 @@ int loadVendorModule() {
 }
 
 int getSensorsList(sensors_module_t*, const sensor_t** list) {
+    if (!list) return -EINVAL;
+    if (!calibrationUsable()) {
+        *list = nullptr;
+        return -EINVAL;
+    }
     int error = loadVendorModule();
     if (error != 0) {
         *list = NULL;
@@ -287,7 +316,8 @@ int openSensors(const hw_module_t* module, const char* id, hw_device_t** device)
     if (error != 0) return error;
     if (!state->vendor || !state->vendor->activate || !state->vendor->setDelay ||
             !state->vendor->poll) return -EINVAL;
-    auto* self = new SensorDevice();
+    // Optional 1.4/direct-channel hooks must remain null.
+    auto* self = new SensorDevice{};
     self->state = state;
     self->device.common.tag = HARDWARE_DEVICE_TAG;
     self->device.common.version = SENSORS_DEVICE_API_VERSION_1_3;

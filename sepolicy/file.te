@@ -17,5 +17,8 @@ type camera_socket, file_type, data_file_type, core_data_file_type;
 # Calibration files for the retained AMI sensor daemon.
 type sensors_data_file, file_type, data_file_type, core_data_file_type;
 
+# The two calibration files used directly by the legacy sensor HAL.
+type batman_sensor_calibration_file, file_type, data_file_type, core_data_file_type;
+
 # This legacy QCOM type labels /data/system/default_values on batman.
 typeattribute mpctl_data_file core_data_file_type;
