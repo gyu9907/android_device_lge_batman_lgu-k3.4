@@ -54,7 +54,26 @@ static void startPartialTile() {
     gTile.active = true;
 }
 extern "C" __attribute__((visibility("default"))) void batmanPartialBeforeBind(GLenum target, GLuint id) {
-    if (gTile.frame && target == GL_FRAMEBUFFER && id != gTile.framebuffer) closeTile(false);
+    if (!gTile.frame) return;
+    // The p930 driver ends application tiling for either read or draw FBO
+    // changes. Skia blits use the ANGLE split targets even on this ES2 device.
+    if (target != GL_FRAMEBUFFER && target != GL_READ_FRAMEBUFFER_ANGLE &&
+            target != GL_DRAW_FRAMEBUFFER_ANGLE) return;
+    bool changed = id != gTile.framebuffer;
+    if (target == GL_READ_FRAMEBUFFER_ANGLE ||
+            (target == GL_FRAMEBUFFER && !changed)) {
+        using Get = void (*)(GLenum, GLint*);
+        static auto get = reinterpret_cast<Get>(tileGl("glGetIntegerv"));
+        GLint readFramebuffer = 0;
+        get(GL_READ_FRAMEBUFFER_BINDING_ANGLE, &readFramebuffer);
+        changed = id != static_cast<GLuint>(readFramebuffer);
+    }
+    if (changed) closeTile(false);
+}
+extern "C" __attribute__((visibility("default"))) void batmanPartialBeforeDelete(GLsizei count) {
+    // Deleting even an unbound FBO detaches its attachments in the p930
+    // driver, which resolves the current target and ends application tiling.
+    if (gTile.frame && count > 0) closeTile(false);
 }
 extern "C" __attribute__((visibility("default"))) void batmanPartialAfterBind() {
     if (!gTile.frame) return;
@@ -129,5 +148,13 @@ static void bindFramebufferOesWithPartialTiles(unsigned int target, unsigned int
     static auto bind = reinterpret_cast<Bind>(gGetProcAddress("glBindFramebufferOES"));
     batmanPartialBeforeBind(target,framebuffer);
     bind(target,framebuffer);
+    batmanPartialAfterBind();
+}
+
+static void deleteFramebuffersWithPartialTiles(int count, const unsigned int* framebuffers) {
+    using Delete = void (*)(GLsizei, const GLuint*);
+    static auto remove = reinterpret_cast<Delete>(tileGl("glDeleteFramebuffers"));
+    batmanPartialBeforeDelete(count);
+    remove(count, framebuffers);
     batmanPartialAfterBind();
 }

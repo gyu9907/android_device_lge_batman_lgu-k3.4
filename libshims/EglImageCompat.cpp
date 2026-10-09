@@ -15,6 +15,7 @@
 static bool bufferAgeEnabled();
 static bool partialTilesEnabled();
 static void bindFramebufferWithPartialTiles(unsigned int,unsigned int);
+static void deleteFramebuffersWithPartialTiles(int,const unsigned int*);
 static void bindFramebufferOesWithPartialTiles(unsigned int,unsigned int);
 static EGLBoolean makeCurrentWithPartialTiles(EGLDisplay,EGLSurface,EGLSurface,EGLContext);
 static EGLBoolean setPartialDamage(EGLDisplay,EGLSurface,EGLint*,EGLint);
@@ -191,6 +192,9 @@ extern "C" EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
     pthread_once(&gOnce, loadVendorEntryPoints);
     if (name && !strcmp(name, "glBindFramebuffer") && partialTilesEnabled()) {
         return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(bindFramebufferWithPartialTiles);
+    }
+    if (name && !strcmp(name, "glDeleteFramebuffers") && partialTilesEnabled()) {
+        return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(deleteFramebuffersWithPartialTiles);
     }
     if (name && !strcmp(name, "glBindFramebufferOES") && partialTilesEnabled() && gGetProcAddress(name)) {
         return reinterpret_cast<__eglMustCastToProperFunctionPointerType>(bindFramebufferOesWithPartialTiles);

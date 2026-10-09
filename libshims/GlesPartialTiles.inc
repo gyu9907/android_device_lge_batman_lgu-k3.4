@@ -6,6 +6,7 @@
  */
 extern "C" void batmanPartialBeforeBind(GLenum, GLuint);
 extern "C" void batmanPartialAfterBind();
+extern "C" void batmanPartialBeforeDelete(GLsizei);
 namespace {
 void* partialGlEntry(const char* name) {
     static void* vendor = dlopen("libGLESv2_adreno200.so", RTLD_NOW | RTLD_LOCAL);
@@ -18,5 +19,12 @@ extern "C" GL_APICALL void GL_APIENTRY glBindFramebuffer(GLenum target, GLuint f
     static auto fn = reinterpret_cast<decltype(&glBindFramebuffer)>(partialGlEntry("glBindFramebuffer"));
     batmanPartialBeforeBind(target, framebuffer);
     fn(target, framebuffer);
+    batmanPartialAfterBind();
+}
+
+extern "C" GL_APICALL void GL_APIENTRY glDeleteFramebuffers(GLsizei count, const GLuint* framebuffers) {
+    static auto fn = reinterpret_cast<decltype(&glDeleteFramebuffers)>(partialGlEntry("glDeleteFramebuffers"));
+    batmanPartialBeforeDelete(count);
+    fn(count, framebuffers);
     batmanPartialAfterBind();
 }
