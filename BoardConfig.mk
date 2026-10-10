@@ -22,10 +22,22 @@ TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 
 # Preserve the current Qualcomm policy baseline and exclude Pie test domains.
 # The broad legacy include requires a separate neverallow compatibility audit.
-include device/qcom/sepolicy/sepolicy.mk
-BOARD_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy/vendor/test,$(BOARD_SEPOLICY_DIRS))
+include device/qcom/sepolicy-legacy/sepolicy.mk
+# msm8660 predates Lineage's legacy platform list. Keep legacy QCOM labels
+# instead of applying aliases intended for newer vendor policy namespaces.
+BOARD_SEPOLICY_M4DEFS := $(filter-out \
+    qdisplay_service=vendor_qdisplay_service \
+    sysfs_graphics=vendor_sysfs_graphics \
+    hal_keymaster_qti_exec=vendor_hal_keymaster_qti_exec \
+    persist_block_device=vendor_persist_block_device \
+    display_vendor_data_file=vendor_display_vendor_data_file \
+    hal_perf_default=vendor_hal_perf_default \
+    sysfs_battery_supply=vendor_sysfs_battery_supply \
+    sysfs_usb_supply=vendor_sysfs_usb_supply,$(BOARD_SEPOLICY_M4DEFS))
+BOARD_VENDOR_SEPOLICY_DIRS += device/lineage/sepolicy/qcom/legacy-vendor
+BOARD_VENDOR_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy-legacy/test,$(BOARD_VENDOR_SEPOLICY_DIRS))
 SELINUX_IGNORE_NEVERALLOWS := false
-BOARD_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
+BOARD_VENDOR_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
 
 TARGET_ARCH := arm
 TARGET_CPU_ABI := armeabi-v7a
@@ -217,8 +229,19 @@ JAVA_SOURCE_OVERLAYS := org.lineageos.hardware|device/lge/batman_lgu/lineagehw|*
 
 # Legacy LGE Qualcomm RIL compatibility
 BOARD_PROVIDES_LIBRIL := true
-BOARD_PROVIDES_LIBREFERENCE_RIL := true
 BOARD_PROVIDES_RILD := true
+# Android 11 uses this guard for a device-provided RIL service.
+ENABLE_VENDOR_RIL_SERVICE := true
 BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
 
 # Device Power HAL requests bounded ondemand pulses through the Oreo adapter.
+
+# Android 11 first-stage init requires real mount points on its read-only root.
+BOARD_ROOT_EXTRA_FOLDERS += persist mpt drm mm tombstones firmware modem
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+# Live mmcblk0p27: 655360 sectors of 512 bytes.
+BOARD_CACHEIMAGE_PARTITION_SIZE := 335544320
+PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
+
+# memfd_create is backported to the 3.4 kernel for ART.
+TARGET_HAS_MEMFD_BACKPORT := true

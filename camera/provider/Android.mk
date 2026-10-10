@@ -6,13 +6,11 @@ LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := CameraProvider.cpp CameraDevice.cpp
-LOCAL_CPPFLAGS := -std=c++14
+LOCAL_CPPFLAGS := -std=c++17
 LOCAL_C_INCLUDES := frameworks/native/include/media/openmax
 LOCAL_SHARED_LIBRARIES := \
     libhidlbase \
     libhidlmemory \
-    libhidltransport \
-    libhwbinder \
     libutils \
     libcutils \
     liblog \
@@ -27,6 +25,10 @@ LOCAL_SHARED_LIBRARIES := \
     android.hardware.camera.common@1.0 \
     android.hardware.graphics.allocator@2.0 \
     android.hardware.graphics.mapper@2.0 \
+    android.hardware.graphics.mapper@3.0 \
+    android.hardware.graphics.mapper@4.0 \
+    libgralloctypes \
+    libexif \
     android.hardware.graphics.common@1.0 \
     android.hidl.allocator@1.0 \
     android.hidl.memory@1.0

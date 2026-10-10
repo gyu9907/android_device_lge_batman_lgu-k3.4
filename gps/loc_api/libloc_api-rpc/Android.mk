@@ -34,22 +34,12 @@ LOCAL_SHARED_LIBRARIES:= librpc
 
 
 
-LOCAL_COPY_HEADERS_TO:= libloc_api-rpc/inc
-LOCAL_COPY_HEADERS:= \
-	$(RPC_INC)/loc_api_cb.h \
-	$(RPC_INC)/loc_api_common.h \
-	$(RPC_INC)/loc_api.h \
-	$(RPC_INC)/loc_api_fixup.h \
-	$(RPC_INC)/loc_apicb_appinit.h \
-	inc/debug.h \
-	inc/loc_api_rpc_glue.h \
-	inc/loc_api_sync_call.h
 
 LOCAL_C_INCLUDES:= \
 	$(LOCAL_PATH) \
 	$(LOCAL_PATH)/inc \
 	$(LOCAL_PATH)/$(RPC_INC) \
-	$(TARGET_OUT_HEADERS)/librpc
+	device/lge/batman_lgu/gps/librpc
 
 LOCAL_MODULE:= libloc_api-rpc
 

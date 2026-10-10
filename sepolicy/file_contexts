@@ -69,3 +69,7 @@
 /sys/devices/virtual/input/input[0-9]+/(enable|poll_delay|proximity_enable|light_enable) u:object_r:sysfs_sensors:s0
 # Keep the dedicated service distinct from the platform's default module.
 /(vendor|system/vendor)/bin/hw/android\.hardware\.sensors@1\.0-service\.batman u:object_r:hal_sensors_default_exec:s0
+
+# Empty mount points now reside on Android 11 read-only system-root.
+# Match the rootfs label they inherited when init created them on ramdisk.
+/(drm|mm|modem|tombstones) -d u:object_r:rootfs:s0

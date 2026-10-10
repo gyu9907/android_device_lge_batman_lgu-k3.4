@@ -1,7 +1,4 @@
-# The Pie common policy no longer declares the legacy hotplug daemon.
-type mpdecision, domain;
-type mpdecision_exec, exec_type, vendor_file_type, file_type;
-init_daemon_domain(mpdecision)
+# The common legacy policy declares the hotplug domain and init transition.
 
 # pyramid 8f3f4d9: legacy mpctl socket and default_values locations.
 allow mpdecision system_data_file:dir { write add_name };

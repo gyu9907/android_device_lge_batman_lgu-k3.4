@@ -25,13 +25,6 @@ LOCAL_CFLAGS += \
 ## Includes
 LOCAL_C_INCLUDES:=
 
-LOCAL_COPY_HEADERS_TO:= gps.utils/
-LOCAL_COPY_HEADERS:= \
-   loc_log.h \
-   loc_cfg.h \
-   log_util.h \
-   linked_list.h \
-   msg_q.h
 
 LOCAL_MODULE := libgps.utils
 

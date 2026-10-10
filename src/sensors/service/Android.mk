@@ -10,5 +10,5 @@ LOCAL_SRC_FILES := ../../../../../../hardware/interfaces/sensors/1.0/default/ser
 LOCAL_INIT_RC := sensors-service.batman.rc
 LOCAL_CFLAGS := -DARCH_ARM_32 -Wall -Werror
 LOCAL_SHARED_LIBRARIES := liblog libcutils libdl libbase libutils \
-    libhidlbase libhidltransport android.hardware.sensors@1.0 libhwbinder
+    libhidlbase android.hardware.sensors@1.0
 include $(BUILD_EXECUTABLE)

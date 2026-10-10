@@ -1,5 +1,3 @@
 type hwaddrs_prop, property_type;
 
-# Control labels used by the retained legacy modem/thermal services.
-type ctl_qmuxd_prop, property_type;
-type mpdecision_prop, property_type;
+# Control labels for qmuxd and mpdecision come from the common legacy policy.

@@ -501,7 +501,7 @@ Return<void> CameraProvider::getCameraDeviceInterface_V3_x(
                 _hidl_cb(Status::INTERNAL_ERROR, nullptr);
                 return Void();
             }
-            device = deviceImpl;
+            device = deviceImpl->getInterface();
             break;
         }
         case 3: { // Map legacy camera device v3 HAL to Treble camera device HAL v3.3
@@ -515,7 +515,7 @@ Return<void> CameraProvider::getCameraDeviceInterface_V3_x(
                 _hidl_cb(Status::INTERNAL_ERROR, nullptr);
                 return Void();
             }
-            device = deviceImpl;
+            device = deviceImpl->getInterface();
             break;
         }
         default:

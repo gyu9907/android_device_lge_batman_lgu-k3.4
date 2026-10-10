@@ -18,7 +18,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 # temporary hack for broken vendor rils
 LOCAL_WHOLE_STATIC_LIBRARIES := \
-	librilutils_static
+	librilutils
 
 LOCAL_CFLAGS := -DRIL_SHLIB
 LOCAL_STATIC_LIBRARIES := libqemu_pipe libbase
@@ -50,8 +50,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_CFLAGS := \
 
 LOCAL_MODULE:= radiooptions
-LOCAL_MODULE_TAGS := debug
-
+LOCAL_MODULE_TAGS := optional
 include $(BUILD_EXECUTABLE)
 
 endif

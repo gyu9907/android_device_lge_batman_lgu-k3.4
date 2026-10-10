@@ -2,7 +2,7 @@ $(call inherit-product-if-exists, vendor/lge/batman_lgu/batman_lgu-vendor.mk)
 
 PRODUCT_PACKAGES += fs_config_files
 
-$(call inherit-product, $(SRC_TARGET_DIR)/product/languages_small.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
 # The gps config appropriate for this device
 #$(call inherit-product, device/common/gps/gps_us_supl.mk)
@@ -40,7 +40,8 @@ PRODUCT_FULL_TREBLE_OVERRIDE := false
 # root
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/root/init.batman_lgu_kr.rc:root/init.batman_lgu_kr.rc \
-    $(LOCAL_PATH)/prebuilt/root/fstab.batman_lgu_kr:root/fstab.batman_lgu_kr \
+    $(LOCAL_PATH)/prebuilt/root/fstab.batman_lgu_kr:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.batman_lgu_kr \
+    $(LOCAL_PATH)/prebuilt/root/fstab.first_stage:$(TARGET_COPY_OUT_RAMDISK)/fstab.batman_lgu_kr \
     $(LOCAL_PATH)/prebuilt/root/init.batman_lgu.usb.rc:root/init.batman_lgu.usb.rc \
     $(LOCAL_PATH)/prebuilt/root/ueventd.batman_lgu_kr.rc:root/ueventd.batman_lgu_kr.rc \
     $(LOCAL_PATH)/prebuilt/root/init.qcom.class_core.sh:root/init.qcom.class_core.sh \
@@ -76,7 +77,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.telephony.cdma.xml:system/etc/permissions/android.hardware.telephony.cdma.xml \
     frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
-    frameworks/native/data/etc/com.android.nfc_extras.xml:system/etc/permissions/com.android.nfc_extras.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
     frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
@@ -133,8 +133,6 @@ PRODUCT_PACKAGES += \
 
 # Filesystem Management Tools
 PRODUCT_PACKAGES += \
-    make_ext4fs \
-    setup_fs \
     toybox_vendor
 
 # Bluetooth firmware, UART and PCM setup are handled by libbt-vendor.
@@ -213,7 +211,7 @@ PRODUCT_PACKAGES += \
     android.hardware.configstore@1.1-service \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
-    android.hardware.graphics.composer@2.1-impl \
+    android.hardware.graphics.composer@2.1-service \
     android.hardware.graphics.mapper@2.0-impl \
     android.hardware.memtrack@1.0-impl \
     memtrack.msm8660
@@ -240,3 +238,16 @@ PRODUCT_PACKAGES += \
     vibrator.default \
     android.hardware.wifi@1.0-service \
     wificond
+
+PRODUCT_SHIPPING_API_LEVEL := 16
+PRODUCT_PACKAGES += android.hardware.health@2.1-impl android.hardware.health@2.1-service
+
+# Cache geometry is declared for OTA transfer metadata; the installer must
+# continue to write only system and boot images.
+
+# Android 11 legacy FCM requires the default MediaDrm HIDL factories.
+# Keep the platform legacy plugin adapter and its real ClearKey implementation.
+PRODUCT_PACKAGES += \
+    android.hardware.drm@1.0-service \
+    android.hardware.drm@1.0-impl \
+    libdrmclearkeyplugin

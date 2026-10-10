@@ -1,0 +1,2 @@
+# Android 11 first-stage system-root mount.
+/dev/block/mmcblk0p26 /system ext4 ro,barrier=1,data=ordered wait,first_stage_mount

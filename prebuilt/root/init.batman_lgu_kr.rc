@@ -234,12 +234,12 @@ on fs
     mkdir /drm 0771 system system
     mkdir /mm 0771 system system
     mkdir /tombstones 0771 system system
+    mkdir /firmware 0771 system system
+    mkdir /modem 0771 system system
+    mount_all /vendor/etc/fstab.batman_lgu_kr
     mkdir /tombstones/modem 0771 system system
     mkdir /tombstones/mdm 0771 system system
     mkdir /tombstones/lpass 0771 system system
-    mkdir /firmware 0771 system system
-    mkdir /modem 0771 system system
-    mount_all /fstab.batman_lgu_kr
 
 on post-fs
     restorecon_recursive /persist
@@ -257,8 +257,9 @@ on post-fs
     write /data/system/sensors/settings 0
     chmod 0664 /data/system/sensors/settings
     # Application-facing DRM directories remain on userdata.
-    mkdir /data/lgdrm 0770 lgdrm lgdrm_acc
-    mkdir /data/wmdrm 0770 lgdrm lgdrm_acc
+    # V40b libc android_ids: lgdrm=4001, lgdrm_acc=4002.
+    mkdir /data/lgdrm 0770 4001 4002
+    mkdir /data/wmdrm 0770 4001 4002
 
 on post-fs-data
     # Relabel existing legacy calibration files; do not create or truncate them.
@@ -435,7 +436,8 @@ service thermald /system/bin/thermald -c /vendor/etc/thermald.conf
 service time_daemon /system/bin/time_daemon
     class late_start
     user root
-    group root system radio qcom_oncrpc oem_2950
+    # V40b qcom_oncrpc uses numeric GID 3008.
+    group root system radio 3008 oem_2950
 
 service dhcpcd_wlan0 /system/bin/dhcpcd -aBKAL
     class core

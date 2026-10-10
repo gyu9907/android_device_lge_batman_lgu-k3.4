@@ -152,3 +152,20 @@
 #----------------------------------------------------------------
 
 /dev/rtc0                 0660   system     system
+
+# Legacy Qualcomm subsystem paths formerly supplied by Pie's platform ueventd.rc.
+# Keep kernel-created nodes at the paths used by the original HALs.
+subsystem oncrpc
+    devname uevent_devpath
+    dirname /dev/oncrpc
+
+subsystem adsp
+    devname uevent_devpath
+    dirname /dev/adsp
+
+subsystem msm_camera
+    devname uevent_devpath
+    dirname /dev/msm_camera
+
+/dev/oncrpc/*             0660   root       system
+/dev/adsp/*               0660   system     audio

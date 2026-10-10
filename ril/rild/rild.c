@@ -79,6 +79,7 @@ static struct RIL_Env s_rilEnv = {
 
 extern void RIL_startEventLoop();
 extern void rilc_thread_pool();
+extern void initWithMmapSize();
 
 static int make_argv(char * args, char ** argv) {
     // Note: reserve argv[0]
@@ -153,6 +154,7 @@ int main(int argc, char **argv) {
 
     int i;
     const char *clientId = NULL;
+    initWithMmapSize();
     RLOGD("**RIL Daemon Started**");
     RLOGD("**RILd param count=%d**", argc);
 

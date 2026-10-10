@@ -17,10 +17,10 @@ type batman_acc_calibration_file, file_type;
 type batman_prox_calibration_file, file_type;
 
 # Legacy camera daemon sockets under /data; retained from Oreo common policy.
-type camera_socket, file_type, data_file_type, core_data_file_type;
+typeattribute camera_socket core_data_file_type;
 
 # Calibration files for the retained AMI sensor daemon.
-type sensors_data_file, file_type, data_file_type, core_data_file_type;
+typeattribute sensors_data_file core_data_file_type;
 
 # The two calibration files used directly by the legacy sensor HAL.
 type batman_sensor_calibration_file, file_type, data_file_type, core_data_file_type;
