@@ -243,8 +243,6 @@ on fs
 
 on post-fs
     restorecon_recursive /persist
-    symlink /sdcard /mnt/sdcard
-    symlink /sdcard /storage/sdcard0
 
     # Stock starts the QSEE listener before the first RIL initialization.
     start qseecomd

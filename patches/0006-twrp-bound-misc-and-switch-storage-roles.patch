@@ -1,0 +1,287 @@
+Subject: [PATCH] TWRP: Bound LG misc BCB and use p28 system with p32 data
+Target-source-root: twrp-3.7.0-oreo (Android 9 recovery tree)
+
+Limit LG misc access to the first 2048 bytes; reject wipe packages.
+Keep calibration bytes and LG factory flags outside the BCB untouched.
+Map system to p28 and ext4 data/media to p32 without changing the
+partition table. The layout marker permits matching full ROM OTAs.
+Existing recovery security configuration is unchanged.
+
+Apply from the TWRP source root with git apply --check, then git apply.
+Do not apply this patch to the Android platform recovery repository.
+
+diff --git a/bootable/recovery/bootloader_message/Android.mk b/bootable/recovery/bootloader_message/Android.mk
+--- a/bootable/recovery/bootloader_message/Android.mk
++++ b/bootable/recovery/bootloader_message/Android.mk
+@@ -26,4 +26,7 @@
+ endif
+ LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+ LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
++ifeq ($(BOARD_MISC_BCB_ONLY),true)
++    LOCAL_CFLAGS += -DBOARD_MISC_BCB_ONLY
++endif
+ include $(BUILD_STATIC_LIBRARY)
+diff --git a/bootable/recovery/bootloader_message/bootloader_message.cpp b/bootable/recovery/bootloader_message/bootloader_message.cpp
+--- a/bootable/recovery/bootloader_message/bootloader_message.cpp
++++ b/bootable/recovery/bootloader_message/bootloader_message.cpp
+@@ -70,6 +70,24 @@
+   }
+   return record->blk_device;
+ }
++
++
++#ifdef BOARD_MISC_BCB_ONLY
++static_assert(BOOTLOADER_MESSAGE_OFFSET_IN_MISC == 0,
++              "BCB-only misc requires a zero message offset");
++static_assert(sizeof(bootloader_message) == 2048, "Unexpected BCB size");
++
++// LG stores NV backups and factory flags outside the recovery message. Check
++// before opening the device, with subtraction to avoid offset + size overflow.
++static bool validate_misc_access(size_t offset, size_t size, std::string* err) {
++  constexpr size_t kBcbSize = 2048;
++  if (offset > kBcbSize || size > kBcbSize - offset) {
++    *err = "misc access outside the 2 KiB bootloader message is disabled";
++    return false;
++  }
++  return true;
++}
++#endif
+ 
+ // In recovery mode, recovery can get started and try to access the misc
+ // device before the kernel has actually created it.
+@@ -96,6 +114,9 @@
+ 
+ static bool read_misc_partition(void* p, size_t size, const std::string& misc_blk_device,
+                                 size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   if (!wait_for_device(misc_blk_device, err)) {
+     return false;
+   }
+@@ -120,6 +141,9 @@
+ 
+ static bool write_misc_partition(const void* p, size_t size, const std::string& misc_blk_device,
+                                  size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   android::base::unique_fd fd(open(misc_blk_device.c_str(), O_WRONLY));
+   if (fd == -1) {
+     *err = android::base::StringPrintf("failed to open %s: %s", misc_blk_device.c_str(),
+@@ -233,6 +257,9 @@
+ }
+ 
+ bool read_wipe_package(std::string* package_data, size_t size, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(WIPE_PACKAGE_OFFSET_IN_MISC, size, err)) return false;
++#endif
+   std::string misc_blk_device = get_misc_blk_device(err);
+   if (misc_blk_device.empty()) {
+     return false;
+diff --git a/bootable/recovery/bootloader_message_twrp/Android.mk b/bootable/recovery/bootloader_message_twrp/Android.mk
+--- a/bootable/recovery/bootloader_message_twrp/Android.mk
++++ b/bootable/recovery/bootloader_message_twrp/Android.mk
+@@ -37,4 +37,7 @@
+     LOCAL_CFLAGS += -DBOARD_RECOVERY_BLDRMSG_OFFSET=$(BOOTLOADER_MESSAGE_OFFSET)
+ endif
+ LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
++ifeq ($(BOARD_MISC_BCB_ONLY),true)
++    LOCAL_CFLAGS += -DBOARD_MISC_BCB_ONLY
++endif
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/bootable/recovery/bootloader_message_twrp/bootloader_message.cpp b/bootable/recovery/bootloader_message_twrp/bootloader_message.cpp
+--- a/bootable/recovery/bootloader_message_twrp/bootloader_message.cpp
++++ b/bootable/recovery/bootloader_message_twrp/bootloader_message.cpp
+@@ -37,6 +37,24 @@
+ // are not configurable without changing all of them.
+ static const size_t BOOTLOADER_MESSAGE_OFFSET_IN_MISC = BOARD_RECOVERY_BLDRMSG_OFFSET;
+ static const size_t WIPE_PACKAGE_OFFSET_IN_MISC = 16 * 1024 + BOOTLOADER_MESSAGE_OFFSET_IN_MISC;
++
++
++#ifdef BOARD_MISC_BCB_ONLY
++static_assert(BOOTLOADER_MESSAGE_OFFSET_IN_MISC == 0,
++              "BCB-only misc requires a zero message offset");
++static_assert(sizeof(bootloader_message) == 2048, "Unexpected BCB size");
++
++// LG stores NV backups and factory flags outside the recovery message. Check
++// before opening the device, with subtraction to avoid offset + size overflow.
++static bool validate_misc_access(size_t offset, size_t size, std::string* err) {
++  constexpr size_t kBcbSize = 2048;
++  if (offset > kBcbSize || size > kBcbSize - offset) {
++    *err = "misc access outside the 2 KiB bootloader message is disabled";
++    return false;
++  }
++  return true;
++}
++#endif
+ 
+ static std::string misc_blkdev;
+ 
+@@ -83,6 +101,9 @@
+ 
+ static bool read_misc_partition(void* p, size_t size, const std::string& misc_blk_device,
+                                 size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   if (!wait_for_device(misc_blk_device, err)) {
+     return false;
+   }
+@@ -127,6 +148,9 @@
+ }
+ 
+ static bool write_misc_partition(const void* p, size_t size, size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   std::string misc_blk_device = get_misc_blk_device(err);
+   if (misc_blk_device.empty()) {
+     *err = "no misc device set";
+@@ -274,6 +298,9 @@
+ }
+ 
+ bool read_wipe_package(std::string* package_data, size_t size, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(WIPE_PACKAGE_OFFSET_IN_MISC, size, err)) return false;
++#endif
+   std::string misc_blk_device = get_misc_blk_device(err);
+   if (misc_blk_device.empty()) {
+     return false;
+diff --git a/bootable/recovery/uncrypt/Android.mk b/bootable/recovery/uncrypt/Android.mk
+--- a/bootable/recovery/uncrypt/Android.mk
++++ b/bootable/recovery/uncrypt/Android.mk
+@@ -34,4 +34,7 @@
+ LOCAL_CFLAGS := -Werror
+ LOCAL_INIT_RC := uncrypt.rc
+ 
++ifeq ($(BOARD_MISC_BCB_ONLY),true)
++    LOCAL_CFLAGS += -DBOARD_MISC_BCB_ONLY
++endif
+ include $(BUILD_EXECUTABLE)
+diff --git a/bootable/recovery/uncrypt/uncrypt.cpp b/bootable/recovery/uncrypt/uncrypt.cpp
+--- a/bootable/recovery/uncrypt/uncrypt.cpp
++++ b/bootable/recovery/uncrypt/uncrypt.cpp
+@@ -583,6 +583,17 @@
+     std::vector<std::string> options = android::base::Split(content, "\n");
+     std::string wipe_package;
+     for (auto& option : options) {
++#ifdef BOARD_MISC_BCB_ONLY
++        if (option == "--wipe_ab" || option == "--wipe_package" ||
++            option == "--wipe_package_size" ||
++            android::base::StartsWith(option, "--wipe_ab=") ||
++            android::base::StartsWith(option, "--wipe_package=") ||
++            android::base::StartsWith(option, "--wipe_package_size=")) {
++            LOG(ERROR) << "A/B wipe commands are disabled on BCB-only misc";
++            write_status_to_socket(-1, socket);
++            return false;
++        }
++#endif
+         if (android::base::StartsWith(option, "--wipe_package=")) {
+             std::string path = option.substr(strlen("--wipe_package="));
+             if (!android::base::ReadFileToString(path, &wipe_package)) {
+diff --git a/device/lge/batman_lgu/BoardConfig.mk b/device/lge/batman_lgu/BoardConfig.mk
+--- a/device/lge/batman_lgu/BoardConfig.mk
++++ b/device/lge/batman_lgu/BoardConfig.mk
+@@ -24,11 +24,13 @@
+ BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
+ BOARD_BOOTIMAGE_PARTITION_SIZE := 10485760
+ BOARD_RECOVERYIMAGE_PARTITION_SIZE := 16777216
+-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824
+-BOARD_USERDATAIMAGE_PARTITION_SIZE := 2147483648
++BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2147483648
++BOARD_USERDATAIMAGE_PARTITION_SIZE := 27095203840
+ BOARD_FLASH_BLOCK_SIZE := 131072
+ TARGET_USERIMAGES_USE_EXT4 := true
+-BOARD_HAS_NO_MISC_PARTITION := true
++# LG misc has calibration data outside its first 2 KiB recovery message.
++BOARD_MISC_BCB_ONLY := true
++BOOTLOADER_MESSAGE_OFFSET := 0
+ BOARD_NO_SECURE_DISCARD := true
+ 
+ TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab
+@@ -46,7 +48,7 @@
+ TARGET_RECOVERY_ADB_USB_SRC := device/lge/batman_lgu/recovery/legacy_adb_usb.cpp
+ TW_USE_MODEL_HARDWARE_ID_FOR_DEVICE_ID := true
+ TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun%d/file
+-TW_DEVICE_VERSION := 0-batman_lgu
++TW_DEVICE_VERSION := 0-batman_lgu-p28sys-p32data
+ 
+ # Fit the dedicated 16 MiB recovery partition; retain ADB, MTP and the shell.
+ TW_EXCLUDE_TWRPAPP := true
+@@ -54,3 +56,6 @@
+ TW_EXCLUDE_NANO := true
+ TW_EXCLUDE_BASH := true
+ TW_INCLUDE_CRYPTO := false
++
++# Internal storage resides within the new ext4 data partition.
++RECOVERY_SDCARD_ON_DATA := true
+diff --git a/device/lge/batman_lgu/omni_batman_lgu.mk b/device/lge/batman_lgu/omni_batman_lgu.mk
+--- a/device/lge/batman_lgu/omni_batman_lgu.mk
++++ b/device/lge/batman_lgu/omni_batman_lgu.mk
+@@ -20,3 +20,5 @@
+     ro.adb.secure=0 \
+     ro.debuggable=1 \
+     persist.sys.usb.config=adb
++
++PRODUCT_DEFAULT_PROPERTY_OVERRIDES += ro.batman.storage_layout=p28-system-p32-data-v1
+diff --git a/device/lge/batman_lgu/recovery.fstab b/device/lge/batman_lgu/recovery.fstab
+--- a/device/lge/batman_lgu/recovery.fstab
++++ b/device/lge/batman_lgu/recovery.fstab
+@@ -1,9 +1,10 @@
+ # mount point  fs    block device             flags
+ # Partition numbers from android7's fstab.batman_lgu_kr.
+-/system       ext4  /dev/block/mmcblk0p26
++/system       ext4  /dev/block/mmcblk0p28
+ /cache        ext4  /dev/block/mmcblk0p27
+-/data         ext4  /dev/block/mmcblk0p28
++/data         ext4  /dev/block/mmcblk0p32
+ /boot         emmc  /dev/block/mmcblk0p8
+ /recovery     emmc  /dev/block/mmcblk0p13
+-# This device has a separate internal FAT partition, not /data/media.
+-/sdcard       vfat  /dev/block/mmcblk0p32       flags=display="Internal Storage";storage;removable=0
++# With no separate storage partition, TWRP uses /data/media automatically.
++# Never expose the mixed BCB/NV partition as a whole-partition operation.
++/misc         emmc  /dev/block/mmcblk0p25       flags=canbewiped=0;wipeingui=0;backup=0;flashimg=0
+diff --git a/bootable/recovery/set_metadata.cpp b/bootable/recovery/set_metadata.cpp
+--- a/bootable/recovery/set_metadata.cpp
++++ b/bootable/recovery/set_metadata.cpp
+@@ -27,8 +27,11 @@
+ 
+ #include <sys/stat.h>
+ #include <stdio.h>
++#include <string.h>
+ #include <unistd.h>
+ #include "selinux/selinux.h"
++#include "selinux/label.h"
++
+ 
+ static security_context_t selinux_context;
+ struct stat s;
+@@ -36,6 +39,26 @@
+ 
+ int tw_get_context(const char* filename) {
+ 	if (lgetfilecon(filename, &selinux_context) >= 0) {
++		// During a FAT-to-data/media transition, vfat is a filesystem label,
++		// not metadata that may be copied onto the new ext4 media directory.
++		// Resolve its intended label from recovery policy before caching it.
++		if (strcmp(selinux_context, "u:object_r:vfat:s0") == 0 &&
++			(strcmp(filename, "/data/media") == 0 ||
++			 strncmp(filename, "/data/media/", 12) == 0)) {
++			struct selinux_opt options[] = {{ SELABEL_OPT_PATH, "/file_contexts" }};
++			struct selabel_handle* media_handle = selabel_open(SELABEL_CTX_FILE, options, 1);
++			char* media_context = NULL;
++			if (media_handle &&
++				selabel_lookup(media_handle, &media_context, filename, S_IFDIR) == 0) {
++				freecon(selinux_context);
++				selinux_context = media_context;
++				// Correct an already converted filesystem too. FAT may reject
++				// this, but the policy label remains valid for later recreation.
++				lsetfilecon(filename, selinux_context);
++			}
++			if (media_handle)
++				selabel_close(media_handle);
++		}
+ 		printf("tw_get_context got selinux context: %s\n", selinux_context);
+ 		return 0;
+ 	} else {

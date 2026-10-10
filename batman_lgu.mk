@@ -18,8 +18,6 @@ DEVICE_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay
 
 # Keep the platform boot profile and add the device color-extraction hot path.
 PRODUCT_DEX_PREOPT_BOOT_IMAGE_PROFILE_LOCATION := frameworks/base/config/boot-image-profile.txt device/lge/batman_lgu/dexpreopt/boot-image-profile-extra.txt
-# Override the common Lineage DocumentsUI start root for physical storage.
-PRODUCT_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay-product
 
 # This device is xhdpi.  However the platform doesn't
 # currently contain all of the bitmaps at xhdpi density so
@@ -265,3 +263,6 @@ PRODUCT_PACKAGES += \
 # apps explicitly as well so Soong's APK compression decision matches that
 # policy; otherwise it retains uncompressed DEX for preopt work it skips.
 $(call add-product-dex-preopt-module-config,AudioFX Bluetooth Contacts DeskClock DocumentsUI EasterEgg Eleven EmergencyInfo Etar Jelly LineageParts LineageSetupWizard LiveWallpapersPicker ManagedProvisioning Nfc PackageInstaller Recorder Seedvault Settings SettingsIntelligence Stk SystemUI TeleService Traceur,disable)
+
+# Distribution default: USB file transfer with ADB disabled.
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += persist.sys.usb.config=mtp

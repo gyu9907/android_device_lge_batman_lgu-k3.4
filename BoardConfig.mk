@@ -188,11 +188,11 @@ TARGET_KERNEL_ADDITIONAL_FLAGS := -j16
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2147483648
 # The read-only system tree uses about 4,200 inodes; reserve room without
-# wasting 16 MiB on the default 65,536-inode table in the fixed 1 GiB image.
+# wasting 16 MiB on the default 65,536-inode table in the system image.
 BOARD_SYSTEMIMAGE_EXTFS_INODE_COUNT := 8192
-BOARD_USERDATAIMAGE_PARTITION_SIZE := 2147483648
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 27095203840
 BOARD_FLASH_BLOCK_SIZE := 131072
 
 #BOARD_HAS_NO_SELECT_BUTTON := true
@@ -262,7 +262,7 @@ PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
 # memfd_create is backported to the 3.4 kernel for ART.
 TARGET_HAS_MEMFD_BACKPORT := true
 
-# The 1 GiB system partition needs compressed privileged-app DEX payloads.
+# Keep compressed privileged-app DEX payloads.
 # Keep boot/system-server preopt; ordinary app DEX is extracted normally on data.
 DONT_UNCOMPRESS_PRIV_APPS_DEXS := true
 
@@ -270,3 +270,6 @@ DONT_UNCOMPRESS_PRIV_APPS_DEXS := true
 SOONG_CONFIG_NAMESPACES += batmanRecovery
 SOONG_CONFIG_batmanRecovery += bcb_only
 SOONG_CONFIG_batmanRecovery_bcb_only := true
+
+# Reject full OTAs in recoveries with the old physical storage roles.
+TARGET_RELEASETOOLS_EXTENSIONS := device/lge/batman_lgu

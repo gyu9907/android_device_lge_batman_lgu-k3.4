@@ -82,8 +82,8 @@ persist.rild.nitz_short_ons_1=
 persist.rild.nitz_short_ons_2=
 persist.rild.nitz_short_ons_3=
 
-# The device exposes physical primary storage rather than emulated storage.
-ro.vold.primary_physical=1
+# p28 is system; p32 is ext4 data with standard emulated storage.
+ro.batman.storage_layout=p28-system-p32-data-v1
 
 # Android 11 adbd must use the synchronous transport supported by this kernel.
 ro.adb.nonblocking_ffs=false
