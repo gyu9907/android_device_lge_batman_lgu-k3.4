@@ -48,9 +48,7 @@ LOCAL_STRIP_MODULE := false
 
 LOCAL_CFLAGS += -fno-short-enums
 
-LOCAL_C_INCLUDES := $(TARGET_OUT_HEADERS)/mm-audio/audio-alsa
-LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audcal
-LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audio-acdb-util
+LOCAL_C_INCLUDES := hardware/qcom-caf/msm8660/audio/legacy/msm8660
 LOCAL_C_INCLUDES += hardware/libhardware/include
 LOCAL_C_INCLUDES += hardware/libhardware_legacy/include
 LOCAL_C_INCLUDES += frameworks/base/include

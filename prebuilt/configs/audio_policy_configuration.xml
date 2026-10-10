@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8'?>
+<audioPolicyConfiguration version="1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <globalConfiguration speaker_drc_enabled="false" />
+    <modules>
+        <module name="primary" halVersion="2.0">
+            <attachedDevices>
+                <item>AUDIO_DEVICE_OUT_SPEAKER</item>
+                <item>AUDIO_DEVICE_OUT_EARPIECE</item>
+                <item>AUDIO_DEVICE_IN_BUILTIN_MIC</item>
+                <item>AUDIO_DEVICE_IN_VOICE_CALL</item>
+            </attachedDevices>
+            <defaultOutputDevice>AUDIO_DEVICE_OUT_SPEAKER</defaultOutputDevice>
+            <mixPorts>
+                <mixPort name="primary output" role="source" flags="AUDIO_OUTPUT_FLAG_PRIMARY">
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT" samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
+                </mixPort>
+                <mixPort name="primary input" role="sink">
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT" samplingRates="8000,11025,12000,16000,22050,24000,32000,44100,48000" channelMasks="AUDIO_CHANNEL_IN_MONO,AUDIO_CHANNEL_IN_STEREO,AUDIO_CHANNEL_IN_VOICE_CALL_MONO,AUDIO_CHANNEL_IN_VOICE_DNLINK_MONO,AUDIO_CHANNEL_IN_VOICE_UPLINK_MONO" />
+                </mixPort>
+            </mixPorts>
+            <devicePorts>
+                <devicePort tagName="AUDIO_DEVICE_OUT_SPEAKER" type="AUDIO_DEVICE_OUT_SPEAKER" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_EARPIECE" type="AUDIO_DEVICE_OUT_EARPIECE" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_WIRED_HEADSET" type="AUDIO_DEVICE_OUT_WIRED_HEADSET" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_WIRED_HEADPHONE" type="AUDIO_DEVICE_OUT_WIRED_HEADPHONE" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_SCO" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT" type="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_AUX_DIGITAL" type="AUDIO_DEVICE_OUT_AUX_DIGITAL" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_FM" type="AUDIO_DEVICE_OUT_FM" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_IN_BUILTIN_MIC" type="AUDIO_DEVICE_IN_BUILTIN_MIC" role="source" />
+                <devicePort tagName="AUDIO_DEVICE_IN_WIRED_HEADSET" type="AUDIO_DEVICE_IN_WIRED_HEADSET" role="source" />
+                <devicePort tagName="AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET" type="AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET" role="source" />
+                <devicePort tagName="AUDIO_DEVICE_IN_AUX_DIGITAL" type="AUDIO_DEVICE_IN_AUX_DIGITAL" role="source" />
+                <devicePort tagName="AUDIO_DEVICE_IN_VOICE_CALL" type="AUDIO_DEVICE_IN_VOICE_CALL" role="source" />
+            </devicePorts>
+            <routes>
+                <route type="mix" sink="AUDIO_DEVICE_OUT_SPEAKER" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_EARPIECE" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_WIRED_HEADSET" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_WIRED_HEADPHONE" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_SCO" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_AUX_DIGITAL" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_FM" sources="primary output" />
+                <route type="mix" sink="primary input" sources="AUDIO_DEVICE_IN_BUILTIN_MIC,AUDIO_DEVICE_IN_WIRED_HEADSET,AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET,AUDIO_DEVICE_IN_AUX_DIGITAL,AUDIO_DEVICE_IN_VOICE_CALL" />
+            </routes>
+        </module>
+        <module name="a2dp" halVersion="2.0">
+            <mixPorts>
+                <mixPort name="primary output" role="source" flags="AUDIO_OUTPUT_FLAG_PRIMARY">
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT" samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
+                </mixPort>
+            </mixPorts>
+            <devicePorts>
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" role="sink" />
+            </devicePorts>
+            <routes>
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" sources="primary output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" sources="primary output" />
+            </routes>
+        </module>
+        <module name="usb" halVersion="2.0">
+            <mixPorts>
+                <mixPort name="usb_accessory output" role="source">
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT" samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
+                </mixPort>
+                <mixPort name="usb_device output" role="source">
+                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT" samplingRates="44100" channelMasks="AUDIO_CHANNEL_OUT_STEREO" />
+                </mixPort>
+            </mixPorts>
+            <devicePorts>
+                <devicePort tagName="AUDIO_DEVICE_OUT_USB_ACCESSORY" type="AUDIO_DEVICE_OUT_USB_ACCESSORY" role="sink" />
+                <devicePort tagName="AUDIO_DEVICE_OUT_USB_DEVICE" type="AUDIO_DEVICE_OUT_USB_DEVICE" role="sink" />
+            </devicePorts>
+            <routes>
+                <route type="mix" sink="AUDIO_DEVICE_OUT_USB_ACCESSORY" sources="usb_accessory output" />
+                <route type="mix" sink="AUDIO_DEVICE_OUT_USB_DEVICE" sources="usb_device output" />
+            </routes>
+        </module>
+        <xi:include href="r_submix_audio_policy_configuration.xml" />
+    </modules>
+    <xi:include href="audio_policy_volumes.xml" />
+    <xi:include href="default_volume_tables.xml" />
+</audioPolicyConfiguration>
