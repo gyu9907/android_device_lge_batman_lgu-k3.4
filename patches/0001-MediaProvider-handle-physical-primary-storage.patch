@@ -1,0 +1,39 @@
+Subject: [PATCH] MediaProvider: Map physical primary paths to external_primary
+Target-repository: packages/providers/MediaProvider
+Base-commit: 48b532256bd094b6467b268d38668ecd0cb92743
+Path-prefix: a/ and b/ relative to the target repository root
+
+A physical primary volume uses a UUID path while MediaStore registers it
+as external_primary. Match Environment's primary storage directory before
+normalizing secondary-volume UUIDs. This also fixes camera saves to that
+primary volume; it is not a separate camera framework change.
+
+Dependencies: none within this patch directory; the device must already
+configure its physical volume as primary. No formatting or DB migration.
+Validation: 27 host cases and on-device scan/camera save previously passed.
+
+Apply manually from the Android source root:
+  git -C packages/providers/MediaProvider apply --check "$PWD/device/lge/batman_lgu/patches/0001-MediaProvider-handle-physical-primary-storage.patch"
+  git -C packages/providers/MediaProvider apply "$PWD/device/lge/batman_lgu/patches/0001-MediaProvider-handle-physical-primary-storage.patch"
+The commands above expand the patch path before changing directory. A successful
+  git -C packages/providers/MediaProvider apply --reverse --check "$PWD/device/lge/batman_lgu/patches/0001-MediaProvider-handle-physical-primary-storage.patch"
+means the patch is already present; do not apply it twice.
+
+diff --git a/src/com/android/providers/media/util/FileUtils.java b/src/com/android/providers/media/util/FileUtils.java
+index 7bd1e4e7c2935d806f6683f791ecbf963cf8f4ac..c3e207727a76306b82b8effdf794266902988fa3 100644
+--- a/src/com/android/providers/media/util/FileUtils.java
++++ b/src/com/android/providers/media/util/FileUtils.java
+@@ -967,6 +967,13 @@ public class FileUtils {
+             if (volumeName.equals("emulated")) {
+                 return MediaStore.VOLUME_EXTERNAL_PRIMARY;
+             } else {
++                // A physical primary volume has a UUID path, but MediaStore
++                // registers it as external_primary, just like emulated storage.
++                final File primary = Environment.getExternalStorageDirectory();
++                if (Environment.getStorageDirectory().equals(primary.getParentFile())
++                        && volumeName.equalsIgnoreCase(primary.getName())) {
++                    return MediaStore.VOLUME_EXTERNAL_PRIMARY;
++                }
+                 return normalizeUuid(volumeName);
+             }
+         } else {
