@@ -3,9 +3,8 @@ type hwaddrs, domain;
 type hwaddrs_exec, exec_type, file_type;
 init_daemon_domain(hwaddrs)
 
-# The legacy vendor RPC libraries contain text relocations.
-allow hwaddrs system_file:file execmod;
-allow hwaddrs vendor_file:file { read open getattr map execute execmod };
+# PIC vendor RPC libraries need ordinary read/execute access only.
+allow hwaddrs vendor_file:file { read open getattr map execute };
 allow hwaddrs kmsg_device:chr_file { open write };
 allow hwaddrs sysfs_devices_system_cpu:file r_file_perms;
 

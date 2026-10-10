@@ -1,22 +1,5 @@
-
-# PIE entrypoints in /system/bin establish the service domain, then execute
-# the legacy payload in /vendor/libexec/batman. Payloads retain vendor_file:
-# Oreo's platform-text-relocation exception excludes custom file types.
+# The normal /system/bin entrypoints establish each service domain before
+# executing its PIC vendor payload. No text-relocation exception is needed.
 allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
         qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
-        port-bridge mm-qcamerad } vendor_file:file { execute_no_trans execmod };
-# Legacy shared libraries also contain text relocations.
-allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
-        qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
-        port-bridge mm-qcamerad } system_file:file execmod;
-# HAL1 runs in mediaserver; the product overrides the separate cameraserver.
-allow { audioserver mediaserver rild } system_file:file execmod;
-
-# Legacy sensor blob access is confined to the dedicated sensor HAL.
-allow hal_sensors_default vendor_file:file execmod;
-
-# Legacy audio calibration libraries are loaded from /vendor.
-allow audioserver vendor_file:file execmod;
-
-# RIL also loads the shared legacy RPC/QMI libraries from /vendor.
-allow rild vendor_file:file execmod;
+        port-bridge mm-qcamerad } vendor_file:file execute_no_trans;
