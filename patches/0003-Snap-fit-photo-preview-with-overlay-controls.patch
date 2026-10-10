@@ -1,0 +1,85 @@
+Subject: [PATCH] Snap: Fit photo preview with overlay controls
+Target-repository: packages/apps/Snap
+Base-commit: 8c444160bd565319468cce5bfdcfc11d20e8b7cb
+Path-prefix: a/ and b/ relative to the target repository root
+
+Port the reviewed Pie photo-layout behavior to the current Android 11
+PhotoUI and CameraControls implementations. Fit the preview to the full
+available view without the 4:3 margin deduction or top anchoring, retain
+the existing aspect-ratio fitting, and use transparent overlaid controls.
+Keep the two-argument CameraControls API for video/panorama callers.
+
+Dependencies: none of 0001/0002/0004; no device property is required.
+This is a source patch for this exact Snap version, not a Pie git diff.
+Rebuild Snap including its matching dexpreopt artifacts.
+Validation: module build; 768x1024 preview layout; three 3264x2448 JPEG
+captures and normal Back exits on batman_lgu.
+
+Apply manually from the Android source root:
+  git -C packages/apps/Snap apply --check "$PWD/device/lge/batman_lgu/patches/0003-Snap-fit-photo-preview-with-overlay-controls.patch"
+  git -C packages/apps/Snap apply "$PWD/device/lge/batman_lgu/patches/0003-Snap-fit-photo-preview-with-overlay-controls.patch"
+Before applying, a successful reverse check means it is already present:
+  git -C packages/apps/Snap apply --reverse --check "$PWD/device/lge/batman_lgu/patches/0003-Snap-fit-photo-preview-with-overlay-controls.patch"
+
+diff --git a/src/com/android/camera/PhotoUI.java b/src/com/android/camera/PhotoUI.java
+index 072294da7fbfa3bd59a68eb0690d444389f80665..7aca7e20928968638c49330cdd7b71a7670585cb 100644
+--- a/src/com/android/camera/PhotoUI.java
++++ b/src/com/android/camera/PhotoUI.java
+@@ -331,7 +331,7 @@ public class PhotoUI implements PieListener,
+             mAspectRatioResize = true;
+             mAspectRatio = ratio;
+         }
+-        mCameraControls.setPreviewRatio(mAspectRatio, false);
++        mCameraControls.setPreviewRatio(mAspectRatio, false, true);
+         layoutPreview(ratio);
+     }
+ 
+@@ -376,13 +376,8 @@ public class PhotoUI implements PieListener,
+         } else {
+             float width = mMaxPreviewWidth, height = mMaxPreviewHeight;
+             if (width == 0 || height == 0) return;
+-            if (mScreenRatio == CameraUtil.RATIO_4_3) {
+-                if (height > width) {
+-                    height -= (mTopMargin + mBottomMargin);
+-                } else {
+-                    width -= (mTopMargin + mBottomMargin);
+-                }
+-            }
++            // Fit the preview to the full view, with controls overlaid. Keep
++            // its aspect ratio so a 4:3 display needs neither bars nor a crop.
+             if (mOrientationResize) {
+                 scaledTextureWidth = height * mAspectRatio;
+                 if (scaledTextureWidth > width) {
+@@ -422,10 +417,6 @@ public class PhotoUI implements PieListener,
+                 lp = new FrameLayout.LayoutParams((int) scaledTextureWidth,
+                         (int) scaledTextureHeight, Gravity.CENTER);
+             }
+-            if(mScreenRatio == CameraUtil.RATIO_4_3) {
+-                lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+-                lp.setMargins(0, mTopMargin, 0, mBottomMargin);
+-            }
+         }
+ 
+         if (mSurfaceTextureUncroppedWidth != scaledTextureWidth ||
+diff --git a/src/com/android/camera/ui/CameraControls.java b/src/com/android/camera/ui/CameraControls.java
+index 26a405727d9993df384ee03c81156b3ff3729f68..2ebdd03d9a5d06e5d327d362e288e00c7676ff9e 100644
+--- a/src/com/android/camera/ui/CameraControls.java
++++ b/src/com/android/camera/ui/CameraControls.java
+@@ -980,12 +980,16 @@ public class CameraControls extends RotatableLayout {
+     }
+ 
+     public void setPreviewRatio(float ratio, boolean panorama) {
++        setPreviewRatio(ratio, panorama, false);
++    }
++
++    public void setPreviewRatio(float ratio, boolean panorama, boolean overlayControls) {
+         if (panorama) {
+             mPaint.setColor(Color.TRANSPARENT);
+         } else {
+             int r = CameraUtil.determineRatio(ratio);
+             mPreviewRatio = r;
+-            if (mPreviewRatio == CameraUtil.RATIO_4_3 && mTopMargin != 0) {
++            if (!overlayControls && mPreviewRatio == CameraUtil.RATIO_4_3 && mTopMargin != 0) {
+                 mPaint.setColor(getResources().getColor(R.color.camera_control_bg_opaque));
+             } else {
+                 mPaint.setColor(getResources().getColor(R.color.camera_control_bg_transparent));
