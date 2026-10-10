@@ -250,3 +250,7 @@ PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
 
 # memfd_create is backported to the 3.4 kernel for ART.
 TARGET_HAS_MEMFD_BACKPORT := true
+
+# The 1 GiB system partition needs compressed privileged-app DEX payloads.
+# Keep boot/system-server preopt; ordinary app DEX is extracted normally on data.
+DONT_UNCOMPRESS_PRIV_APPS_DEXS := true

@@ -84,3 +84,8 @@ persist.rild.nitz_short_ons_3=
 
 # The device exposes physical primary storage rather than emulated storage.
 ro.vold.primary_physical=1
+
+# Avoid doing all SystemUI verification inside its service startup timeout.
+# Match the normal userdebug boot policy even for this first-boot eng build.
+pm.dexopt.first-boot=quicken
+pm.dexopt.boot=verify

@@ -14,7 +14,7 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 DEVICE_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay
 
 # Keep the platform boot profile and add the device color-extraction hot path.
-PRODUCT_DEX_PREOPT_BOOT_IMAGE_PROFILE_LOCATION := $(OUT_DIR)/target/product/batman_lgu/obj/ETC/batman_boot_image_profile_intermediates/boot-image-profile.txt
+PRODUCT_DEX_PREOPT_BOOT_IMAGE_PROFILE_LOCATION := frameworks/base/config/boot-image-profile.txt device/lge/batman_lgu/dexpreopt/boot-image-profile-extra.txt
 # Override the common Lineage DocumentsUI start root for physical storage.
 PRODUCT_PACKAGE_OVERLAYS += device/lge/batman_lgu/overlay-product
 
@@ -242,6 +242,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_SHIPPING_API_LEVEL := 16
 PRODUCT_PACKAGES += android.hardware.health@2.1-impl android.hardware.health@2.1-service
 
+# The Android 11 policy manager reads XML; retain the original device routes.
+PRODUCT_PACKAGES += r_submix_audio_policy_configuration.xml audio_policy_volumes.xml default_volume_tables.xml
+
+# Android 11 replaces the legacy Java calibration extension with LiveDisplay.
+PRODUCT_PACKAGES += vendor.lineage.livedisplay@2.0-service.batman
+
 # Cache geometry is declared for OTA transfer metadata; the installer must
 # continue to write only system and boot images.
 
@@ -252,8 +258,7 @@ PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-impl \
     libdrmclearkeyplugin
 
-# The Android 11 policy manager reads XML; retain the original device routes.
-PRODUCT_PACKAGES += r_submix_audio_policy_configuration.xml audio_policy_volumes.xml default_volume_tables.xml
-
-# Android 11 replaces the legacy Java calibration extension with LiveDisplay.
-PRODUCT_PACKAGES += vendor.lineage.livedisplay@2.0-service.batman
+# Eng already preopts only boot and system-server jars. Declare the ordinary
+# apps explicitly as well so Soong's APK compression decision matches that
+# policy; otherwise it retains uncompressed DEX for preopt work it skips.
+$(call add-product-dex-preopt-module-config,AudioFX Bluetooth Contacts DeskClock DocumentsUI EasterEgg Eleven EmergencyInfo Etar Jelly LineageParts LineageSetupWizard LiveWallpapersPicker ManagedProvisioning Nfc PackageInstaller Recorder Seedvault Settings SettingsIntelligence Stk SystemUI TeleService Traceur,disable)
