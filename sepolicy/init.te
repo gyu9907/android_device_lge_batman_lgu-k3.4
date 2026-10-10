@@ -16,3 +16,6 @@ allow init { sysfs_graphics sysfs_hwaddrs_ready sysfs_batman_bt_addr sysfs_batma
 
 # Preserve the existing kcal ownership/mode for the LiveDisplay HAL.
 allow init sysfs_livedisplay_tuneable:file setattr;
+
+# The system-root mount point has a dedicated calibration-volume label.
+allow init batman_mpt_file:dir mounton;

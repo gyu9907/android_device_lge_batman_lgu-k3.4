@@ -3,3 +3,6 @@
 # Keep its existing core-data label rather than broad DAC bypass.
 allow time_daemon time_data_file:dir rw_dir_perms;
 allow time_daemon time_data_file:file create_file_perms;
+
+# Keep the stock alarm ioctl path without granting generic device access.
+allow time_daemon batman_alarm_device:chr_file rw_file_perms;

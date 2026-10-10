@@ -250,6 +250,9 @@ BOARD_RIL_CLASS := ../../../device/lge/batman_lgu/ril_class
 
 # Device Power HAL requests bounded ondemand pulses through the Oreo adapter.
 
+# Start SELinux enforcement from early boot.
+BOARD_KERNEL_CMDLINE += androidboot.selinux=enforcing
+
 # Android 11 first-stage init requires real mount points on its read-only root.
 BOARD_ROOT_EXTRA_FOLDERS += persist mpt drm mm tombstones firmware modem
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4

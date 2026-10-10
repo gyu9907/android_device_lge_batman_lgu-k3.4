@@ -76,3 +76,13 @@
 # Empty mount points now reside on Android 11 read-only system-root.
 # Match the rootfs label they inherited when init created them on ramdisk.
 /(drm|mm|modem|tombstones) -d u:object_r:rootfs:s0
+
+# Auxiliary ext4 volumes: persist, drm, tombstones, mm and mpt.
+/dev/block/mmcblk0p(12|20|22|23|29) u:object_r:batman_aux_block_device:s0
+/dev/alarm u:object_r:batman_alarm_device:s0
+/vendor/firmware/libpn544_fw\.so -l u:object_r:batman_nfc_firmware_link:s0
+/system/vendor/firmware/libpn544_fw\.so -l u:object_r:batman_nfc_firmware_link:s0
+
+# Use existing platform fsck permissions for cache and userdata.
+/dev/block/mmcblk0p27 u:object_r:cache_block_device:s0
+/dev/block/mmcblk0p28 u:object_r:userdata_block_device:s0

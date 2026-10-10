@@ -1,0 +1,2 @@
+# Only the fixed auxiliary ext4 volumes listed in the device fstab.
+allow fsck batman_aux_block_device:blk_file rw_file_perms;

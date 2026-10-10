@@ -117,7 +117,8 @@
 /dev/block/mmcblk0p18     0660   system     system
 /dev/block/mmcblk0     0660   system     system
 /dev/block/mmcblk0p25     0660   system     system
-/dev/block/mmcblk0p29     0660   system     system
+# Let root fsck access mpt without DAC override; keep system group access.
+/dev/block/mmcblk0p29     0660   root       system
 # sysfs properties
 /sys/devices/virtual/input/input*   enable      0660  system   input
 /sys/devices/virtual/input/input*   poll_delay  0660  system   input

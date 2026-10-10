@@ -27,3 +27,6 @@ type batman_sensor_calibration_file, file_type, data_file_type, core_data_file_t
 
 # This legacy QCOM type labels /data/system/default_values on batman.
 typeattribute mpctl_data_file core_data_file_type;
+
+# Only the PN544 firmware compatibility symlink, not the firmware directory.
+type batman_nfc_firmware_link, file_type, vendor_file_type;

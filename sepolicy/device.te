@@ -6,3 +6,8 @@ type batman_rmt_device, dev_type;
 type batman_mdm_device, dev_type;
 
 type batman_partition_table_device, dev_type;
+
+# Fixed auxiliary ext4 volumes mounted and checked by init on batman.
+type batman_aux_block_device, dev_type;
+# Legacy MSM8660 Android alarm driver retained by the stock time daemon.
+type batman_alarm_device, dev_type;

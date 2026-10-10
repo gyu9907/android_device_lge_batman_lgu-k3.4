@@ -1,0 +1,2 @@
+# Firmware loading follows the existing link to the PIC firmware wrapper.
+allow nfc batman_nfc_firmware_link:lnk_file read;
