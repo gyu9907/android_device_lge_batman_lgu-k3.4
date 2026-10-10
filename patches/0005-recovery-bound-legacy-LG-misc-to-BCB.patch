@@ -1,0 +1,154 @@
+Subject: [PATCH] recovery: Restrict legacy LG misc access to the BCB region
+Target-repository: bootable/recovery
+Base-commit: ac8c9e96627671e53a1aebdacaf9748b7241a3df
+Path-prefix: a/ and b/ relative to the target repository root
+
+LG batman misc contains calibration backups outside its first 2 KiB.
+Limit low-level BCB-library IO before opening the block device and reject
+unsupported A/B wipe requests before uncrypt leaves a pending command.
+
+Dependencies: the device BoardConfig opts into batmanRecovery.bcb_only.
+Pair with the same zero-offset BCB-only TWRP implementation and real p25
+fstab entry. A file_contexts label alone does not restrict byte offsets.
+Other products without the opt-in keep their existing behavior.
+
+Validation: LOS18.1 targeted modules and TWRP image build passed; three
+BCB implementations tested with restriction on/off using regular host
+files. Device recovery round trip is pending the sdcard backup gate.
+LOS19.1 needs independent API/caller review, target build and device tests.
+
+Apply manually from the Android source root after the device commits are
+fast-forwarded and the platform adaptation is authorized:
+  git -C bootable/recovery apply --check "$PWD/device/lge/batman_lgu/patches/0005-recovery-bound-legacy-LG-misc-to-BCB.patch"
+  git -C bootable/recovery apply "$PWD/device/lge/batman_lgu/patches/0005-recovery-bound-legacy-LG-misc-to-BCB.patch"
+Check reverse applicability to avoid applying an existing patch twice.
+Do not merge the whole LOS18.1 recovery history into LOS19.1.
+
+diff --git a/bootloader_message/Android.bp b/bootloader_message/Android.bp
+index f23b1deae586bf7a1520bb6dfc212f7ef6bdc877..c6850ea8e7f1f1f3bae0ed75ed00e389f81b40a8 100644
+--- a/bootloader_message/Android.bp
++++ b/bootloader_message/Android.bp
+@@ -16,7 +16,7 @@
+ 
+ cc_defaults {
+     name: "libbootloader_message_defaults",
+-    defaults: ["bootloader_message_offset_defaults"],
++    defaults: ["bootloader_message_offset_defaults", "misc_bcb_only_defaults"],
+     srcs: ["bootloader_message.cpp"],
+     cflags: [
+         "-Wall",
+@@ -59,3 +59,21 @@ cc_library_static {
+     vendor: true,
+     recovery_available: true,
+ }
++
++// Opt in only on devices whose misc partition contains legacy calibration data.
++soong_config_module_type {
++    name: "misc_bcb_only",
++    module_type: "cc_defaults",
++    config_namespace: "batmanRecovery",
++    bool_variables: ["bcb_only"],
++    properties: ["cflags"],
++}
++
++misc_bcb_only {
++    name: "misc_bcb_only_defaults",
++    soong_config_variables: {
++        bcb_only: {
++            cflags: ["-DBOARD_MISC_BCB_ONLY"],
++        },
++    },
++}
+diff --git a/bootloader_message/bootloader_message.cpp b/bootloader_message/bootloader_message.cpp
+index d4eae8547390931b9f5108a8ed8e32ea7372f02b..36fe836c42dcc6ed57c1e21320d5b5e4b05f2c71 100644
+--- a/bootloader_message/bootloader_message.cpp
++++ b/bootloader_message/bootloader_message.cpp
+@@ -64,6 +64,24 @@ std::string get_misc_blk_device(std::string* err) {
+   return "";
+ }
+ 
++
++#ifdef BOARD_MISC_BCB_ONLY
++static_assert(BOOTLOADER_MESSAGE_OFFSET_IN_MISC == 0,
++              "BCB-only misc requires a zero message offset");
++static_assert(sizeof(bootloader_message) == 2048, "Unexpected BCB size");
++
++// LG stores NV backups and factory flags outside the recovery message. Check
++// before opening the device, with subtraction to avoid offset + size overflow.
++static bool validate_misc_access(size_t offset, size_t size, std::string* err) {
++  constexpr size_t kBcbSize = 2048;
++  if (offset > kBcbSize || size > kBcbSize - offset) {
++    *err = "misc access outside the 2 KiB bootloader message is disabled";
++    return false;
++  }
++  return true;
++}
++#endif
++
+ // In recovery mode, recovery can get started and try to access the misc
+ // device before the kernel has actually created it.
+ static bool wait_for_device(const std::string& blk_device, std::string* err) {
+@@ -89,6 +107,9 @@ static bool wait_for_device(const std::string& blk_device, std::string* err) {
+ 
+ static bool read_misc_partition(void* p, size_t size, const std::string& misc_blk_device,
+                                 size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   if (!wait_for_device(misc_blk_device, err)) {
+     return false;
+   }
+@@ -113,6 +134,9 @@ static bool read_misc_partition(void* p, size_t size, const std::string& misc_bl
+ 
+ bool write_misc_partition(const void* p, size_t size, const std::string& misc_blk_device,
+                           size_t offset, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(offset, size, err)) return false;
++#endif
+   android::base::unique_fd fd(open(misc_blk_device.c_str(), O_WRONLY));
+   if (fd == -1) {
+     *err = android::base::StringPrintf("failed to open %s: %s", misc_blk_device.c_str(),
+@@ -241,6 +265,9 @@ bool write_reboot_bootloader(std::string* err) {
+ }
+ 
+ bool read_wipe_package(std::string* package_data, size_t size, std::string* err) {
++#ifdef BOARD_MISC_BCB_ONLY
++  if (!validate_misc_access(WIPE_PACKAGE_OFFSET_IN_MISC, size, err)) return false;
++#endif
+   std::string misc_blk_device = get_misc_blk_device(err);
+   if (misc_blk_device.empty()) {
+     return false;
+diff --git a/uncrypt/Android.bp b/uncrypt/Android.bp
+index 107a7f0fc6c5a3d0254fbd5478e6d426d2f67468..4147bd5f0b09d81baefa6edfadbf4cd7cf8530c3 100644
+--- a/uncrypt/Android.bp
++++ b/uncrypt/Android.bp
+@@ -14,6 +14,7 @@
+ 
+ cc_binary {
+     name: "uncrypt",
++    defaults: ["misc_bcb_only_defaults"],
+ 
+     srcs: [
+         "uncrypt.cpp",
+diff --git a/uncrypt/uncrypt.cpp b/uncrypt/uncrypt.cpp
+index f1f4f69f0fb6daa5fbd44b58892ac095af77746d..11c040af42a6bb247783c04acd4d8e71a8e171a3 100644
+--- a/uncrypt/uncrypt.cpp
++++ b/uncrypt/uncrypt.cpp
+@@ -584,6 +584,17 @@ static bool setup_bcb(const int socket) {
+     std::vector<std::string> options = android::base::Split(content, "\n");
+     std::string wipe_package;
+     for (auto& option : options) {
++#ifdef BOARD_MISC_BCB_ONLY
++        if (option == "--wipe_ab" || option == "--wipe_package" ||
++            option == "--wipe_package_size" ||
++            android::base::StartsWith(option, "--wipe_ab=") ||
++            android::base::StartsWith(option, "--wipe_package=") ||
++            android::base::StartsWith(option, "--wipe_package_size=")) {
++            LOG(ERROR) << "A/B wipe commands are disabled on BCB-only misc";
++            write_status_to_socket(-1, socket);
++            return false;
++        }
++#endif
+         if (android::base::StartsWith(option, "--wipe_package=")) {
+             std::string path = option.substr(strlen("--wipe_package="));
+             if (!android::base::ReadFileToString(path, &wipe_package)) {

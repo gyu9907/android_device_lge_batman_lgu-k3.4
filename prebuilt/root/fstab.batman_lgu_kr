@@ -13,3 +13,5 @@
 /dev/block/mmcblk0p8        /boot          emmc    defaults                                               recoveryonly
 /dev/block/mmcblk0p13       /recovery      emmc    defaults                                               recoveryonly
 /devices/platform/msm_sdcc.1/mmc_host/mmc0/mmc0* auto auto defaults voldmanaged=sdcard0:32,noemulatedsd,nonremovable
+# BCB only: libbootloader_message restricts access to bytes 0..2047.
+/dev/block/mmcblk0p25       /misc          emmc    defaults                                               defaults
