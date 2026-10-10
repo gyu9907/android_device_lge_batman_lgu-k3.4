@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "kind": "startup",
+      "path": "bin/btld",
+      "installed_path": "/system/bin/btld",
+      "input_sha256": "76f6a374be303c576a826cd0deab5dd34d9ff10ef9568715a67932bf26353a96",
+      "output_sha256": "9a0ea5583ce8bdb5d94c89f9ec5c35c6057fa07760c95ba5b418c08c300a0dce"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/libbroadcast_server",
+      "installed_path": "/system/bin/libbroadcast_server",
+      "input_sha256": "50fe251299e43819953335ff59f9bda93ed5b28a7a93e970540e60c84fac8796",
+      "output_sha256": "dba46c6f5637044c06eaa935c250d52e60200b1a00a1b7736c12f55479b479a9"
+    },
+    {
+      "kind": "jpeg",
+      "path": "lib/libmmjpeg.so",
+      "installed_path": "/system/lib/libmmjpeg.so",
+      "input_sha256": "96c5d28327e3251c186e713c82a3dba9b5b89aaba6e44c4a4b3de93e75631230",
+      "consumers": [
+        {
+          "instruction": 162152,
+          "register": 3,
+          "literal": 163020,
+          "target": 176152
+        },
+        {
+          "instruction": 162156,
+          "register": 12,
+          "literal": 163024,
+          "target": 176168
+        },
+        {
+          "instruction": 162168,
+          "register": 3,
+          "literal": 163028,
+          "target": 176184
+        },
+        {
+          "instruction": 162172,
+          "register": 12,
+          "literal": 163032,
+          "target": 176200
+        },
+        {
+          "instruction": 162352,
+          "register": 5,
+          "literal": 163036,
+          "target": 176064
+        },
+        {
+          "instruction": 162356,
+          "register": 6,
+          "literal": 163040,
+          "target": 176080
+        },
+        {
+          "instruction": 162360,
+          "register": 7,
+          "literal": 163044,
+          "target": 176096
+        },
+        {
+          "instruction": 162364,
+          "register": 8,
+          "literal": 163048,
+          "target": 176112
+        },
+        {
+          "instruction": 162368,
+          "register": 9,
+          "literal": 163052,
+          "target": 176128
+        },
+        {
+          "instruction": 162864,
+          "register": 5,
+          "literal": 163056,
+          "target": 176144
+        }
+      ],
+      "literal": 152184,
+      "stub_start": 176216,
+      "output_sha256": "851dddf5464871f1b0eeb65c2c2a6b15640be495cf1c4e1e6dd5461f5597d8db"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/ks",
+      "installed_path": "/system/vendor/libexec/batman/ks",
+      "input_sha256": "8fcda1613448475798d0fdc0280d190ccbb4ac22fa9bba98b063875bb95a2de8",
+      "output_sha256": "5f358da6aa9922d7e9eabb7d8c819d1b7c0c3f1699c8b535eea0888032e71d79"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/ami304d",
+      "installed_path": "/system/vendor/libexec/batman/ami304d",
+      "input_sha256": "c0cf141c503210cc3173d0bd29473c53aeefbcc220a2beacbff2943c596adbe1",
+      "output_sha256": "de763f9a0d0790cb42d72936e14e66c771e1b7ed2af956fa858b9351ff222b8d"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/qcks",
+      "installed_path": "/system/vendor/libexec/batman/qcks",
+      "input_sha256": "0a6914ae9d4276ad201c5fa8ea5f10544486c981486d0bc22223d3b29cc906d9",
+      "output_sha256": "57c4c49645304609b17801d764ed33a64c6126861892470574ab58c5cae8cc79"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/mm-qcamera-daemon",
+      "installed_path": "/system/vendor/libexec/batman/mm-qcamera-daemon",
+      "input_sha256": "0e21a4a2f15e32c8f27f65ad5ec795d0e254be99906de95b15db396dae30571b",
+      "output_sha256": "4745ba6f5650952c35bd21b147b610dc8f00224ec9b6bed30cf042e8f09124f6"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/bridgemgrd",
+      "installed_path": "/system/vendor/libexec/batman/bridgemgrd",
+      "input_sha256": "b05c851403c8c632e4a349125d41d0fc06dffa3647136bbb87393741dfc8e9c4",
+      "output_sha256": "fcb27546a6312adfe0c88f062a491a54646e84af8eb44a7e7b5c2611a97ae4d9"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/mpdecision",
+      "installed_path": "/system/vendor/libexec/batman/mpdecision",
+      "input_sha256": "66ba308e59f23060a00a9fd21a7282eda2d607d705128936655190cd0c25df0a",
+      "output_sha256": "15095e5c0e1728c78106f936ef1579220f73e969c97ddc84254c58a95bd54f0c"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/cnd",
+      "installed_path": "/system/vendor/libexec/batman/cnd",
+      "input_sha256": "7d9c9b84311ebca67af49aa75beb0e3af9895df68f6b5cc3949232af678aba17",
+      "output_sha256": "15990a9e3351cfce7f889bdaa8e1b7b4ddb36eed770d614bf7d56f7d19b0ca70"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/rmt_storage",
+      "installed_path": "/system/vendor/libexec/batman/rmt_storage",
+      "input_sha256": "939dbd866f8fc61665fa49d22cf6d0ea09309401b0aa8911d8cc922467ed9bd4",
+      "output_sha256": "d6923e117bcd15070d3c2344470c363220aecdf102dde02462101239e0e217a3"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/time_daemon",
+      "installed_path": "/system/vendor/libexec/batman/time_daemon",
+      "input_sha256": "495916fddc11b7791acafb1cd494726fab700adc31f809bd4725d98c6450fde4",
+      "output_sha256": "35b94cfe2debeb2dbf4396cd07b647ebe7cd0e199cc1b2d4d537fe88f587edba"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/qmiproxy",
+      "installed_path": "/system/vendor/libexec/batman/qmiproxy",
+      "input_sha256": "14357753585e804f00d1bea7b1368b6f924c9259081acc507b8a62b787c12cc1",
+      "output_sha256": "df6a8b928df6513a4e00fe977146293d3d7e49c92ea1914d0b5a17b8f0069ac2"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/port-bridge",
+      "installed_path": "/system/vendor/libexec/batman/port-bridge",
+      "input_sha256": "8959e20042a7dcbc34599324ff316b897e9dcb372b55285fa804261763fbe0eb",
+      "output_sha256": "bf3c170403d7e7d1fbfeb18870bec55a87f9420343ffe412f36b5077c278b873"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/netmgrd",
+      "installed_path": "/system/vendor/libexec/batman/netmgrd",
+      "input_sha256": "14fd593e79cc0c3b20be23dda832c9906062513e56c68a5b05e53017d8ac8e29",
+      "output_sha256": "cf5adb962523a96dbc29268cd461b5af00836a21d268c8460b584f7445473e3d"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/qmuxd",
+      "installed_path": "/system/vendor/libexec/batman/qmuxd",
+      "input_sha256": "b2f3ebf029f2572ee36cd67a44235a84c2126a83433805dc64304a4c4c7bc33e",
+      "output_sha256": "4220637dc427d1015016cc5caaee50e91d4818de1284c10cc1dd3869fdf71a5e"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/qseecomd",
+      "installed_path": "/system/vendor/libexec/batman/qseecomd",
+      "input_sha256": "133e6b551e6d0e5c149f685c3f6e61b10e05c2ab1b23f2bddc8c73ab7d54ba98",
+      "output_sha256": "dc3a289e955cabc62a6cb6dcbb794a428775006338e5597b571da2abdb6a2016"
+    },
+    {
+      "kind": "startup",
+      "path": "bin/thermald",
+      "installed_path": "/system/vendor/libexec/batman/thermald",
+      "input_sha256": "fd9309a05c947e2781b819b0c6a29dd3ff369345a07ad56d1afc484b84687590",
+      "output_sha256": "5221f8c69bb6fe3a817ac96f83cb685c081f316773721b392cb1c273a3fb01e7"
+    }
+  ]
+}

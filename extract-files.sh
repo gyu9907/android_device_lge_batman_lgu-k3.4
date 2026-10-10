@@ -70,6 +70,10 @@ done < proprietary-files.txt
 # Apply the reproducible camera poll initialization fix after stock hash checks.
 python3 "$SCRIPT_DIR/tools/fix-camera-poll.py" "$STAGE/lib/liboemcamera.so"
 
+# Convert verified legacy CRT relocations after all stock hash checks.
+python3 "$SCRIPT_DIR/tools/fix-textrel.py" --apply "$STAGE"
+python3 "$SCRIPT_DIR/tools/fix-textrel-extra.py" --apply "$STAGE"
+
 # Do not replace working blobs until every required file and hash is verified.
 cp -a "$STAGE/." "$BASE/"
 rm -f "$BASE/lib/egl/libplayback_adreno200.so"

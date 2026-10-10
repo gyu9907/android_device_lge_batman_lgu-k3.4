@@ -1,0 +1,769 @@
+{
+  "version": 1,
+  "stage": "After all proprietary-files.txt stock hashes and fix-camera-poll.py; input hashes are pre-TEXTREL baseline, not alternate stock hashes.",
+  "libraries": [
+    {
+      "path": "lib/hw/camera.msm8660.so",
+      "installed_path": "/system/lib/hw/camera.vendor.msm8660.so",
+      "input_sha256": "9b762d6000a85d04882320e931df75d71a889c0149a00e96e99f3f23ba849107",
+      "literal": 145900,
+      "output_sha256": "0c83eb06218cb84ff75eceb45a3b8c3208df237dfee48e6efaeada381e19f3f2"
+    },
+    {
+      "path": "lib/hw/gps.default.so",
+      "installed_path": "/system/lib/hw/gps.default.so",
+      "input_sha256": "19fb8dd84e635d8cec60a6a09d8efc97b34fa0e0d505402e58f33b788a64c683",
+      "literal": 16316,
+      "output_sha256": "c47687b555c3599aa0a0b2318675061109731db50aaeef8972cd4747acfe6d60"
+    },
+    {
+      "path": "lib/hw/sensors.msm8660.so",
+      "installed_path": "/system/vendor/lib/hw/sensors.vendor.msm8660.so",
+      "input_sha256": "10f31f0ad2895b9505249bc5d2f3048eea0de2dfda506a2af8c2d642b0d62f18",
+      "literal": 31336,
+      "output_sha256": "39f000084965a2f352766d54c05c5e94a554c7bac963cfae55786d095cd6f96d"
+    },
+    {
+      "path": "lib/libCommandSvc.so",
+      "installed_path": "/system/lib/libCommandSvc.so",
+      "input_sha256": "d276f6eead4202d0ed233625cbccef8cbab62f12ba7169c3c8a5cb1432a10641",
+      "literal": 7944,
+      "output_sha256": "0793310f75f0bbd15a7eea9f4963b7173e627ac08796feb4030fd3d26da2d698"
+    },
+    {
+      "path": "lib/libDivxDrm.so",
+      "installed_path": "/system/lib/libDivxDrm.so",
+      "input_sha256": "2dde26e06db264b060464b61dfff0ecefb8b62a479eb232f2a0986910fb3b670",
+      "literal": 168860,
+      "output_sha256": "52bd10646e44d790337af31d3a12a0e4db6115748634b3065baaed58a2780c3a"
+    },
+    {
+      "path": "lib/libQSEEComAPI.so",
+      "installed_path": "/system/lib/libQSEEComAPI.so",
+      "input_sha256": "7973de851d4d8a3b39b6af2afc5100d3eee9cba4fa5eda86d6f204565fc765b1",
+      "literal": 8116,
+      "output_sha256": "d75ebe21331b3eb3f24d6d98cadaf7970495920eb88651bf826ff90f44a779f6"
+    },
+    {
+      "path": "lib/libacdbloader.so",
+      "installed_path": "/system/vendor/lib/libacdbloader.so",
+      "input_sha256": "f5c497eaf07f9ed9ac37b57fb2856eff4f7e03507c181c56d72450f60b970239",
+      "literal": 13160,
+      "output_sha256": "74519ca77636338cc371333a728d2f97a049fb92c6ac80afead2a8b2d067f1e2"
+    },
+    {
+      "path": "lib/libacdbmapper.so",
+      "installed_path": "/system/vendor/lib/libacdbmapper.so",
+      "input_sha256": "b751ec417893dcb83429805444f9def05b0117ea1f82d4c9c1f523f53a2d4c5e",
+      "literal": 1148,
+      "output_sha256": "054a5b74c967238ffbd35f54897205e26b81cb34da300756e5e09108d8901dd6"
+    },
+    {
+      "path": "lib/libaudcal.so",
+      "installed_path": "/system/vendor/lib/libaudcal.so",
+      "input_sha256": "45f0713f93bdbc34fb8afdd29ae4dfc1c0fde582a5682498781e4d13f0e31916",
+      "literal": 235176,
+      "output_sha256": "8725aff61319c6fbf7268b80f05109a5b2f8c12f43dbe7f7f6e69bc3d1723085"
+    },
+    {
+      "path": "lib/libaudioalsa.so",
+      "installed_path": "/system/vendor/lib/libaudioalsa.so",
+      "input_sha256": "2104f73eebee8f1172a316df4c364130bec1ebf1bc6a288b3ce5decfaaa7ffee",
+      "literal": 6756,
+      "output_sha256": "268ea6c5e494c83812137ccd615e746b6ccdeb6d298a92fa819ae1f79080b7cc"
+    },
+    {
+      "path": "lib/libbroadcast_frame.so",
+      "installed_path": "/system/lib/libbroadcast_frame.so",
+      "input_sha256": "903bd1fa52d35e28affaa8fc7a6060aee64d86965f0db9277260e67450ec59ad",
+      "literal": 52408,
+      "output_sha256": "4fa823f159b062ec6ee89a87855aee293e85855144e904fd4649a1078ca50a92"
+    },
+    {
+      "path": "lib/libbroadcast_service.so",
+      "installed_path": "/system/lib/libbroadcast_service.so",
+      "input_sha256": "285c0e2430f16b59e510026df63b5da9b07b2f5b105e2242de40382ff481fd71",
+      "literal": 254204,
+      "output_sha256": "97b0bcce18224ae339d54ed961f30666653202d72810cd2cc6915520d102be6a"
+    },
+    {
+      "path": "lib/libbt-aptx-4.0.3.so",
+      "installed_path": "/system/lib/libbt-aptx-4.0.3.so",
+      "input_sha256": "217b86ded5caf6fddef5e24c6e20975b80546cab92ec701bbccb173889ea45fc",
+      "literal": 2508,
+      "output_sha256": "72b4d37fd1a5c0a9175692dc0a8b76c51d1cd7463002d88bc94f40ac5144cc77"
+    },
+    {
+      "path": "lib/libchromatix_imx074_default_video.so",
+      "installed_path": "/system/lib/libchromatix_imx074_default_video.so",
+      "input_sha256": "641f309cd024918a71e94acf9e0b6d73ab7bb058ddc48e90dfb3bcb5f4343fc7",
+      "literal": 924,
+      "output_sha256": "655ed886de44f7e332c8a61c9de70c2d2b20b691d4335b5e9fa674093356acf6"
+    },
+    {
+      "path": "lib/libchromatix_imx074_preview.so",
+      "installed_path": "/system/lib/libchromatix_imx074_preview.so",
+      "input_sha256": "0d491523b5e87ca48d849518d7e7a85647a54164b1a6064c060f527a0dacd13e",
+      "literal": 916,
+      "output_sha256": "8e554302876c021af8eaafc569d80a9dfba80b9f28314f95c5e5ddd0e89de5de"
+    },
+    {
+      "path": "lib/libchromatix_imx074_video_hd.so",
+      "installed_path": "/system/lib/libchromatix_imx074_video_hd.so",
+      "input_sha256": "90debf61f6b55ac0e2d0fdbd0635218e1496ff0737deccf05781ec62c8776558",
+      "literal": 916,
+      "output_sha256": "f1b901dbd7a554c3a45027a6fe434e32ef34b6ddb603ddbe4d33bd1cc3981a1d"
+    },
+    {
+      "path": "lib/libchromatix_imx074_zsl.so",
+      "installed_path": "/system/lib/libchromatix_imx074_zsl.so",
+      "input_sha256": "1d1987d8fce9c6eb5b3a21e3aa13169c6b51f31aa79f7cc885cf88445b55c009",
+      "literal": 912,
+      "output_sha256": "9ededd9c2f8f590a6c8cd9d5506bf86a1e16663bcaa9652b206a7c98f29f1287"
+    },
+    {
+      "path": "lib/libchromatix_imx091_default_video.so",
+      "installed_path": "/system/lib/libchromatix_imx091_default_video.so",
+      "input_sha256": "29e26c100cb3e5e002c39044b4ec64aa468ad1d8a0d7abe5f12dfb6309499966",
+      "literal": 924,
+      "output_sha256": "b33f05f04f83c0de7ce23b3ea680ba12c9ac2e9bcf38347f34d7d778dbfe1e5b"
+    },
+    {
+      "path": "lib/libchromatix_imx091_preview.so",
+      "installed_path": "/system/lib/libchromatix_imx091_preview.so",
+      "input_sha256": "31ba8997e1773d5bf7f173152c35968da3fc9bdc625ba9f470445387d8da74d5",
+      "literal": 916,
+      "output_sha256": "f1eee06da5143ef677a25c51233a268256b3983faf8f6ce042a03d635d9197bc"
+    },
+    {
+      "path": "lib/libchromatix_imx091_video_hd.so",
+      "installed_path": "/system/lib/libchromatix_imx091_video_hd.so",
+      "input_sha256": "2563048e841908bb276dcbe41dd0cbe932af8c8721239567f14a7f5b1a8234c2",
+      "literal": 916,
+      "output_sha256": "598d06e0109e8bbd67c11c86926fb2b01c5113633f35bffe661a527ad6b86452"
+    },
+    {
+      "path": "lib/libchromatix_imx105_default_video.so",
+      "installed_path": "/system/lib/libchromatix_imx105_default_video.so",
+      "input_sha256": "da58c04d67e4dd1e70eabd176a6ab739603838e481aace28b486fb2a398d07c9",
+      "literal": 924,
+      "output_sha256": "621bbda6d96389c8a9264bf7c50b7a8f7fe1820562031d6f0f1c75a63bf188db"
+    },
+    {
+      "path": "lib/libchromatix_imx105_preview.so",
+      "installed_path": "/system/lib/libchromatix_imx105_preview.so",
+      "input_sha256": "08a40ec8535b1c1cefdc90e31da34a5be26ed9bb7a8a2e185145d7c7198301c4",
+      "literal": 916,
+      "output_sha256": "34c05a582b5a6f4e14d9b97e63c97784ece17a85fd0558908aeb6b3278f1c2fe"
+    },
+    {
+      "path": "lib/libchromatix_imx105_video_hfr.so",
+      "installed_path": "/system/lib/libchromatix_imx105_video_hfr.so",
+      "input_sha256": "4f5502350be44694183c1d9f136e11b246b8e4b3b7f42755133f2f09bc85dfdf",
+      "literal": 920,
+      "output_sha256": "25a743fb190f195b79936138183f5c764fa2a021732376b739595db368df35a8"
+    },
+    {
+      "path": "lib/libchromatix_mt9e013_default_video.so",
+      "installed_path": "/system/lib/libchromatix_mt9e013_default_video.so",
+      "input_sha256": "08b0cec63faf6005df364125f6ff479460b14b5a962f7e075b4f7ee44abcdbfd",
+      "literal": 924,
+      "output_sha256": "2f01ee89f78215a7864919e5f03017d25a79223e74ef77385e17cad843a3a034"
+    },
+    {
+      "path": "lib/libchromatix_mt9e013_preview.so",
+      "installed_path": "/system/lib/libchromatix_mt9e013_preview.so",
+      "input_sha256": "5361c3bc0a44007715793b54a7e14cb7a1319523264e7a70dffdb76e499231ad",
+      "literal": 916,
+      "output_sha256": "e5b7cb4951ed0c896943d4a2ba6beaf25e5010027bb8c1fc927670513050dbbb"
+    },
+    {
+      "path": "lib/libchromatix_mt9e013_video_hfr.so",
+      "installed_path": "/system/lib/libchromatix_mt9e013_video_hfr.so",
+      "input_sha256": "8ffecd21fce4c48d77c79e7ead96fb4d9bc39b8189617adf7b077fe4535b3f05",
+      "literal": 920,
+      "output_sha256": "76d7f93bc70c4d3962187a41c78a6f0cbb1e71fd81682137aaeb8c6bcf4e8a60"
+    },
+    {
+      "path": "lib/libchromatix_mt9p017_default_video.so",
+      "installed_path": "/system/lib/libchromatix_mt9p017_default_video.so",
+      "input_sha256": "05adf728828c1f6193271e3078b2e12f2f0bd135ce95fdea4456ccd6244e116f",
+      "literal": 924,
+      "output_sha256": "2f143b03873b6552e80e04f388cba8789a524e9cf9a10563efec0027e0556359"
+    },
+    {
+      "path": "lib/libchromatix_mt9p017_preview.so",
+      "installed_path": "/system/lib/libchromatix_mt9p017_preview.so",
+      "input_sha256": "dd83bfe21bc1c5d9dfb40967e5f05da8d113b4d3d92058bfbd5f68ab7570622b",
+      "literal": 916,
+      "output_sha256": "69b22e0f54a091bd8c10a982a221cd2c6b56dff922bb9a282793edbfdacc9f65"
+    },
+    {
+      "path": "lib/libchromatix_mt9p017_video_hfr.so",
+      "installed_path": "/system/lib/libchromatix_mt9p017_video_hfr.so",
+      "input_sha256": "39d07d66d3cff629e24862857996f3172da208a2f1aba66b70bfba921f3dd95c",
+      "literal": 920,
+      "output_sha256": "f2600fa1dce4368a8195d91936ba020cf1fa12ce3a92d5130fd50704e565a7e0"
+    },
+    {
+      "path": "lib/libchromatix_ov2720_default_video.so",
+      "installed_path": "/system/lib/libchromatix_ov2720_default_video.so",
+      "input_sha256": "3bc0002ee39f5b3800ae11df4266662067f896bcb3f6834b5d0d6350e48c8f55",
+      "literal": 924,
+      "output_sha256": "3964c272ba4e9771d7d5f66656569702cbbf02422018160812176f4f78e059f3"
+    },
+    {
+      "path": "lib/libchromatix_ov2720_hfr.so",
+      "installed_path": "/system/lib/libchromatix_ov2720_hfr.so",
+      "input_sha256": "d4e2464df28f401a842d8838434ccfabba6f2a951f5898234bb77123e360f4e2",
+      "literal": 912,
+      "output_sha256": "1729eb4c9d14befaa771e13d8af1a30a2c0a1a16220ebf622c8ac4401743dfa3"
+    },
+    {
+      "path": "lib/libchromatix_ov2720_preview.so",
+      "installed_path": "/system/lib/libchromatix_ov2720_preview.so",
+      "input_sha256": "16a16380bc0964f75bf9d4143a6c92f0c5c2ed56b6ad15751c3b57c9d546b929",
+      "literal": 916,
+      "output_sha256": "94fe0b29ca083521b6223523759fcaee3b0865e75fd66393a5eba613ef7855c1"
+    },
+    {
+      "path": "lib/libchromatix_ov2720_zsl.so",
+      "installed_path": "/system/lib/libchromatix_ov2720_zsl.so",
+      "input_sha256": "4b3bb09616ea2386c0362e9bfe82529572b2c4a14acf79f745f26be29da868e3",
+      "literal": 912,
+      "output_sha256": "c890c6707eb3f111d3dadd3e5a640bfa392a0cf80e670e24a6eec5bb5a8cd076"
+    },
+    {
+      "path": "lib/libchromatix_ov5647_default_video.so",
+      "installed_path": "/system/lib/libchromatix_ov5647_default_video.so",
+      "input_sha256": "30684b1179a7856a391201630af05bcbfd7eb9df69dc5ee4b1a4909ef4fe5213",
+      "literal": 924,
+      "output_sha256": "9ce9967ea3c2da1e9b7725517e431508d7231eb10e3b009cd36bb23ba072b8f2"
+    },
+    {
+      "path": "lib/libchromatix_ov5647_preview.so",
+      "installed_path": "/system/lib/libchromatix_ov5647_preview.so",
+      "input_sha256": "d181a272acffbadbc49962ccab4d1bcf03f8477a55fcf5a1afdcf44f794b9f19",
+      "literal": 916,
+      "output_sha256": "638ff98727acb035b5b686bd673f8165032dfd6679bdf1a07e101920c3912eb4"
+    },
+    {
+      "path": "lib/libchromatix_ov5647_video_hfr.so",
+      "installed_path": "/system/lib/libchromatix_ov5647_video_hfr.so",
+      "input_sha256": "1c0d155f0bb5c766eff678816d6ad3a905f8d3b7e2aaa889425861db84f52966",
+      "literal": 920,
+      "output_sha256": "535fc4d344d284ea87af275c8ff8ef58f094990db63acb83550101b494a67c85"
+    },
+    {
+      "path": "lib/libchromatix_ov8825_default_video.so",
+      "installed_path": "/system/lib/libchromatix_ov8825_default_video.so",
+      "input_sha256": "663ee137531b43322b71d420732a3e768b73f2fc5dc4db72c440b252957d97aa",
+      "literal": 924,
+      "output_sha256": "a9633828fbeb6f0291802f6ec4c1349bf037a0c69855312b2935e859247f4468"
+    },
+    {
+      "path": "lib/libchromatix_ov8825_preview.so",
+      "installed_path": "/system/lib/libchromatix_ov8825_preview.so",
+      "input_sha256": "fdeb4454aa04ea13c8dea890b998e7f05d64daad612ba2006cb803a2cf80c224",
+      "literal": 916,
+      "output_sha256": "f7907486b5368160f0ab404af651443bf2b55cb7043b4fcd36b7d6c5a4f2b6c7"
+    },
+    {
+      "path": "lib/libchromatix_ov9726_default_video.so",
+      "installed_path": "/system/lib/libchromatix_ov9726_default_video.so",
+      "input_sha256": "6fe5e3cc8d4aab83b7f52ed6003fab589b15313781b2cf4e4122de9895d0f177",
+      "literal": 924,
+      "output_sha256": "9d76e036f3adb8bf269f43fd1b457ca552ba42ecc40dcb7209cbd2ad80122083"
+    },
+    {
+      "path": "lib/libchromatix_ov9726_preview.so",
+      "installed_path": "/system/lib/libchromatix_ov9726_preview.so",
+      "input_sha256": "25a8dcbd384dcae6ea7b40c842791767fda391bea8eb41674eba3fb623ee86ef",
+      "literal": 916,
+      "output_sha256": "bc4d6e2a15c8b7c4ed0fd3f9c9404a0ca19e5a3d5a404daba376115bc14f77a1"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_default_video.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_default_video.so",
+      "input_sha256": "b3879539af7ef0a3ab528138d22dbbde7d118bd4641489613cd1a87c6f7d6a89",
+      "literal": 924,
+      "output_sha256": "16dff33be1045f831199683ab000f2b3e71d3f8e45f25e19877f472abed27983"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_hfr_120fps.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_hfr_120fps.so",
+      "input_sha256": "e382daf123cc256c8df1d829ddd1b8391ce840c25e333670a1b831e3f8ea1a0d",
+      "literal": 920,
+      "output_sha256": "fa8dd409ef8bad9026547b6213cc6cce166c3ee54cdd6b14ae0d4a2473ad219a"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_hfr_60fps.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_hfr_60fps.so",
+      "input_sha256": "5f7e6cc28454e18f0b3893d128cf4dd101048fb8073a1f75dc6f4efbe06bfeea",
+      "literal": 920,
+      "output_sha256": "6df86fba3a586fe86cc34b3f5222ac11fd90357662fd41ad486951e194ad8cfb"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_hfr_90fps.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_hfr_90fps.so",
+      "input_sha256": "893fbb326414c135b0d73d5e6b71e8b8529c7a995fcbf977097b49ac6f8c4207",
+      "literal": 920,
+      "output_sha256": "dabb2ec87106a4d9c2181d89ab8c3b1d16cee270b9400521f80fbae4a4162f35"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_preview.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_preview.so",
+      "input_sha256": "de6103702abc8cf182577bf3d3464fe0a9c56d44fc77406087f4596e864a76f0",
+      "literal": 920,
+      "output_sha256": "f5e9ec0b62161633f2eca38f615545391b5d979393b0081e56e712e6ba881c8d"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_video_hd.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_video_hd.so",
+      "input_sha256": "22f4c3c1a6b3b110b08c879d2ffa925cd243887369347309fb8e74c36b362c46",
+      "literal": 920,
+      "output_sha256": "42eb8f77fe3773a8767c42a7168bf03d2f6638222dacae72ca434ef2e4e2bbba"
+    },
+    {
+      "path": "lib/libchromatix_s5k3l1yx_zsl.so",
+      "installed_path": "/system/lib/libchromatix_s5k3l1yx_zsl.so",
+      "input_sha256": "0b3905e7314cba2c4a10f8a067c04d1f4985f3ad848dc5c8fb4d10b7811c1293",
+      "literal": 916,
+      "output_sha256": "b2e2797f777ca8cb0704309d9c5ae19d7b394c54967c53b1e40a00c7fcb8c8d4"
+    },
+    {
+      "path": "lib/libchromatix_s5k4e1_default_video.so",
+      "installed_path": "/system/lib/libchromatix_s5k4e1_default_video.so",
+      "input_sha256": "dd95ac0a800ac99406dfa36ed7c28611f6b350d51d8ade4e294d74b023f1a8e5",
+      "literal": 924,
+      "output_sha256": "b773579e1f7b19e2477fbed514d7623de95984d1b0ed9a837cedc6e92e416631"
+    },
+    {
+      "path": "lib/libchromatix_s5k4e1_preview.so",
+      "installed_path": "/system/lib/libchromatix_s5k4e1_preview.so",
+      "input_sha256": "6d5f38a4d1636708ef02ee572cb6a8fcddd09f9c6703e93834200a273a5de471",
+      "literal": 916,
+      "output_sha256": "9f7c2dfef061e737ae437c22b341554a85daeab6c9bddcc11cb6b014d14d2aa2"
+    },
+    {
+      "path": "lib/libcneqmiutils.so",
+      "installed_path": "/system/vendor/lib/libcneqmiutils.so",
+      "input_sha256": "d60fd36a6ad8496fdee90a32e7581da712b309401f783312129530fe8b9e6bc3",
+      "literal": 1160,
+      "output_sha256": "0b20d81ebedf9b8a84c3cc1bc53089ba5c3bb7ed2167ebcea7e5b7969af3da26"
+    },
+    {
+      "path": "lib/libcneutils.so",
+      "installed_path": "/system/vendor/lib/libcneutils.so",
+      "input_sha256": "ea9b0727b0fa507f48c186fcc5995330a22e96bbcff4004404b70faee2f72747",
+      "literal": 13252,
+      "output_sha256": "494986e0b87d10ea4d0caace3c330746a0cb4386fd40fad5cb14836153fc0f22"
+    },
+    {
+      "path": "lib/libcommondefs.so",
+      "installed_path": "/system/lib/libcommondefs.so",
+      "input_sha256": "d12a149dc519b3ce6e6cb5623339b71c2a6ea69e657eb91afe73909198b67ef6",
+      "literal": 1960,
+      "output_sha256": "f3c93fc3d827a6fed123b3f2b9b2250d87d758b702ed9f4045f34af375192765"
+    },
+    {
+      "path": "lib/libdiag.so",
+      "installed_path": "/system/vendor/lib/libdiag.so",
+      "input_sha256": "ee9d80e5f999230f044d3904c6b34d174737b5877ec9bd6a3311f49fd6748d53",
+      "literal": 20976,
+      "output_sha256": "733df15f820a70b28bca70c0ca2b1e28bce7125c1982ff99b40890627bf3f563"
+    },
+    {
+      "path": "lib/libdrmfs.so",
+      "installed_path": "/system/lib/libdrmfs.so",
+      "input_sha256": "8bfae141707832571197f362551adc23c3bf15b9b9f0f09bd979d290ac55d803",
+      "literal": 7108,
+      "output_sha256": "9a8da8b291366bab65a4c4497ab3b104f7a3fad41131c85b6a54289104a7278f"
+    },
+    {
+      "path": "lib/libdrmtime.so",
+      "installed_path": "/system/lib/libdrmtime.so",
+      "input_sha256": "7989a7ed5ce7c55f5d0f9bfc1ab4e1d8dc70a748db7d948a835c6bea896baf2d",
+      "literal": 2616,
+      "output_sha256": "e33bee2eb3380083532a4f27c7ebb6325db649db1322d49ad632f5853451c782"
+    },
+    {
+      "path": "lib/libdsi_netctrl.so",
+      "installed_path": "/system/vendor/lib/libdsi_netctrl.so",
+      "input_sha256": "fb2f0f9da7c5f6755ff5a77c3f50fd8cdebc745ff3dd6460e0f91a7b6f426422",
+      "literal": 79128,
+      "output_sha256": "7820fc0a7697fd7ae10dc074eaec325def203072d61cd8e6b75d1f967f9e685e"
+    },
+    {
+      "path": "lib/libdsm.so",
+      "installed_path": "/system/vendor/lib/libdsm.so",
+      "input_sha256": "7f0afe6257583023adaeb2160625babf662cd7f7375cd565657d9b8e5ede8426",
+      "literal": 21020,
+      "output_sha256": "62734f1d62748bb2315a40c3e8f5ea056b2c41d0b80d2e3074ea2c699cf83ede"
+    },
+    {
+      "path": "lib/libdsutils.so",
+      "installed_path": "/system/vendor/lib/libdsutils.so",
+      "input_sha256": "7136b6a65c3e145f1f51622d0f81234b0116f83bce1d698880ef1abddad38768",
+      "literal": 27048,
+      "output_sha256": "9bf4f7a04a387b038b5f9a720bb6de4007e4c8a062dd236c3942224878e8405b"
+    },
+    {
+      "path": "lib/libgemini.so",
+      "installed_path": "/system/lib/libgemini.so",
+      "input_sha256": "7f4df72efe58694fe43d87fabb05a4541ec75e51950bfc671a99a806dc5a72f0",
+      "literal": 16360,
+      "output_sha256": "aa9271420639c38774310d3ab7f976a98f9ebdb2ae2e1ff909d3265ca54882fb"
+    },
+    {
+      "path": "lib/libgps.utils.so",
+      "installed_path": "/system/lib/libgps.utils.so",
+      "input_sha256": "89b3cb397876cf685eb2e0a51ec9fbaae53ff35adcc81180501674bf7e21487d",
+      "literal": 7688,
+      "output_sha256": "6e29fb0ca6ab6b3b42b1686ca3a70872ec7ca96fb43c71010ad32a1f3514d8f1"
+    },
+    {
+      "path": "lib/libidl.so",
+      "installed_path": "/system/vendor/lib/libidl.so",
+      "input_sha256": "d00bff68495bf59a39fa589ed934953205bcfd800a0aaf32df32e6194ae68529",
+      "literal": 5780,
+      "output_sha256": "3be853b51ffb71e1b44b5c6bb2e7b4028c3069b70e73e797b6526b3a58055947"
+    },
+    {
+      "path": "lib/libimage-jpeg-dec-omx-comp.so",
+      "installed_path": "/system/lib/libimage-jpeg-dec-omx-comp.so",
+      "input_sha256": "dcd2d570967e38a65f3ed24a63d9aefd37069d12438e16214c48e6fbbd4416dc",
+      "literal": 16688,
+      "output_sha256": "6128485c619678fd666a86ae90c2389af530d26b43365fce30b78e2de1239b8c"
+    },
+    {
+      "path": "lib/libimage-jpeg-enc-omx-comp.so",
+      "installed_path": "/system/lib/libimage-jpeg-enc-omx-comp.so",
+      "input_sha256": "3fe56a8486855bdac1fdf66de05afaa99e6deae1fa1448fe8f3c093837e8be83",
+      "literal": 17528,
+      "output_sha256": "ffb6a426086fcfd3d24797fec61fe47ce9bb42fd8808fe06e7a5a091429dc6b8"
+    },
+    {
+      "path": "lib/libimage-omx-common.so",
+      "installed_path": "/system/lib/libimage-omx-common.so",
+      "input_sha256": "a840080464bcbbdadd83043e35dc03351cc007ef4c1dc750ff42e4c1a4a51b59",
+      "literal": 1700,
+      "output_sha256": "12746226d1b3fae5c98ff1b7843adf4adaeaacb7430a81e2f6ff9988bca980ea"
+    },
+    {
+      "path": "lib/liblgdrm.so",
+      "installed_path": "/system/lib/liblgdrm.so",
+      "input_sha256": "0296104daeb5f2956962beced9eb9346e9ea15cc70ab5ae9f737a35ee52469ab",
+      "literal": 493660,
+      "output_sha256": "0677a6471ab73871ad1a2dafe58e65834caafd44e1dcfdd9788024ddb4632f06"
+    },
+    {
+      "path": "lib/liblgsecclk.so",
+      "installed_path": "/system/lib/liblgsecclk.so",
+      "input_sha256": "8933fcd6bf61c04561613a12cd9e4e41ec2370e0119cfc854043933f0a4a6a9f",
+      "literal": 35780,
+      "output_sha256": "aee22d606c4b46271cad004eb9bd4281d1f1f07d8246b9d9104fce0cb0e6c17e"
+    },
+    {
+      "path": "lib/liblgtomadrm.so",
+      "installed_path": "/system/lib/liblgtomadrm.so",
+      "input_sha256": "7f4ae8e4e763f242561dda04596b0d0646d492107c590e62b0dd6017b1531f2b",
+      "literal": 163232,
+      "output_sha256": "72cb0fcf4b64f5f9657657a41e210835aa35d3e307640c0f9d820515df529132"
+    },
+    {
+      "path": "lib/liblgtomadrm_sf.so",
+      "installed_path": "/system/lib/liblgtomadrm_sf.so",
+      "input_sha256": "1437a99494064bea11e24fd65d2dfb3c461a589d786959d6b7107a0426fd40b9",
+      "literal": 163232,
+      "output_sha256": "523daf05580e07cae5f80568f1c0e96ba6ff4f1bd040dce439c806fb501b4742"
+    },
+    {
+      "path": "lib/libloc_adapter.so",
+      "installed_path": "/system/lib/libloc_adapter.so",
+      "input_sha256": "f668dade69e0da9d2073851a2c05e2c4e42ceff00617fbd36a3bb35787983569",
+      "literal": 8520,
+      "output_sha256": "328d08c471692a5543e7552a05c2eddb701d83f168604ba0fd83c9a980ecf3c3"
+    },
+    {
+      "path": "lib/libloc_api-rpc-qc.so",
+      "installed_path": "/system/lib/libloc_api-rpc-qc.so",
+      "input_sha256": "fc875bf3511d3fb87e5cbe8ee7a0565e4718bd384db6785ba6484b628c484a02",
+      "literal": 33948,
+      "output_sha256": "32d4e8474d1b8f47b4042c19431934d3bb51cc6a4692f0cde045e665f615865c"
+    },
+    {
+      "path": "lib/libloc_eng.so",
+      "installed_path": "/system/lib/libloc_eng.so",
+      "input_sha256": "ee9e0a5ff541a1a5e084b905fd2369f44383a014d541b93284e2ac32d1bb168a",
+      "literal": 49084,
+      "output_sha256": "cbfc23cc00653a22f463362c489fd15c538dc3ab067ce1aaa366ab4e6211186d"
+    },
+    {
+      "path": "lib/libmm-color-convertor.so",
+      "installed_path": "/system/lib/libmm-color-convertor.so",
+      "input_sha256": "72757a6dfae389a2c682fc24acc7959c315356b5c155423be8ada79d1e8f1242",
+      "literal": 1432,
+      "output_sha256": "9a5d5a53c1ff658e2ad2c6544cf40c13506a822fc962d17df1738a42906c085d"
+    },
+    {
+      "path": "lib/libmmcamera_faceproc.so",
+      "installed_path": "/system/lib/libmmcamera_faceproc.so",
+      "input_sha256": "041232478f7ac50c55bfeddb41e232f521f20263a2a0a02b6aca5b0cc1f8cb0f",
+      "literal": 30208,
+      "output_sha256": "9cf5c4077bbde5fc2133fca895eec4ee7f86c73af01a4489fc00a197ef132978"
+    },
+    {
+      "path": "lib/libmmcamera_frameproc.so",
+      "installed_path": "/system/lib/libmmcamera_frameproc.so",
+      "input_sha256": "fcee64c036b8c13db05fa27fd44db49c8c2935a84085831e4288836d0ffd33e2",
+      "literal": 25796,
+      "output_sha256": "802fecb6f302708c846ed3cf417f6583563f24029cd7aa37054c2344fd65d547"
+    },
+    {
+      "path": "lib/libmmcamera_hdr_lib.so",
+      "installed_path": "/system/lib/libmmcamera_hdr_lib.so",
+      "input_sha256": "9035b36d0e79ddb2ec200f0eefbabace3cfd25fceb8121017f08cbd12723e85f",
+      "literal": 25212,
+      "output_sha256": "507928188cf098435461c78dd3c0582c077e307d5085d5774aa1ebe3314fbe89"
+    },
+    {
+      "path": "lib/libmmcamera_image_stab.so",
+      "installed_path": "/system/lib/libmmcamera_image_stab.so",
+      "input_sha256": "e62235f1d2280b335ba7a1c9ce5fc2526fa905e823199f34bf794a2f91c3ef9d",
+      "literal": 6980,
+      "output_sha256": "74f7e864f1a68968b4423afb65271060ffd541d4d0c0e86c932a86c3d46a9c51"
+    },
+    {
+      "path": "lib/libmmcamera_interface2.so",
+      "installed_path": "/system/lib/libmmcamera_interface2.so",
+      "input_sha256": "ac55dff00ba40ca23d4b12c728b7fc09867ac08cce09e39bdb7a76687e0d76c9",
+      "literal": 33468,
+      "output_sha256": "e05add9e6c5467d68afee9fde40053155959775d331f8d0b05b50a0b89bb8039"
+    },
+    {
+      "path": "lib/libmmcamera_statsproc31.so",
+      "installed_path": "/system/lib/libmmcamera_statsproc31.so",
+      "input_sha256": "852c88c2ea318b4f54c8a458fec7901eabe6fc08e48531281fbbb12c5604d954",
+      "literal": 83244,
+      "output_sha256": "127212c8606fb495d73013a05b249b3f38037c338041b196895e9270fe9624f4"
+    },
+    {
+      "path": "lib/libmmcamera_wavelet_lib.so",
+      "installed_path": "/system/lib/libmmcamera_wavelet_lib.so",
+      "input_sha256": "7d21d30a7e4eca041032839b836cd0582af6f4846ac7c1cd5876511c46dea4dd",
+      "literal": 9280,
+      "output_sha256": "04ee45f50c8763aa1110ff7e9d572d314c8498a8e3e1abc8a12bef4fed40716a"
+    },
+    {
+      "path": "lib/libmmipl.so",
+      "installed_path": "/system/lib/libmmipl.so",
+      "input_sha256": "64c4d28bf61276a7073cd052b00e50e247981027b7de401422d4b37e1a508ae6",
+      "literal": 449028,
+      "output_sha256": "bb4850a56dd3fab19df3fa1a6a51b80c08e9c695e574e483b545b70f984ac662"
+    },
+    {
+      "path": "lib/libmmjps.so",
+      "installed_path": "/system/lib/libmmjps.so",
+      "input_sha256": "f3abf53427b51ee571596df5b803dc2ccb185922ca1b4e8461df9151a3599a73",
+      "literal": 17080,
+      "output_sha256": "f7fdda54dce383e0ba442add1e0d69cd00556d49a9d6f3dfefd47f5ccbea21bd"
+    },
+    {
+      "path": "lib/libmmmpo.so",
+      "installed_path": "/system/lib/libmmmpo.so",
+      "input_sha256": "1f12c96e5979098908c8dcd12bf7f5b5f731092457c61552a78ac6473cbf78a7",
+      "literal": 11900,
+      "output_sha256": "09fbc9df299af9a8301ae5c17a31960bb8305be9dd1478229a94e5a6d5d919c4"
+    },
+    {
+      "path": "lib/libmmmpod.so",
+      "installed_path": "/system/lib/libmmmpod.so",
+      "input_sha256": "9c7a6365ee5c7c47db6bf2c232dd6a504a32464d4ac889c5651d9e250b692495",
+      "literal": 8180,
+      "output_sha256": "1460b649e4e3f9f8f95623bbd0078ef135f33443f6e50c72eeba2b854a89d46f"
+    },
+    {
+      "path": "lib/libmmosal.so",
+      "installed_path": "/system/lib/libmmosal.so",
+      "input_sha256": "a4be96325f3eaa886fd1e851020206108f04bb2dd5d14c59622783130c48a599",
+      "literal": 13416,
+      "output_sha256": "92a0dafc75185e7eb4c73258b3ac6bb081675e523e292ce6ac942451980331f7"
+    },
+    {
+      "path": "lib/libmmparser.so",
+      "installed_path": "/system/lib/libmmparser.so",
+      "input_sha256": "ef58062846209c852b385d69f39b025337aef946dd0d853eedc8cffb9a4d9f5c",
+      "literal": 491428,
+      "output_sha256": "2fb5e11048118514bcca0af32b81a5215d80ac4602f44441ba13b26ab9492aea"
+    },
+    {
+      "path": "lib/libmmstereo.so",
+      "installed_path": "/system/lib/libmmstereo.so",
+      "input_sha256": "d8ff5016459138e835f06dd52c54b561a8dba3c16d0f673be1db9bcacc07d7f5",
+      "literal": 9688,
+      "output_sha256": "6112de34fce487fcec54a25494b08a22d3e1ec27141818d5db40e79ac9d2be88"
+    },
+    {
+      "path": "lib/libmmstillomx.so",
+      "installed_path": "/system/lib/libmmstillomx.so",
+      "input_sha256": "41889587f4deb3fd80ab24c920f99c96ad3a630a90f829b0fd4ff17c872bea21",
+      "literal": 2376,
+      "output_sha256": "7c31d3986f17632912dcb41a2ebbe0fcd8d5143f343c2029177c9aa8d9e775b8"
+    },
+    {
+      "path": "lib/libnetmgr.so",
+      "installed_path": "/system/vendor/lib/libnetmgr.so",
+      "input_sha256": "2b6487c9cf2dae3f01b011a3af70f1a4250ac422c95ef46d971309dc27fec950",
+      "literal": 20824,
+      "output_sha256": "f28a19473e27a1da77f1a702d44ee0e73ded1e125f66b8447a4c36b5276ba5a9"
+    },
+    {
+      "path": "lib/libnv.so",
+      "installed_path": "/system/vendor/lib/libnv.so",
+      "input_sha256": "bc07f7e9653079eafe05b15c2c442a648134f8fa3b1af2fffdfc8159211e8172",
+      "literal": 51932,
+      "output_sha256": "d5f6a2ab8046b98efbc40d89b7229cfb3d377238bc46114310a104197615e62f"
+    },
+    {
+      "path": "lib/liboem_rapi.so",
+      "installed_path": "/system/vendor/lib/liboem_rapi.so",
+      "input_sha256": "913d7387b358aabb49d1b83e579d8ea2be6f3973816d6ae65de1cc1301818e3d",
+      "literal": 16352,
+      "output_sha256": "e93d330b456e9be0bdec4f4979e8b314d88fddb50f920eb3f969b6dccdfbcedf"
+    },
+    {
+      "path": "lib/liboem_rapi_fusion.so",
+      "installed_path": "/system/vendor/lib/liboem_rapi_fusion.so",
+      "input_sha256": "d5b65258ca4bca7285fe050bafd581fdf87a9c50e83cf10da66360b78f64f368",
+      "literal": 5408,
+      "output_sha256": "c35a7e3220d6020e212982b4fa16bb61efb0dfbfbe20f8e7e18feafe3345ad93"
+    },
+    {
+      "path": "lib/liboemcamera.so",
+      "installed_path": "/system/lib/liboemcamera.so",
+      "input_sha256": "3fc7fdce757859b599281db932c86f1ed9105d173aa15f675c2d2fd4662dd0f3",
+      "literal": 45492,
+      "output_sha256": "7a88767f0f11348b2844e3a78d99b150a2932f71b7eb1b610d6856eb96e3cf52"
+    },
+    {
+      "path": "lib/liboncrpc.so",
+      "installed_path": "/system/vendor/lib/liboncrpc.so",
+      "input_sha256": "cef856ed507b9cd00cdd8acb5bfa6d784ca3850315f915a35718de7fa8d2331d",
+      "literal": 79036,
+      "output_sha256": "2299e4dbf9d0c78e8d5fbd41043a350a77f3eb6dadc3dcf56a5e54b4ac5ded63"
+    },
+    {
+      "path": "lib/libqc-opt.so",
+      "installed_path": "/system/lib/libqc-opt.so",
+      "input_sha256": "694f3ab58e686c1f95b9102e9e5a2fba7efc0a682e9d7421f8a67617a71da51b",
+      "literal": 5988,
+      "output_sha256": "aeeea14766cc25e1c9a9e35fbe6d775704e26034f35eaa849d73db05aef39479"
+    },
+    {
+      "path": "lib/libqcci_legacy.so",
+      "installed_path": "/system/vendor/lib/libqcci_legacy.so",
+      "input_sha256": "524650c07d5b852a9f9009957aa068d28c4d34c9e072e7c7a2e77f381bacf0f9",
+      "literal": 5108,
+      "output_sha256": "a2ab8c18b09f15a47a2e873ca211b811d2a7cbe35c70f28aa39b836ac3f8124f"
+    },
+    {
+      "path": "lib/libqdi.so",
+      "installed_path": "/system/vendor/lib/libqdi.so",
+      "input_sha256": "43e7d3f35adf6d19c9db7bdd3164a2df0b1b3dcc4612ec1462f5d3cf6c208653",
+      "literal": 23872,
+      "output_sha256": "1de79005b72a8ccc3464b4e7e0cc9f85885868ff4a76451b4026252b7d8db2d1"
+    },
+    {
+      "path": "lib/libqdp.so",
+      "installed_path": "/system/vendor/lib/libqdp.so",
+      "input_sha256": "a4cb6de26aebf0ac483eac9f797d1ed233ac026885e964e75e06a82de40bad0e",
+      "literal": 18712,
+      "output_sha256": "605eb3d99c677e2f86cb7cbc48a8a9c0295c2d57207d9b25e38a8f9ebb1e5484"
+    },
+    {
+      "path": "lib/libqmi.so",
+      "installed_path": "/system/vendor/lib/libqmi.so",
+      "input_sha256": "e18e6f02398cf0cda54429ff9eb428451f7297f0ef66f59685aa995777afe422",
+      "literal": 101696,
+      "output_sha256": "74b9d2c105a3bc89456dbd4b1562ae2af0b57f595110e302292952e0318ed562"
+    },
+    {
+      "path": "lib/libqmi_client_qmux.so",
+      "installed_path": "/system/vendor/lib/libqmi_client_qmux.so",
+      "input_sha256": "d6971bf689699cf6d98fa7d7e435260d963775aebb88e6f343227f50b16e8bf0",
+      "literal": 17908,
+      "output_sha256": "f5e00a20b51a56cd7221e0f7233a2c1f8d3f8824a00145ab9bf99302a27b33b3"
+    },
+    {
+      "path": "lib/libqmiservices.so",
+      "installed_path": "/system/vendor/lib/libqmiservices.so",
+      "input_sha256": "0a4fcde7936ca7dffa637664372d434cf936f60b9b0d7e22e1cde73b4fd8c4a7",
+      "literal": 15816,
+      "output_sha256": "a4c7a0b8d1b4b2e4cfb7981594d534154a0752465fa3c89ea7f19d71a1895b83"
+    },
+    {
+      "path": "lib/libqueue.so",
+      "installed_path": "/system/vendor/lib/libqueue.so",
+      "input_sha256": "85f98043863805c71a47b60b2658b92ab288d9babd29cb71bdd3d012e4d72201",
+      "literal": 2528,
+      "output_sha256": "5b70cac867eb2a443457a1455cc63364c061d4fe12d4dc8bed7aec1c9cee323e"
+    },
+    {
+      "path": "lib/libril-qc-qmi-1.so",
+      "installed_path": "/system/vendor/lib/libril-qc-qmi-1.so",
+      "input_sha256": "805d15335a328a4f59e3118a99283c7fc6782a7343994139a96ca7b32693c3a4",
+      "literal": 3159216,
+      "output_sha256": "c44f35c3c908f630e065b58dd748d70fcf36d12d95acfc8b2a1d28f5af05b61d"
+    },
+    {
+      "path": "lib/libril-qcril-hook-oem.so",
+      "installed_path": "/system/vendor/lib/libril-qcril-hook-oem.so",
+      "input_sha256": "d6eab4bea138f5d337c8277f0ed385f1f58a43929b30172c847ce788f6b34c7f",
+      "literal": 844,
+      "output_sha256": "f417b85c2372c65acf94ff178d9694ddbdf519fdce468019e75517543b886bbc"
+    },
+    {
+      "path": "lib/libsurfaceflinger_client.so",
+      "installed_path": "/system/lib/libsurfaceflinger_client.so",
+      "input_sha256": "3be350a6e6674e3d57c2a27d0bb954f9b375c7a523a67dcd360d8fe9251a0706",
+      "literal": 740,
+      "output_sha256": "f9fddd35a1a882b480281780c5d0ee16dfe8a3b961e567d54da5f6c267b3a85b"
+    },
+    {
+      "path": "lib/libthermal_mitigation.so",
+      "installed_path": "/system/vendor/lib/libthermal_mitigation.so",
+      "input_sha256": "01b3747849f6bedd692c8a143282ff8b22c7d59ea43695d5278b048bae1e0402",
+      "literal": 5928,
+      "output_sha256": "5889e310d2f573c9f887b5870731c2c8b4731a276f7a40cb8f290a0c0adcf27a"
+    },
+    {
+      "path": "lib/libthermal_mitigation_fusion.so",
+      "installed_path": "/system/vendor/lib/libthermal_mitigation_fusion.so",
+      "input_sha256": "f767b51533586b8af699a57074846106f9b7e21876db8ccc77ce9757171f3c33",
+      "literal": 6000,
+      "output_sha256": "143f313fd1a0687b831e8491ef21c6c6540fdb8c22dcbaa60044eedd96cb6263"
+    },
+    {
+      "path": "lib/libtime_remote_atom.so",
+      "installed_path": "/system/vendor/lib/libtime_remote_atom.so",
+      "input_sha256": "59674b97675a00ad0d15c84eb6a370e0aaf9298f96d630b7c8ac09b9e27e4a6a",
+      "literal": 20564,
+      "output_sha256": "144eb51247c54c43a22962e1bed2ceaf91ca2af16be4357b53f5eac2923e0646"
+    },
+    {
+      "path": "lib/libxml.so",
+      "installed_path": "/system/vendor/lib/libxml.so",
+      "input_sha256": "e21b6778561d6c73bb1d0c6d32691be231cb0c30d1a5455bc11e394d8045c7b9",
+      "literal": 19128,
+      "output_sha256": "c913a0327c344504e4d799edf9e0f19a5e20e73d3ab2dffb13731c6e55bcda03"
+    },
+    {
+      "path": "vendor/lib/drm/libdrmwvmplugin.so",
+      "installed_path": "/system/vendor/lib/drm/libdrmwvmplugin.so",
+      "input_sha256": "6bba016deecf728b4eecec9840cb93167b4eadd934f942cc49dfeea28a405380",
+      "literal": 26952,
+      "output_sha256": "8d8d0bd5ccc317d9191cfc7dad802ea045e64900e358c3737cdadd1fc4f12feb"
+    }
+  ]
+}
