@@ -67,6 +67,9 @@ while IFS='|' read -r ENTRY EXPECTED_HASH; do
     fi
 done < proprietary-files.txt
 
+# Apply the reproducible camera poll initialization fix after stock hash checks.
+python3 "$SCRIPT_DIR/tools/fix-camera-poll.py" "$STAGE/lib/liboemcamera.so"
+
 # Do not replace working blobs until every required file and hash is verified.
 cp -a "$STAGE/." "$BASE/"
 rm -f "$BASE/lib/egl/libplayback_adreno200.so"
