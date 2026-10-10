@@ -183,9 +183,8 @@ BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01800000
 
 TARGET_KERNEL_SOURCE := kernel/lge/msm8660
 TARGET_KERNEL_CONFIG := batman_lgu_defconfig
-TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
+# Match mako: use the LineageOS ARM kernel GCC 4.9 toolchain defaults.
 TARGET_KERNEL_ADDITIONAL_FLAGS := -j16
-KERNEL_TOOLCHAIN := $(abspath prebuilts/gcc/$(HOST_PREBUILT_TAG)/arm/arm-eabi-4.8/bin)
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x01000000
