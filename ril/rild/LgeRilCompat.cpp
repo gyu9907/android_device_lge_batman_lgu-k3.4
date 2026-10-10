@@ -158,8 +158,8 @@ void unsolicited(int response, const void *data, size_t size) {
     frameworkEnv.OnUnsolicitedResponse(response, data, size);
 }
 
-// LGE v7 power, subscription and screen-state handlers dereference their
-// DMS/NAS/PBM clients before checking readiness. RIL_CONNECTED can arrive
+// LGE v7 power, subscription, screen-state and TTY handlers dereference their
+// DMS/NAS/PBM/VOICE clients before checking readiness. RIL_CONNECTED can arrive
 // while those clients are still being initialized.
 // Keep the original request and payload on the existing RIL event loop until
 // the vendor reports a usable radio state; never acknowledge an unsent request.
@@ -195,7 +195,8 @@ void request(int code, void *data, size_t size, RIL_Token token) {
         return;
     }
     if ((code == RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE ||
-            code == RIL_REQUEST_RADIO_POWER || code == RIL_REQUEST_SCREEN_STATE) &&
+            code == RIL_REQUEST_RADIO_POWER || code == RIL_REQUEST_SCREEN_STATE ||
+            code == RIL_REQUEST_SET_TTY_MODE) &&
             vendor->onStateRequest() == RADIO_STATE_UNAVAILABLE) {
         if (!data || size != sizeof(int)) {
             frameworkEnv.OnRequestComplete(token, RIL_E_GENERIC_FAILURE, nullptr, 0);
