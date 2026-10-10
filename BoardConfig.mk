@@ -36,7 +36,13 @@ BOARD_SEPOLICY_M4DEFS := $(filter-out \
     sysfs_usb_supply=vendor_sysfs_usb_supply,$(BOARD_SEPOLICY_M4DEFS))
 BOARD_VENDOR_SEPOLICY_DIRS += device/lineage/sepolicy/qcom/legacy-vendor
 BOARD_VENDOR_SEPOLICY_DIRS := $(filter-out device/qcom/sepolicy-legacy/test,$(BOARD_VENDOR_SEPOLICY_DIRS))
+# Retain the legacy neverallow-check exemption for debug builds only.
+# This does not disable runtime SELinux enforcement or establish CTS compliance.
+ifneq (,$(filter eng userdebug,$(TARGET_BUILD_VARIANT)))
+SELINUX_IGNORE_NEVERALLOWS := true
+else
 SELINUX_IGNORE_NEVERALLOWS := false
+endif
 BOARD_VENDOR_SEPOLICY_DIRS += device/lge/batman_lgu/sepolicy
 
 TARGET_ARCH := arm
