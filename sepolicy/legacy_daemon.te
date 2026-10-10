@@ -9,7 +9,8 @@ allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
 allow { sensors cnd mpdecision netmgrd batman_kickstart batman_qmiproxy
         qmuxd tee rmt_storage thermal-engine time_daemon batman_bridgemgrd
         port-bridge mm-qcamerad } system_file:file execmod;
-allow { audioserver cameraserver mediaserver rild } system_file:file execmod;
+# HAL1 runs in mediaserver; the product overrides the separate cameraserver.
+allow { audioserver mediaserver rild } system_file:file execmod;
 
 # Legacy sensor blob access is confined to the dedicated sensor HAL.
 allow hal_sensors_default vendor_file:file execmod;
