@@ -331,6 +331,7 @@ service rmt_storage /system/bin/rmt_storage
     class core
     user root
     group root system
+    shutdown critical
     disabled
 
 # CM11 preserves androidboot.emmc=true instead of normalizing it to 1.
