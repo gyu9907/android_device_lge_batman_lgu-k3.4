@@ -8,7 +8,7 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/foundation/AString.h>
 #include <gui/Surface.h>
-#include <media/ICrypto.h>
+#include <mediadrm/ICrypto.h>
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
 
 namespace android {

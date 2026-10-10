@@ -61,19 +61,44 @@ struct BatmanThumbnailCodecList {
 };
 }
 
+// Android 11 split frame extraction into FrameDecoder. Keep the local NV12
+// conversion in that implementation as well as the retriever admission gate.
+#define FrameDecoder BatmanThumbnailFrameDecoder
+#define VideoFrameDecoder BatmanThumbnailVideoFrameDecoder
+#define ImageDecoder BatmanThumbnailImageDecoder
+#define allocVideoFrame batmanThumbnailAllocVideoFrame
+#define allocMetaFrame batmanThumbnailAllocMetaFrame
+#define findThumbnailInfo batmanThumbnailFindInfo
+#define findGridInfo batmanThumbnailFindGridInfo
+#define getDstColorFormat batmanThumbnailGetDstColorFormat
+#define isHDR batmanThumbnailIsHDR
+#define ColorConverter BatmanThumbnailColorConverter
+#undef LOG_TAG
+#include "frameworks/av/media/libstagefright/FrameDecoder.cpp"
+#undef ColorConverter
 #define StagefrightMetadataRetriever BatmanThumbnailRetriever
 #define MediaCodecList BatmanThumbnailCodecList
 #define ColorConverter BatmanThumbnailColorConverter
 #undef LOG_TAG
-#include "frameworks/av/media/libstagefright/StagefrightMetadataRetriever.cpp"
+#include "frameworks/av/media/libmediaplayerservice/StagefrightMetadataRetriever.cpp"
 #undef MediaCodecList
 #undef ColorConverter
 #undef StagefrightMetadataRetriever
+#undef FrameDecoder
+#undef VideoFrameDecoder
+#undef ImageDecoder
+#undef allocVideoFrame
+#undef allocMetaFrame
+#undef findThumbnailInfo
+#undef findGridInfo
+#undef getDstColorFormat
+#undef isHDR
+
 
 // MetadataRetrieverClient allocates the original class before calling C1.
 // Verify that the renamed implementation has exactly the same object size.
 #undef STAGEFRIGHT_METADATA_RETRIEVER_H_
-#include "frameworks/av/media/libstagefright/include/StagefrightMetadataRetriever.h"
+#include "frameworks/av/media/libmediaplayerservice/StagefrightMetadataRetriever.h"
 static_assert(sizeof(android::BatmanThumbnailRetriever) ==
         sizeof(android::StagefrightMetadataRetriever), "retriever ABI changed");
 

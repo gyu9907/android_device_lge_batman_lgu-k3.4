@@ -95,7 +95,12 @@ TARGET_LD_SHIM_LIBS := \
     /system/lib/hw/camera.vendor.msm8660.so|libshim_camera.so \
     /system/lib/libOmxVenc.so|libshim_omx_venc.so \
     /system/lib/libOmxVdec.so|libshim_omx_vdec.so \
-    /system/lib/libmediaplayerservice.so|libshim_thumbnail.so
+    /system/lib/libmediaplayerservice.so|libshim_thumbnail.so \
+    /system/lib/libGLESv2_adreno200.so|libshim_arm_compat.so \
+    /system/lib/liboemcamera.so|libshim_arm_compat.so \
+    /system/lib/libmmparser.so|libshim_arm_compat.so \
+    /system/lib/liblgdrm.so|libshim_arm_compat.so \
+    /system/vendor/lib/libWVStreamControlAPI_L3.so|libshim_arm_compat.so
 # A mediaserver domain transition sets AT_SECURE in enforcing mode, so
 # LD_PRELOAD is ignored. The service library mapping loads the thumbnail shim
 # before its dependencies while keeping normal linker security checks.
@@ -135,7 +140,7 @@ BOARD_CUSTOM_BT_CONFIG := device/lge/batman_lgu/bluetooth/vnd_bt.txt
 
 # Graphics
 # Preserve the legacy OMX decoder's uncached-buffer request through Gralloc2.
-TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x02000000
+TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x02000000 | (1 << 10)
 # Keep the working device-specific lights blob instead of the generic CAF HAL.
 TARGET_PROVIDES_LIBLIGHT := true
 TARGET_QCOM_DISPLAY_VARIANT := caf
