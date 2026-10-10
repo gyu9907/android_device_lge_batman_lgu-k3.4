@@ -1,0 +1,68 @@
+Subject: [PATCH] stagefright: Opt in to legacy Qualcomm sync-frame thumbnails
+Target-repository: frameworks/av
+Base-commit: a8732aa05d8920fdbcc56638e5c63036227a5bb9
+Path-prefix: a/ and b/ relative to the target repository root
+
+Android 11's library resolution no longer reaches the device's previous
+thumbnail configure interposer. Request the existing Qualcomm sync-frame
+mode at FrameDecoder configuration time for sync video single-frame reads.
+
+Default: debug.stagefright.qcom_sync_frame=false. Enable explicitly in the
+device system.prop; batman_lgu uses true. Require a video/ source MIME,
+OMX.qcom.video.decoder.* component, PREVIOUS/NEXT/CLOSEST_SYNC seek, and
+both android._num-input-buffers and android._num-output-buffers equal to 1.
+Other codecs, non-sync extraction and ordinary playback are unchanged.
+
+Dependencies: independent of 0001. The device must provide the existing
+qcom.sync-frame vendor extension (msm8660 media commit f5a78d53ea790aecc13ee13492762ccf98432b24).
+The validated batman setup additionally has the separate OMX input-pool
+refresh fix in hardware/qcom-caf/msm8660/media, omx_vdec::set_parameter,
+when changing resolution. That applied, uncommitted hardware change is
+NOT included here; do not treat this directory as its replacement.
+Rebuild libstagefright and libshim_thumbnail: the latter includes this
+FrameDecoder source. No build hook is added by this patch.
+Validation: 1920x1088 MMR and Gallery thumbnails; AVC/MPEG4 Surface decode.
+
+Apply manually from the Android source root:
+  git -C frameworks/av apply --check "$PWD/device/lge/batman_lgu/patches/0002-stagefright-opt-in-legacy-QCOM-sync-frame-thumbnails.patch"
+  git -C frameworks/av apply "$PWD/device/lge/batman_lgu/patches/0002-stagefright-opt-in-legacy-QCOM-sync-frame-thumbnails.patch"
+The commands above expand the patch path before changing directory. A successful
+  git -C frameworks/av apply --reverse --check "$PWD/device/lge/batman_lgu/patches/0002-stagefright-opt-in-legacy-QCOM-sync-frame-thumbnails.patch"
+means the patch is already present; do not apply it twice.
+
+diff --git a/media/libstagefright/FrameDecoder.cpp b/media/libstagefright/FrameDecoder.cpp
+index 734f5bb5aeed932d2540ebfecf546ab6a786adc9..448adb26f04f793fbd125f029a7253db37a361cd 100644
+--- a/media/libstagefright/FrameDecoder.cpp
++++ b/media/libstagefright/FrameDecoder.cpp
+@@ -21,6 +21,7 @@
+ #include "include/FrameCaptureLayer.h"
+ #include <binder/MemoryBase.h>
+ #include <binder/MemoryHeapBase.h>
++#include <cutils/properties.h>
+ #include <gui/Surface.h>
+ #include <inttypes.h>
+ #include <mediadrm/ICrypto.h>
+@@ -276,6 +277,23 @@ status_t FrameDecoder::init(
+         return (decoder.get() == NULL) ? NO_MEMORY : err;
+     }
+ 
++    // Opt in only on devices whose legacy decoder needs its sync-frame mode
++    // to honor the retriever's single-frame buffer requests.
++    const char *mime;
++    int32_t inputBuffers, outputBuffers;
++    if (property_get_bool("debug.stagefright.qcom_sync_frame", false)
++            && mComponentName.startsWith("OMX.qcom.video.decoder.")
++            && mTrackMeta->findCString(kKeyMIMEType, &mime)
++            && !strncasecmp(mime, "video/", 6)
++            && option >= MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC
++            && option <= MediaSource::ReadOptions::SEEK_CLOSEST_SYNC
++            && videoFormat->findInt32("android._num-input-buffers", &inputBuffers)
++            && inputBuffers == 1
++            && videoFormat->findInt32("android._num-output-buffers", &outputBuffers)
++            && outputBuffers == 1) {
++        videoFormat->setInt32("vendor.qcom.sync-frame.value", 1);
++    }
++
+     err = decoder->configure(
+             videoFormat, mSurface, NULL /* crypto */, 0 /* flags */);
+     if (err != OK) {

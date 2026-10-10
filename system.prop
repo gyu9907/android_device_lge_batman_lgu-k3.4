@@ -92,3 +92,6 @@ ro.adb.nonblocking_ffs=false
 # Match the normal userdebug boot policy even for this first-boot eng build.
 pm.dexopt.first-boot=quicken
 pm.dexopt.boot=verify
+
+# Use the legacy Qualcomm single-frame mode for video thumbnails.
+debug.stagefright.qcom_sync_frame=true
