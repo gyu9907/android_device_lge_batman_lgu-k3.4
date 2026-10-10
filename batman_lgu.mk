@@ -2,6 +2,9 @@ $(call inherit-product-if-exists, vendor/lge/batman_lgu/batman_lgu-vendor.mk)
 
 PRODUCT_PACKAGES += fs_config_files
 
+# Report the legacy micro-USB gadget state through the standard USB port HAL.
+PRODUCT_PACKAGES += android.hardware.usb@1.0-service.batman
+
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 
 # The gps config appropriate for this device
