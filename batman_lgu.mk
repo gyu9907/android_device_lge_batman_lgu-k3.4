@@ -254,3 +254,6 @@ PRODUCT_PACKAGES += \
 
 # The Android 11 policy manager reads XML; retain the original device routes.
 PRODUCT_PACKAGES += r_submix_audio_policy_configuration.xml audio_policy_volumes.xml default_volume_tables.xml
+
+# Android 11 replaces the legacy Java calibration extension with LiveDisplay.
+PRODUCT_PACKAGES += vendor.lineage.livedisplay@2.0-service.batman

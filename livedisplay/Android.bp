@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+cc_binary {
+    name: "vendor.lineage.livedisplay@2.0-service.batman",
+    defaults: ["hidl_defaults"],
+    vendor: true,
+    relative_install_path: "hw",
+    srcs: ["service.cpp"],
+    init_rc: ["vendor.lineage.livedisplay@2.0-service.batman.rc"],
+    vintf_fragments: ["vendor.lineage.livedisplay@2.0-service.batman.xml"],
+    shared_libs: ["libbase", "libhidlbase", "libutils", "vendor.lineage.livedisplay@2.0"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}

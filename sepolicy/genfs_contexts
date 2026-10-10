@@ -25,7 +25,7 @@ genfscon proc /sys/kernel/sched_min_granularity_ns u:object_r:proc_sched:s0
 genfscon proc /sys/vm/dirty_writeback_centisecs u:object_r:proc_dirty:s0
 genfscon proc /bluetooth/sleep/proto u:object_r:proc_bluetooth_writable:s0
 genfscon sysfs /devices/platform/msm_hsusb/gadget/lun0/file u:object_r:sysfs_android_usb:s0
-genfscon sysfs /devices/platform/mdp.524801/kcal u:object_r:sysfs_graphics:s0
+genfscon sysfs /devices/platform/mdp.524801/kcal u:object_r:sysfs_livedisplay_tuneable:s0
 genfscon sysfs /module/subsystem_restart/parameters/enable_ramdumps u:object_r:sysfs_batman_boot_control:s0
 genfscon sysfs /devices/system/cpu/cpu0/rq-stats/run_queue_poll_ms u:object_r:sysfs_mpdecision:s0
 genfscon sysfs /devices/system/cpu/cpu1/online u:object_r:sysfs_mpdecision:s0
