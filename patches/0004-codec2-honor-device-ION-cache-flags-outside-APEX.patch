@@ -1,0 +1,46 @@
+Subject: [PATCH] codec2: Honor device ION cache flags outside APEX
+Target-repository: frameworks/av
+Base-commit: a8732aa05d8920fdbcc56638e5c63036227a5bb9
+Path-prefix: a/ and b/ relative to the target repository root
+
+The existing APEX component store reads the device ION cache policy, but
+the non-APEX allocator path forces uncached flags. MSM8660 system ION heap
+rejects CPU mappings of uncached buffers, leaving SoundPool decode workers
+blocked and camera onPause waiting in SoundPool.release.
+
+Read ro.com.android.media.swcodec.ion.flags with the same default 0 in the
+non-APEX setter. Existing APEX logic, heap selection and alignment are
+unchanged. Devices without the property retain allocFlags=0.
+
+Device requirement: batman_lgu system.prop sets
+ro.com.android.media.swcodec.ion.flags=1 (ION_FLAG_CACHED).
+Rebuild/install system libcodec2_vndk and reboot to load the read-only
+property. The APEX implementation already reads this property.
+Dependencies: independent of 0002 (different source file). Both apply to
+the same frameworks/av base; preserve the thumbnail patch when applying.
+No SoundPool timeout, disabled sound, C2 disablement or heap-layout change.
+Validation: three SoundPool load/play/release cycles (release 8-15 ms),
+three camera captures/exits, C2 Vorbis/AAC/AVC decoding, and existing
+high-resolution thumbnails/Qualcomm Surface decoding under Enforcing.
+
+Apply manually from the Android source root:
+  git -C frameworks/av apply --check "$PWD/device/lge/batman_lgu/patches/0004-codec2-honor-device-ION-cache-flags-outside-APEX.patch"
+  git -C frameworks/av apply "$PWD/device/lge/batman_lgu/patches/0004-codec2-honor-device-ION-cache-flags-outside-APEX.patch"
+Before applying, a successful reverse check means it is already present:
+  git -C frameworks/av apply --reverse --check "$PWD/device/lge/batman_lgu/patches/0004-codec2-honor-device-ION-cache-flags-outside-APEX.patch"
+
+diff --git a/media/codec2/vndk/C2Store.cpp b/media/codec2/vndk/C2Store.cpp
+index d16527ee6ff2b683dcd5e2131c3bdd8a2670ad58..5ac8239029380dd2ac7551b8b619649efa0f1e09 100644
+--- a/media/codec2/vndk/C2Store.cpp
++++ b/media/codec2/vndk/C2Store.cpp
+@@ -676,7 +676,9 @@ private:
+                     me.set().minAlignment = defaultAlign;
+ #else
+                     me.set().heapMask = ~0;
+-                    me.set().allocFlags = 0;
++                    // Match the software store's device-specific ION cache policy.
++                    me.set().allocFlags = property_get_int32(
++                            "ro.com.android.media.swcodec.ion.flags", 0);
+                     me.set().minAlignment = 0;
+ #endif
+                     return C2R::Ok();

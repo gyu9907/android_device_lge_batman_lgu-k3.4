@@ -95,3 +95,6 @@ pm.dexopt.boot=verify
 
 # Use the legacy Qualcomm single-frame mode for video thumbnails.
 debug.stagefright.qcom_sync_frame=true
+
+# MSM8660 system ION heap supports CPU mappings only for cached buffers.
+ro.com.android.media.swcodec.ion.flags=1
