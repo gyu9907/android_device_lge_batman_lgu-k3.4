@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- BCM4330 supports firmware PNO through cfg80211 scheduled scans. -->
+    <bool name="config_wifi_background_scan_support">true</bool>
+</resources>
