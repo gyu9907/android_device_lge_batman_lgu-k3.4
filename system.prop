@@ -98,3 +98,7 @@ debug.stagefright.qcom_sync_frame=true
 
 # MSM8660 system ION heap supports CPU mappings only for cached buffers.
 ro.com.android.media.swcodec.ion.flags=1
+
+# Use the GLES RenderEngine with the existing Adreno 220 compatibility driver.
+debug.renderengine.backend=threaded
+debug.hwui.use_buffer_age=false
