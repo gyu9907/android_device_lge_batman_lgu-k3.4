@@ -229,7 +229,7 @@ PRODUCT_PACKAGES += android.hardware.keymaster@3.0-impl
 PRODUCT_PACKAGES += \
     android.hardware.gnss@1.0-impl \
     android.hardware.light@2.0-impl \
-    android.hardware.power@1.0-impl \
+    android.hardware.power@1.0-impl.batman \
     power.batman_lgu_kr \
     android.hardware.sensors@1.0-impl \
     android.hardware.sensors@1.0-service.batman \
