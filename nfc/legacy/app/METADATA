@@ -1,0 +1,6 @@
+name: "app"
+third_party {
+  url { type: GIT value: "https://github.com/LineageOS-UL/android_packages_apps_Nfc" }
+  version: "d35765b96031546a606eceb00d75aacde97c9ebc"
+  license_type: NOTICE
+}

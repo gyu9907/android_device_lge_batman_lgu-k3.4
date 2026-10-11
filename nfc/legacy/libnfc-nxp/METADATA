@@ -1,0 +1,6 @@
+name: "libnfc-nxp"
+third_party {
+  url { type: GIT value: "https://github.com/LineageOS-UL/android_external_libnfc-nxp" }
+  version: "e4fb0694ac4eb888f098598bd895587b71747ce5"
+  license_type: NOTICE
+}

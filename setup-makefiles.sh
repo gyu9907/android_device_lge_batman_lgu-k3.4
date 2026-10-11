@@ -134,3 +134,6 @@ EOF
   fi
   echo 'include $(BUILD_PREBUILT)' >> "$PREBUILTS"
 done
+
+# Android 12 native prebuilts retain the existing installation layout.
+python3 generate-prebuilts.py ../../../vendor/lge/batman_lgu

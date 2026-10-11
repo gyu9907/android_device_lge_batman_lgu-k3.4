@@ -1,0 +1,2 @@
+# Original shipping API is consumed from vendor on Android 12.
+ro.product.first_api_level=16

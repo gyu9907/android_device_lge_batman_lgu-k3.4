@@ -1,0 +1,17 @@
+soong_namespace {
+    imports: ["vendor/lge/batman_lgu"],
+}
+
+python_binary_host {
+    name: "batman_pn544_firmware_extract",
+    main: "extract_firmware.py",
+    srcs: ["extract_firmware.py"],
+}
+
+genrule {
+    name: "batman_pn544_firmware_header",
+    tools: ["batman_pn544_firmware_extract"],
+    srcs: [":batman_pn544_firmware"],
+    out: ["pn544_firmware.h"],
+    cmd: "$(location batman_pn544_firmware_extract) $(in) $(out)",
+}

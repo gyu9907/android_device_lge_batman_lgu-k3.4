@@ -88,7 +88,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml
 
 # Camera
-PRODUCT_PACKAGES += Snap
+PRODUCT_PACKAGES += Camera2
 
 # Audio
 PRODUCT_PACKAGES += \
@@ -151,9 +151,7 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += \
     nfc.msm8660 \
-    libnfc \
-    libnfc_jni \
-    Nfc \
+    NfcPn544 \
     Tag \
     com.android.nfc_extras
 
@@ -219,8 +217,8 @@ PRODUCT_PACKAGES += \
 
 # Legacy implementations remain in their existing processes via HIDL passthrough.
 PRODUCT_PACKAGES += \
-    android.hardware.audio@2.0-impl \
-    android.hardware.audio.effect@2.0-impl \
+    android.hardware.audio@6.0-impl \
+    android.hardware.audio.effect@6.0-impl \
     android.hardware.camera.provider@2.4-impl.batman \
     android.hardware.media.omx@1.0-service
 
@@ -237,14 +235,17 @@ PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-service.batman \
     android.hardware.vibrator@1.0-impl \
     vibrator.default \
-    android.hardware.wifi@1.0-service \
+    android.hardware.wifi@1.0-service.legacy \
     wificond
 
 PRODUCT_SHIPPING_API_LEVEL := 16
 PRODUCT_PACKAGES += android.hardware.health@2.1-impl android.hardware.health@2.1-service
 
 # The Android 11 policy manager reads XML; retain the original device routes.
-PRODUCT_PACKAGES += r_submix_audio_policy_configuration.xml audio_policy_volumes.xml default_volume_tables.xml
+PRODUCT_COPY_FILES += \
+    frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
+    frameworks/av/services/audiopolicy/config/audio_policy_volumes.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_volumes.xml \
+    frameworks/av/services/audiopolicy/config/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml
 
 # Android 11 replaces the legacy Java calibration extension with LiveDisplay.
 PRODUCT_PACKAGES += vendor.lineage.livedisplay@2.0-service.batman
@@ -262,7 +263,20 @@ PRODUCT_PACKAGES += \
 # Eng already preopts only boot and system-server jars. Declare the ordinary
 # apps explicitly as well so Soong's APK compression decision matches that
 # policy; otherwise it retains uncompressed DEX for preopt work it skips.
-$(call add-product-dex-preopt-module-config,AudioFX Bluetooth Contacts DeskClock DocumentsUI EasterEgg Eleven EmergencyInfo Etar Jelly LineageParts LineageSetupWizard LiveWallpapersPicker ManagedProvisioning Nfc PackageInstaller Recorder Seedvault Settings SettingsIntelligence Stk SystemUI TeleService Traceur,disable)
+$(call add-product-dex-preopt-module-config,AudioFX Bluetooth Contacts DeskClock DocumentsUI EasterEgg Eleven EmergencyInfo Etar Jelly LineageParts LineageSetupWizard LiveWallpapersPicker ManagedProvisioning NfcPn544 PackageInstaller Recorder Seedvault Settings SettingsIntelligence Stk SystemUI TeleService Traceur,disable)
+
+# Android 12 audio adapters run in the dedicated HIDL service.
+PRODUCT_PACKAGES += android.hardware.audio.service
+# Retain the pre-Treble matrix provided by the Android 12 reference tree.
+PRODUCT_PACKAGES += framework_compatibility_matrix.batman_legacy.xml
+PRODUCT_COPY_FILES += device/lge/batman_lgu/prebuilt/configs/cgroups.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json
+
+# PN544 HCI needs the Android 12 legacy app and JNI, as in ef52 8a13098.
+PRODUCT_SOONG_NAMESPACES += device/lge/batman_lgu/nfc/legacy vendor/lge/batman_lgu
+PRODUCT_PACKAGES += android.hardware.keymaster@3.0-service
+
+# Linux 3.4 retains legacy networking and lowmemorykiller interfaces.
+PRODUCT_SYSTEM_PROPERTIES += ro.kernel.ebpf.supported=false ro.lmk.use_psi=false
 
 # Distribution default: USB file transfer with ADB disabled.
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += persist.sys.usb.config=mtp

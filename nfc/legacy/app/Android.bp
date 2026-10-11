@@ -1,0 +1,20 @@
+// PN544 uses the NXP HCI implementation, not the platform NCI HAL.
+android_app {
+    name: "NfcPn544",
+    overrides: ["NfcNci", "Nfc"],
+    srcs: ["src/**/*.java", "nxp/**/*.java", ":statslog-Nfc-java-gen"],
+    platform_apis: true,
+    certificate: "platform",
+    jni_libs: ["libnfc_pn544_jni"],
+    compile_multilib: "32",
+    static_libs: ["androidx.legacy_legacy-support-v4", "androidx.appcompat_appcompat"],
+    optimize: { enabled: false },
+}
+
+cc_library_shared {
+    name: "libnfc_pn544_jni",
+    compile_multilib: "32",
+    srcs: ["nxp/jni/*.cpp"],
+    local_include_dirs: ["nxp/jni"],
+    shared_libs: ["libnativehelper", "libcutils", "libutils", "liblog", "libnfc_pn544", "libhardware"],
+}

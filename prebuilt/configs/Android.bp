@@ -1,0 +1,6 @@
+// Legacy FCM adapted from ef52 ed3887f for the pre-Treble device.
+vintf_compatibility_matrix {
+    name: "framework_compatibility_matrix.batman_legacy.xml",
+    stem: "compatibility_matrix.batman_legacy.xml",
+    srcs: ["compatibility_matrix.legacy.xml"],
+}

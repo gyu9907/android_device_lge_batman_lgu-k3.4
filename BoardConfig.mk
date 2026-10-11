@@ -273,3 +273,7 @@ SOONG_CONFIG_batmanRecovery_bcb_only := true
 
 # Reject full OTAs in recoveries with the old physical storage roles.
 TARGET_RELEASETOOLS_EXTENSIONS := device/lge/batman_lgu
+
+# Android 12 defaults to Clang; retain the validated GCC 4.9 kernel ABI.
+TARGET_KERNEL_CLANG_COMPILE := false
+TARGET_VENDOR_PROP += device/lge/batman_lgu/vendor.prop

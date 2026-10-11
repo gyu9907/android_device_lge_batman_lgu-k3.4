@@ -1,0 +1,52 @@
+Subject: [PATCH] libbinder: Widen legacy wire values before pointer casts
+Target-repository: frameworks/native
+Base-commit: f58c3a0619b788bf04b1d3025f065e2bea4f6459
+
+With BINDER_IPC_32BIT, binder_size_t and binder_uintptr_t are 32-bit even
+in a 64-bit host build. Convert through uintptr_t before the existing
+pointer casts in diagnostic printing. This preserves values and the
+legacy kernel wire ABI without disabling compiler diagnostics.
+
+Validation: Android ARM and host x86_64 IPCThreadState/Parcel compilation,
+clang-tidy and host libbinder.a link pass in the Android12 build.
+Apply manually only to this Android12 platform tree. No automatic hook.
+The existing device patches0001-0004 remain unapplied.
+
+diff --git a/libs/binder/IPCThreadState.cpp b/libs/binder/IPCThreadState.cpp
+index 0d653caf5d..caa30ea714 100644
+--- a/libs/binder/IPCThreadState.cpp
++++ b/libs/binder/IPCThreadState.cpp
+@@ -137,9 +137,9 @@ static const void* printBinderTransactionData(TextOutput& out, const void* data)
+     }
+     out << " (cookie " << btd->cookie << ")" << endl
+         << "code=" << TypeCode(btd->code) << ", flags=" << (void*)(uint64_t)btd->flags << endl
+-        << "data=" << btd->data.ptr.buffer << " (" << (void*)btd->data_size
++        << "data=" << btd->data.ptr.buffer << " (" << (void*)(uintptr_t)btd->data_size
+         << " bytes)" << endl
+-        << "offsets=" << btd->data.ptr.offsets << " (" << (void*)btd->offsets_size
++        << "offsets=" << btd->data.ptr.offsets << " (" << (void*)(uintptr_t)btd->offsets_size
+         << " bytes)";
+     return btd+1;
+ }
+@@ -1004,7 +1004,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
+         TextOutput::Bundle _b(alog);
+         if (outAvail != 0) {
+             alog << "Sending commands to driver: " << indent;
+-            const void* cmds = (const void*)bwr.write_buffer;
++            const void* cmds = (const void*)(uintptr_t)bwr.write_buffer;
+             const void* end = ((const uint8_t*)cmds)+bwr.write_size;
+             alog << HexDump(cmds, bwr.write_size) << endl;
+             while (cmds < end) cmds = printCommand(alog, cmds);
+diff --git a/libs/binder/Parcel.cpp b/libs/binder/Parcel.cpp
+index 4903b4c4b9..4f9204f011 100644
+--- a/libs/binder/Parcel.cpp
++++ b/libs/binder/Parcel.cpp
+@@ -2198,7 +2198,7 @@ void Parcel::print(TextOutput& to, uint32_t /*flags*/) const
+         for (size_t i=0; i<N; i++) {
+             const flat_binder_object* flat
+                 = reinterpret_cast<const flat_binder_object*>(DATA+OBJS[i]);
+-            to << endl << "Object #" << i << " @ " << (void*)OBJS[i] << ": "
++            to << endl << "Object #" << i << " @ " << (void*)(uintptr_t)OBJS[i] << ": "
+                 << TypeCode(flat->hdr.type & 0x7f7f7f00)
+                 << " = " << flat->binder;
+         }

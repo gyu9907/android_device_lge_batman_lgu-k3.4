@@ -34,3 +34,10 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     PRODUCT_DEFAULT_REGION=KR
 
 BUILD_FINGERPRINT := LGE/batman_lgu_kr/batman:4.1.2/JZO54K/LG-F100L-V40b.1e5d95b998:user/release-keys
+
+# Fail on missing selected hardware or applications during the port.
+# Same inherited replacements and absent optional base tools as ef52 8a13098.
+$(call enforce-product-packages-exist, \
+    Browser2 Calendar Launcher3QuickStep Music MusicFX QuickSearchBox \
+    android.hidl.memory@1.0-impl.vendor product_manifest.xml \
+    vndk_apex_snapshot_package 7z lib7z pigz zip)

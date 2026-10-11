@@ -1,0 +1,87 @@
+Subject: [PATCH] libbinder: Export both Binder wire widths on ARM32
+Target-repository: frameworks/native
+Base-commit: f58c3a0619b788bf04b1d3025f065e2bea4f6459
+
+The ARM32 export maps assume 64-bit binder_size_t. With BINDER_IPC_32BIT,
+two signatures use uint32_t (j) instead of uint64_t (y), and the uint64_t
+TextOutput instantiation may not exist. Exact j/y alternatives retain all
+original Binder64 exports and add only the two Binder32 signatures.
+Keep version-script validation enabled and leave the kernel wire ABI intact.
+
+Validation: actual ARM32 libbinder shared link passes with Binder32; dynamic
+symbols contain both legacy IPC helpers and TextOutput<uint32_t>. Expanding
+the two maps proves no prior export is removed and only those two signatures
+are added. Apply manually; no automatic patch hook is installed.
+
+diff --git a/libs/binder/libbinder.arm32.map b/libs/binder/libbinder.arm32.map
+index 9f10b677bd..e9c92e7ff2 100644
+--- a/libs/binder/libbinder.arm32.map
++++ b/libs/binder/libbinder.arm32.map
+@@ -125,7 +125,8 @@ LIBBINDER {
+     _ZN7android12ProcessStateD1Ev;
+     _ZN7android12ProcessStateD2Ev;
+     _ZN7android13printTypeCodeEjPFvPvPKcES0_;
+-    _ZN7android14IPCThreadState10freeBufferEPNS_6ParcelEPKhjPKyj;
++    /* Binder wire offsets use j (32-bit) or y (64-bit). */
++    _ZN7android14IPCThreadState10freeBufferEPNS_6ParcelEPKhjPK[jy]j;
+     _ZN7android14IPCThreadState10selfOrNullEv;
+     _ZN7android14IPCThreadState11clearCallerEv;
+     _ZN7android14IPCThreadState11stopProcessEb;
+@@ -456,7 +457,7 @@ LIBBINDER {
+     _ZN7android6Parcel18getGlobalAllocSizeEv;
+     _ZN7android6Parcel19finishFlattenBinderERKNS_2spINS_7IBinderEEE;
+     _ZN7android6Parcel19getGlobalAllocCountEv;
+-    _ZN7android6Parcel19ipcSetDataReferenceEPKhjPKyjPFvPS0_S2_jS4_jE;
++    _ZN7android6Parcel19ipcSetDataReferenceEPKhjPK[jy]jPFvPS0_S2_jS4_jE;
+     _ZN7android6Parcel19writeFileDescriptorEib;
+     _ZN7android6Parcel19writeInterfaceTokenEPKDsj;
+     _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E;
+@@ -751,11 +752,10 @@ LIBBINDER {
+     _ZN7androidlsIA5_cEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIA8_cEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIA9_cEERNS_10TextOutputES3_RKT_;
+-    _ZN7androidlsIjEERNS_10TextOutputES2_RKT_;
++    _ZN7androidlsI[jy]EERNS_10TextOutputES2_RKT_;
+     _ZN7androidlsINSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEEERNS_10TextOutputES9_RKT_;
+     _ZN7androidlsIPcEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIPvEERNS_10TextOutputES3_RKT_;
+-    _ZN7androidlsIyEERNS_10TextOutputES2_RKT_;
+     _ZNK7android10MemoryBase9getMemoryEPiPj;
+     _ZNK7android10RpcAddress13writeToParcelEPNS_6ParcelE;
+     _ZNK7android10RpcAddress15viewRawEmbeddedEv;
+diff --git a/libs/binder/libbinder.arm32.vendor.map b/libs/binder/libbinder.arm32.vendor.map
+index 5042414c28..7ce5f3f0ce 100644
+--- a/libs/binder/libbinder.arm32.vendor.map
++++ b/libs/binder/libbinder.arm32.vendor.map
+@@ -125,7 +125,8 @@ LIBBINDER {
+     _ZN7android12ProcessStateD1Ev;
+     _ZN7android12ProcessStateD2Ev;
+     _ZN7android13printTypeCodeEjPFvPvPKcES0_;
+-    _ZN7android14IPCThreadState10freeBufferEPNS_6ParcelEPKhjPKyj;
++    /* Binder wire offsets use j (32-bit) or y (64-bit). */
++    _ZN7android14IPCThreadState10freeBufferEPNS_6ParcelEPKhjPK[jy]j;
+     _ZN7android14IPCThreadState10selfOrNullEv;
+     _ZN7android14IPCThreadState11clearCallerEv;
+     _ZN7android14IPCThreadState11stopProcessEb;
+@@ -426,7 +427,7 @@ LIBBINDER {
+     _ZN7android6Parcel18getGlobalAllocSizeEv;
+     _ZN7android6Parcel19finishFlattenBinderERKNS_2spINS_7IBinderEEE;
+     _ZN7android6Parcel19getGlobalAllocCountEv;
+-    _ZN7android6Parcel19ipcSetDataReferenceEPKhjPKyjPFvPS0_S2_jS4_jE;
++    _ZN7android6Parcel19ipcSetDataReferenceEPKhjPK[jy]jPFvPS0_S2_jS4_jE;
+     _ZN7android6Parcel19writeFileDescriptorEib;
+     _ZN7android6Parcel19writeInterfaceTokenEPKDsj;
+     _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E;
+@@ -713,11 +714,10 @@ LIBBINDER {
+     _ZN7androidlsIA5_cEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIA8_cEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIA9_cEERNS_10TextOutputES3_RKT_;
+-    _ZN7androidlsIjEERNS_10TextOutputES2_RKT_;
++    _ZN7androidlsI[jy]EERNS_10TextOutputES2_RKT_;
+     _ZN7androidlsINSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEEERNS_10TextOutputES9_RKT_;
+     _ZN7androidlsIPcEERNS_10TextOutputES3_RKT_;
+     _ZN7androidlsIPvEERNS_10TextOutputES3_RKT_;
+-    _ZN7androidlsIyEERNS_10TextOutputES2_RKT_;
+     _ZNK7android10MemoryBase9getMemoryEPiPj;
+     _ZNK7android10RpcAddress13writeToParcelEPNS_6ParcelE;
+     _ZNK7android10RpcAddress15viewRawEmbeddedEv;
